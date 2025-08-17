@@ -1,70 +1,213 @@
-# Getting Started with Create React App
+# Vishal Panwar - Personal Portfolio
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern, responsive personal portfolio website built with React and Tailwind CSS, showcasing my skills, projects, and experience as a Full-Stack Developer, AI & Cloud Engineer, and Flutter Enthusiast.
 
-## Available Scripts
+## 🚀 Features
 
-In the project directory, you can run:
+- **Responsive Design**: Fully responsive across all devices (mobile, tablet, desktop)
+- **Modern UI/UX**: Clean, elegant design with smooth animations and transitions
+- **Interactive Components**: Hover effects, smooth scrolling, and engaging user experience
+- **Professional Sections**: Hero, About, Skills, Portfolio, Contact, and Footer
+- **SEO Optimized**: Semantic HTML structure and meta tags
+- **Performance**: Optimized images and lazy loading
 
-### `npm start`
+## 🛠️ Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Frontend**: React 19, Tailwind CSS
+- **Icons**: Lucide React
+- **Routing**: React Router DOM
+- **Build Tool**: Create React App
+- **Styling**: Tailwind CSS with custom components
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 📱 Sections
 
-### `npm test`
+### Hero Section
+- Professional introduction with typing effect
+- Call-to-action buttons
+- Social media links
+- Professional photo with diagonal background split
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### About Section
+- Professional summary
+- Work experience at Cognizant
+- Educational background
+- Certifications (Azure Data Scientist Associate, HackMol 4.0)
 
-### `npm run build`
+### Skills Section
+- Programming Languages (Python, Java, JavaScript, TypeScript, Dart)
+- Frontend Development (React, Next.js, Flutter, Tailwind CSS)
+- Backend Development (Node.js, Express, Django)
+- Databases (MySQL, PostgreSQL, MongoDB, Redis, Firebase)
+- Cloud & DevOps (AWS, Azure, Docker, Kubernetes, Terraform)
+- Additional expertise in ML, AI, and data science
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Portfolio Section
+- **Table Tap**: Food ordering platform with AI features
+- **PG Flow**: PG management tool built with Flutter
+- **Smart Parking System**: YOLOv8-powered parking detection
+- **AI/ML Projects**: Comprehensive AI/ML solutions
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Contact Section
+- Contact form
+- Professional contact information
+- Social media links
+- Availability status
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 🚀 Getting Started
 
-### `npm run eject`
+### Prerequisites
+- Node.js (v16 or higher)
+- npm or yarn
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Installation
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. Clone the repository:
+```bash
+git clone https://github.com/vishalpanwar416/portfolio.git
+cd portfolio
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+3. Start the development server:
+```bash
+npm start
+```
 
-## Learn More
+4. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 🎨 Customization
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Colors
+The portfolio uses a consistent color scheme defined in Tailwind CSS:
+- Primary: Blue (`blue-600`)
+- Secondary: Gray (`gray-800`, `gray-900`)
+- Accent: Various shades for different sections
 
-### Code Splitting
+### Typography
+- Headings: Large, bold fonts for impact
+- Body text: Readable, medium-weight fonts
+- Consistent spacing and hierarchy
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Images
+Replace placeholder images in the `public/` folder:
+- `placeholder-user.jpg` - Your professional photo
+- `placeholder.jpg` - Project images
 
-### Analyzing the Bundle Size
+## 📱 Responsive Design
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+The portfolio is fully responsive with breakpoints:
+- **Mobile**: < 768px
+- **Tablet**: 768px - 1024px
+- **Desktop**: > 1024px
 
-### Making a Progressive Web App
+## 🚀 Deployment
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### Deploy to Vercel (Recommended)
 
-### Advanced Configuration
+1. Push your code to GitHub
+2. Go to [vercel.com](https://vercel.com) and sign up
+3. Import your GitHub repository
+4. Vercel will automatically detect it's a React app
+5. Click deploy
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### Deploy to GitHub Pages
 
-### Deployment
+1. Install gh-pages:
+```bash
+npm install --save-dev gh-pages
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+2. Add to package.json:
+```json
+{
+  "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
+  },
+  "homepage": "https://yourusername.github.io/portfolio"
+}
+```
 
-### `npm run build` fails to minify
+3. Deploy:
+```bash
+npm run deploy
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Deploy to Netlify
+
+1. Push your code to GitHub
+2. Go to [netlify.com](https://netlify.com) and sign up
+3. Click "New site from Git"
+4. Choose your repository
+5. Build command: `npm run build`
+6. Publish directory: `build`
+7. Click deploy
+
+## 🔧 Build for Production
+
+```bash
+npm run build
+```
+
+This creates a `build` folder with optimized production files.
+
+## 📁 Project Structure
+
+```
+src/
+├── components/          # Reusable UI components
+│   └── navbar.jsx      # Navigation component
+├── Sections/           # Main page sections
+│   ├── Hero.jsx        # Hero section
+│   ├── About.jsx       # About section
+│   ├── Skills.jsx      # Skills section
+│   ├── Portfolio.jsx   # Portfolio section
+│   ├── Contacts.jsx    # Contact section
+│   └── Footer.jsx      # Footer section
+├── App.js              # Main app component
+├── index.js            # App entry point
+└── index.css           # Global styles with Tailwind
+```
+
+## 🎯 Performance Optimization
+
+- Lazy loading for images
+- Optimized bundle size
+- Efficient CSS with Tailwind
+- Responsive images
+- Minimal JavaScript
+
+## 🔍 SEO Features
+
+- Semantic HTML structure
+- Meta tags for social sharing
+- Proper heading hierarchy
+- Alt text for images
+- Fast loading times
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## 📞 Contact
+
+- **Email**: vishalpanwar416@gmail.com
+- **LinkedIn**: [linkedin.com/in/vishalpanwar416](https://linkedin.com/in/vishalpanwar416)
+- **GitHub**: [github.com/vishalpanwar416](https://github.com/vishalpanwar416)
+- **LeetCode**: [leetcode.com/vishalpanwar416](https://leetcode.com/vishalpanwar416)
+
+---
+
+Made with ❤️ by Vishal Panwar using React & Tailwind CSS
