@@ -201,7 +201,7 @@ export default function Hero() {
             </motion.div>
 
             <motion.p 
-              className="text-xs md:text-lg mb-6 mt-4 text-gray-600 font-medium min-h-[2rem]"
+              className="text-xs md:text-lg mb-6 mt-10 text-gray-600 font-medium min-h-[2rem]"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 1.2 }}
@@ -212,7 +212,7 @@ export default function Hero() {
 
             {/* Freelance Services Section */}
             <motion.div 
-              className="mb-6"
+              className="mb-10 mt-10"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 1.8 }}

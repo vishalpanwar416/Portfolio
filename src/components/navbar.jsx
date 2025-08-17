@@ -17,6 +17,11 @@ export default function Navbar() {
       // Check if scrolled for background effect
       setScrolled(currentScrollY > 50)
 
+      // Close mobile menu on scroll
+      if (isOpen) {
+        setIsOpen(false)
+      }
+
       // Hide/show navbar on mobile based on scroll direction
       if (window.innerWidth <= 768) { // Mobile only
         if (currentScrollY > lastScrollY && currentScrollY > 100) {
@@ -74,7 +79,7 @@ export default function Navbar() {
           >
             <img 
               src={logo} 
-              alt="Vishal Panwar Logo" 
+              alt="Vishal Panwar — Full-Stack Web Developer" 
               className="h-20 w-auto mix-blend-multiply filter drop-shadow-lg"
             />
           </motion.div>
@@ -146,8 +151,8 @@ export default function Navbar() {
           <motion.button 
             className={`md:hidden p-3 rounded-2xl transition-all duration-300 relative overflow-hidden ${
               scrolled 
-                ? 'text-gray-800 hover:bg-gray-100/50' 
-                : 'text-gray-800 hover:bg-gray-100/50'
+                ? 'text-white hover:bg-white/10' 
+                : 'text-white hover:bg-white/10'
             }`}
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle mobile menu"
@@ -184,68 +189,74 @@ export default function Navbar() {
           </motion.button>
         </div>
 
-        {/* Enhanced Mobile Menu */}
+        {/* Mobile overlay to close on outside touch and keep blurred bg */}
         <AnimatePresence>
           {isOpen && (
-            <motion.div 
-              className="md:hidden absolute top-full left-0 w-full backdrop-blur-xl border-t border-white/20 overflow-hidden"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
-              <motion.div 
-                className="container mx-auto px-4 py-6 space-y-2"
+            <div>
+              {/* Full-screen overlay behind the menu */}
+              <motion.div
+                className="fixed inset-0 md:hidden z-40 bg-black/30 backdrop-blur-md"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setIsOpen(false)}
+              />
+
+              {/* Enhanced Mobile Menu */}
+              <motion.div
+                className="md:hidden absolute top-full left-0 w-full z-50 backdrop-blur-xl border-t border-white/20 overflow-hidden"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
               >
-                {navItems.map((item, index) => (
-                  <motion.a
-                    key={item.name}
-                    href={item.href}
-                    onClick={() => handleNavClick(item.href.slice(1))}
-                    className="block p-4 rounded-2xl text-gray-800 hover:text-blue-600 font-medium transition-all duration-300 relative overflow-hidden group"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                    whileHover={{ x: 5 }}
+                <div className="container mx-auto px-4 py-6 space-y-2">
+                  {navItems.map((item, index) => (
+                    <motion.a
+                      key={item.name}
+                      href={item.href}
+                      onClick={() => handleNavClick(item.href.slice(1))}
+                      className="block p-4 rounded-2xl text-white hover:text-blue-300 font-medium transition-all duration-300 relative overflow-hidden group"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                      whileHover={{ x: 5 }}
+                    >
+                      {/* Background hover effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+                      {/* Text */}
+                      <span className="relative z-10">{item.name}</span>
+                      {/* Left border indicator */}
+                      <motion.div
+                        className="absolute left-0 top-1/2 w-1 h-0 bg-gradient-to-b from-blue-500 to-purple-500 rounded-r-full"
+                        initial={{ height: 0, y: "-50%" }}
+                        whileHover={{ height: "80%", y: "-50%" }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    </motion.a>
+                  ))}
+
+                  {/* Mobile Contact Button */}
+                  <motion.div
+                    className="pt-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.4 }}
                   >
-                    {/* Background hover effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
-                    
-                    {/* Text */}
-                    <span className="relative z-10">{item.name}</span>
-                    
-                    {/* Left border indicator */}
-                    <motion.div
-                      className="absolute left-0 top-1/2 w-1 h-0 bg-gradient-to-b from-blue-500 to-purple-500 rounded-r-full"
-                      initial={{ height: 0, y: "-50%" }}
-                      whileHover={{ height: "80%", y: "-50%" }}
-                      transition={{ duration: 0.3 }}
-                    />
-                  </motion.a>
-                ))}
-                
-                {/* Mobile Contact Button */}
-                <motion.div
-                  className="pt-4"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.4 }}
-                >
-                  <motion.a
-                    href="#contact"
-                    onClick={() => handleNavClick('contact')}
-                    className="block w-full p-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center rounded-2xl font-semibold shadow-lg"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    Get In Touch
-                  </motion.a>
-                </motion.div>
+                    <motion.a
+                      href="#contact"
+                      onClick={() => handleNavClick('contact')}
+                      className="block w-full p-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center rounded-2xl font-semibold shadow-lg"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      Get In Touch
+                    </motion.a>
+                  </motion.div>
+                </div>
               </motion.div>
-            </motion.div>
+            </div>
           )}
         </AnimatePresence>
       </div>
