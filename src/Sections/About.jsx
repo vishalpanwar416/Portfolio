@@ -93,9 +93,7 @@ export default function About() {
               whileHover={{ scale: 1.01 }}
               transition={{ duration: 0.3 }}
             >
-              Experienced in MERN, Python, Cloud (AWS/Azure), DevOps, and Flutter. 
-              Graduated with B.Tech in CSE (2024) from KIET Group of Institutions. 
-              Certified in AWS Academy Cloud Foundations, IBM AI, Machine Learning, and Azure Data Scientist Associate.
+              Experienced across MERN, Python, and Cloud (AWS/Azure), with DevOps and Flutter. B.Tech CSE (KIET, 2024). Certifications: AWS Academy Cloud Foundations, IBM AI & ML, Microsoft Azure Data Scientist Associate.
             </motion.p>
             
             {/* Experience */}

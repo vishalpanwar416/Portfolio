@@ -39,6 +39,16 @@ code {
   background: #555;
 }
 
+/* Hide scrollbar utility for horizontal scrollers */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Spartan:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 /* Apply Spartan font to all elements */
