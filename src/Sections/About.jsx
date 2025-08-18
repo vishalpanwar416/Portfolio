@@ -82,26 +82,26 @@ export default function About() {
           {/* Left side - Intro text */}
           <motion.div className="space-y-4" variants={itemVariants}>
             <motion.h3 
-              className="text-2xl font-semibold text-gray-800 mb-3 leading-relaxed"
+              className="text-2xl font-semibold text-gray-800 mb-3 leading-relaxed break-words"
               whileHover={{ scale: 1.02 }}
               transition={{ duration: 0.3 }}
             >
               Full-Stack & Cloud Engineer passionate about AI, Data Science, and scalable systems.
             </motion.h3>
             <motion.p 
-              className="text-gray-600 leading-relaxed text-lg"
+              className="text-gray-600 leading-relaxed text-lg max-w-full break-words"
               whileHover={{ scale: 1.01 }}
               transition={{ duration: 0.3 }}
             >
               Experienced in MERN, Python, Cloud (AWS/Azure), DevOps, and Flutter. 
               Graduated with B.Tech in CSE (2024) from KIET Group of Institutions. 
-              Certified Azure Data Scientist Associate.
+              Certified in AWS Academy Cloud Foundations, IBM AI, Machine Learning, and Azure Data Scientist Associate.
             </motion.p>
             
             {/* Experience */}
             <motion.div className="space-y-4" variants={itemVariants}>
-              <h4 className="text-xl font-semibold text-gray-800 flex items-center">
-                <span className="w-2 h-2 bg-blue-600 rounded-full mr-3"></span>
+              <h4 className="text-xl font-semibold text-gray-800 flex items-center break-words">
+                <span className="w-2 h-2 bg-blue-600 rounded-full mr-3 flex-shrink-0"></span>
                 Experience
               </h4>
               <div className="space-y-3">
@@ -128,8 +128,8 @@ export default function About() {
 
             {/* Education */}
             <motion.div className="space-y-4" variants={itemVariants}>
-              <h4 className="text-xl font-semibold text-gray-800 flex items-center">
-                <span className="w-2 h-2 bg-green-600 rounded-full mr-3"></span>
+              <h4 className="text-xl font-semibold text-gray-800 flex items-center break-words">
+                <span className="w-2 h-2 bg-green-600 rounded-full mr-3 flex-shrink-0"></span>
                 Education
               </h4>
               <div className="space-y-3">
@@ -162,46 +162,81 @@ export default function About() {
             whileHover={{ y: -5, scale: 1.02 }}
             transition={{ duration: 0.3 }}
           >
-            <h4 className="text-2xl font-semibold text-gray-800 mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h4 className="text-2xl font-semibold text-gray-800 mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent break-words">
               Certifications
             </h4>
             <div className="space-y-4">
               <motion.div 
-                className="flex items-center space-x-4 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl hover:shadow-lg transition-all duration-300"
+                className="flex flex-col p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl hover:shadow-lg transition-all duration-300"
                 whileHover={{ scale: 1.02, x: 5 }}
                 transition={{ duration: 0.3 }}
               >
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-blue-700 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <h5 className="font-semibold text-gray-800">Microsoft Certified: Azure Data Scientist Associate</h5>
+                <div className="w-full overflow-hidden">
+                  <h5 className="font-semibold text-gray-800 break-words">Microsoft Certified: Azure Data Scientist Associate</h5>
                   <p className="text-sm text-gray-600">March 2025 - March 2026</p>
-                  <p className="text-xs text-blue-600 hover:underline">
-                    <a href="https://learn.microsoft.com/api/credentials/share/en-in/vishalpanwar/42DF39354B276076?sharingId" target="_blank" rel="noopener noreferrer">
+                  <p className="text-xs text-blue-600 hover:underline overflow-hidden text-ellipsis">
+                    <a href="https://learn.microsoft.com/api/credentials/share/en-in/vishalpanwar/42DF39354B276076?sharingId" target="_blank" rel="noopener noreferrer" className="break-words">
                       Credential ID: 42DF39354B276076
                     </a>
                   </p>
                 </div>
               </motion.div>
               <motion.div 
-                className="flex items-center space-x-4 p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl hover:shadow-lg transition-all duration-300"
+                className="flex flex-col p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl hover:shadow-lg transition-all duration-300"
                 whileHover={{ scale: 1.02, x: 5 }}
                 transition={{ duration: 0.3 }}
               >
-                <div className="w-12 h-12 bg-gradient-to-r from-green-600 to-green-700 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
+                <div className="w-full overflow-hidden">
+                  <h5 className="font-semibold text-gray-800 break-words">AWS Academy Graduate - AWS Academy Cloud Foundations</h5>
+                  <p className="text-sm text-gray-600">March 2024 - No Expiration</p>
+                  <p className="text-xs text-orange-600 hover:underline overflow-hidden text-ellipsis">
+                    <a href="https://www.credly.com/badges/de038709-d600-4cb2-91ff-0162c9f98b68/linked_in_profile" target="_blank" rel="noopener noreferrer" className="break-words">
+                      Credential ID: de038709-d600-4cb2-91ff-0162c9f98b68
+                    </a>
+                  </p>
                 </div>
-                <div>
-                  <h5 className="font-semibold text-gray-800">HackMol 4.0</h5>
+              </motion.div>
+              <motion.div 
+                className="flex flex-col p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl hover:shadow-lg transition-all duration-300"
+                whileHover={{ scale: 1.02, x: 5 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="w-full overflow-hidden">
+                  <h5 className="font-semibold text-gray-800 break-words">HackMol 4.0</h5>
                   <p className="text-sm text-gray-600">Developer Student Club - NIT J, January 2023</p>
-                  <p className="text-xs text-green-600 hover:underline">
-                    <a href="https://certificate.givemycertificate.com/c/f284425a-c375-4439-88db-c26f9a92c0fe" target="_blank" rel="noopener noreferrer">
+                  <p className="text-xs text-green-600 hover:underline overflow-hidden text-ellipsis">
+                    <a href="https://certificate.givemycertificate.com/c/f284425a-c375-4439-88db-c26f9a92c0fe" target="_blank" rel="noopener noreferrer" className="break-words">
                       Credential ID: f284425a-c375-4439-88db-c26f9a92c0fe
+                    </a>
+                  </p>
+                </div>
+              </motion.div>
+              <motion.div 
+                className="flex flex-col p-4 bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-xl hover:shadow-lg transition-all duration-300"
+                whileHover={{ scale: 1.02, x: 5 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="w-full overflow-hidden">
+                  <h5 className="font-semibold text-gray-800 break-words">Machine Learning A-Z™: Hands-On Python & R In Data Science</h5>
+                  <p className="text-sm text-gray-600">September 2022 - September 2034</p>
+                  <p className="text-xs text-indigo-600 hover:underline overflow-hidden text-ellipsis">
+                    <a href="https://ude.my/UC-df034de3-8ed8-456b-b0d7-8a56dabfb39b" target="_blank" rel="noopener noreferrer" className="break-words">
+                      Credential ID: UC-df034de3-8ed8-456b-b0d7-8a56dabfb39b
+                    </a>
+                  </p>
+                </div>
+              </motion.div>
+              <motion.div 
+                className="flex flex-col p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl hover:shadow-lg transition-all duration-300"
+                whileHover={{ scale: 1.02, x: 5 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="w-full overflow-hidden">
+                  <h5 className="font-semibold text-gray-800 break-words">Introduction to Artificial Intelligence (AI)</h5>
+                  <p className="text-sm text-gray-600">August 2021 - August 2034</p>
+                  <p className="text-xs text-purple-600 hover:underline overflow-hidden text-ellipsis">
+                    <a href="https://coursera.org/share/6f74bd9186caf8cb74b613a866366e20" target="_blank" rel="noopener noreferrer" className="break-words">
+                      Credential ID: 6f74bd9186caf8cb74b613a866366e20
                     </a>
                   </p>
                 </div>

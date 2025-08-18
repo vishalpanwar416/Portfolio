@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { smoothScrollTo } from '../lib/utils.js'
 import logo from '../assets/logo.png'
@@ -43,6 +43,26 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [lastScrollY])
 
+  // Lock body scroll when mobile menu is open and close on Escape
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setIsOpen(false)
+    }
+
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+      document.addEventListener('keydown', onKeyDown)
+    } else {
+      document.body.style.overflow = ''
+      document.removeEventListener('keydown', onKeyDown)
+    }
+
+    return () => {
+      document.body.style.overflow = ''
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [isOpen])
+
   const handleNavClick = (sectionId) => {
     smoothScrollTo(sectionId)
     setIsOpen(false)
@@ -51,13 +71,12 @@ export default function Navbar() {
   const navItems = [
     { name: "About", href: "#about" },
     { name: "Skills", href: "#skills" },
-    { name: "Portfolio", href: "#portfolio" },
-    { name: "Contact", href: "#contact" }
+    { name: "Portfolio", href: "#portfolio" }
   ]
 
   return (
     <motion.nav 
-      className={`fixed w-full z-50 transition-all duration-700 ${scrolled ? 'bg-white/10 backdrop-blur-xl py-0 shadow-2xl border-b border-white/20' : 'bg-transparent py-0'}`}
+      className={`fixed w-full z-50 transition-all duration-700 ${scrolled ? 'bg-gray-500/70 backdrop-blur-xl py-0 shadow-2xl border-b border-white/20' : 'bg-transparent py-0'}`}
       initial={{ y: -100, opacity: 0 }}
       animate={{ 
         y: isVisible ? 0 : -100, 
@@ -80,7 +99,7 @@ export default function Navbar() {
             <img 
               src={logo} 
               alt="Vishal Panwar — Full-Stack Web Developer" 
-              className="h-20 w-auto mix-blend-multiply filter drop-shadow-lg"
+              className="h-20 w-auto mix-blend-normal filter brightness-100 drop-shadow-lg"
             />
           </motion.div>
 
@@ -93,7 +112,7 @@ export default function Navbar() {
                 onClick={() => handleNavClick(item.href.slice(1))}
                 className={`relative px-6 py-3 rounded-2xl font-medium transition-all duration-300 group overflow-hidden ${
                   scrolled 
-                    ? 'text-gray-800 hover:text-blue-600' 
+                    ? 'text-white hover:text-blue-300' 
                     : 'text-gray-800 hover:text-blue-600'
                 }`}
                 initial={{ opacity: 0, y: -20 }}
@@ -145,6 +164,7 @@ export default function Navbar() {
               {/* Shine effect */}
               <div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
             </motion.a>
+
           </div>
 
           {/* Enhanced Mobile Toggle */}
@@ -156,6 +176,8 @@ export default function Navbar() {
             }`}
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle mobile menu"
+            aria-expanded={isOpen}
+            aria-controls="mobile-menu"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >
@@ -205,7 +227,10 @@ export default function Navbar() {
 
               {/* Enhanced Mobile Menu */}
               <motion.div
-                className="md:hidden absolute top-full left-0 w-full z-50 backdrop-blur-xl border-t border-white/20 overflow-hidden"
+                id="mobile-menu"
+                role="dialog"
+                aria-modal="true"
+                className="md:hidden absolute top-full left-0 w-full z-50 backdrop-blur-xl border-t border-white/20 overflow-hidden rounded-b-2xl shadow-2xl bg-white/5"
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
@@ -226,7 +251,10 @@ export default function Navbar() {
                       {/* Background hover effect */}
                       <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
                       {/* Text */}
-                      <span className="relative z-10">{item.name}</span>
+                      <div className="relative z-10 flex items-center justify-between">
+                        <span>{item.name}</span>
+                        <ChevronRight size={18} className="opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+                      </div>
                       {/* Left border indicator */}
                       <motion.div
                         className="absolute left-0 top-1/2 w-1 h-0 bg-gradient-to-b from-blue-500 to-purple-500 rounded-r-full"
@@ -236,8 +264,8 @@ export default function Navbar() {
                       />
                     </motion.a>
                   ))}
-
-                  {/* Mobile Contact Button */}
+                  
+                  {/* Mobile Enhanced Contact Button */}
                   <motion.div
                     className="pt-4"
                     initial={{ opacity: 0, y: 20 }}
@@ -247,11 +275,24 @@ export default function Navbar() {
                     <motion.a
                       href="#contact"
                       onClick={() => handleNavClick('contact')}
-                      className="block w-full p-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center rounded-2xl font-semibold shadow-lg"
+                      className="block w-full relative px-6 py-4 rounded-2xl font-semibold overflow-hidden group text-center"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
-                      Get In Touch
+                      {/* Button background */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 rounded-2xl" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300" />
+
+                      {/* Animated border */}
+                      <div className="absolute inset-0 rounded-2xl p-[2px] bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400">
+                        <div className="h-full w-full rounded-2xl bg-white/0" />
+                      </div>
+
+                      {/* Text */}
+                      <span className="relative z-10 text-white">Contact</span>
+
+                      {/* Shine effect */}
+                      <div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                     </motion.a>
                   </motion.div>
                 </div>
