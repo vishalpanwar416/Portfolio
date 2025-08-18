@@ -178,7 +178,12 @@ export default function About() {
                 </div>
                 <div>
                   <h5 className="font-semibold text-gray-800">Microsoft Certified: Azure Data Scientist Associate</h5>
-                  <p className="text-sm text-gray-600">Apr 2024</p>
+                  <p className="text-sm text-gray-600">March 2025 - March 2026</p>
+                  <p className="text-xs text-blue-600 hover:underline">
+                    <a href="https://learn.microsoft.com/api/credentials/share/en-in/vishalpanwar/42DF39354B276076?sharingId" target="_blank" rel="noopener noreferrer">
+                      Credential ID: 42DF39354B276076
+                    </a>
+                  </p>
                 </div>
               </motion.div>
               <motion.div 
