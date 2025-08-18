@@ -198,7 +198,12 @@ export default function About() {
                 </div>
                 <div>
                   <h5 className="font-semibold text-gray-800">HackMol 4.0</h5>
-                  <p className="text-sm text-gray-600">NIT Jalandhar, 2023</p>
+                  <p className="text-sm text-gray-600">Developer Student Club - NIT J, January 2023</p>
+                  <p className="text-xs text-green-600 hover:underline">
+                    <a href="https://certificate.givemycertificate.com/c/f284425a-c375-4439-88db-c26f9a92c0fe" target="_blank" rel="noopener noreferrer">
+                      Credential ID: f284425a-c375-4439-88db-c26f9a92c0fe
+                    </a>
+                  </p>
                 </div>
               </motion.div>
             </div>
