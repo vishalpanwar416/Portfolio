@@ -129,10 +129,10 @@ export default function Hero() {
                   transition={{ duration: 1, delay: 0.7 }}
                 >
                   <motion.span
-                    className="block text-black mb-2 relative"
+                    className="block text-white mb-2 relative"
                     style={{
                       letterSpacing: '-0.02em',
-                      textShadow: '2px 2px 8px rgba(0, 0, 0, 0.1)'
+                      textShadow: '2px 2px 12px rgba(0, 0, 0, 0.3), 0 0 30px rgba(255, 255, 255, 0.1)'
                     }}
                     whileHover={{ scale: 1.02, letterSpacing: '0em' }}
                     transition={{ duration: 0.3 }}
@@ -141,7 +141,7 @@ export default function Hero() {
                       Vishal
                       {/* Subtle underline accent */}
                       <motion.div
-                        className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-black to-gray-600 rounded-full"
+                        className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-white to-gray-300 rounded-full shadow-lg"
                         initial={{ width: 0 }}
                         animate={{ width: '100%' }}
                         transition={{ duration: 0.8, delay: 1.5 }}
@@ -149,10 +149,10 @@ export default function Hero() {
                     </span>
                   </motion.span>
                   <motion.span
-                    className="block text-black relative font-extrabold"
+                    className="block text-white relative font-extrabold"
                     style={{
                       letterSpacing: '-0.02em',
-                      textShadow: '2px 2px 8px rgba(0, 0, 0, 0.15)'
+                      textShadow: '2px 2px 12px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 255, 255, 0.15)'
                     }}
                     whileHover={{ scale: 1.02, letterSpacing: '0em' }}
                     transition={{ duration: 0.3 }}
@@ -161,7 +161,7 @@ export default function Hero() {
                       Panwar
                       {/* Accent dot */}
                       <motion.span
-                        className="inline-block w-2 h-2 bg-black rounded-full ml-2 mb-4"
+                        className="inline-block w-2 h-2 bg-white rounded-full ml-2 mb-4 shadow-lg"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ duration: 0.5, delay: 2 }}
@@ -221,10 +221,10 @@ export default function Hero() {
                 transition={{ duration: 1, delay: 0.7 }}
               >
                 <motion.span
-                  className="block text-black mb-1 relative"
+                  className="block text-white mb-1 relative"
                   style={{
                     letterSpacing: '-0.02em',
-                    textShadow: '2px 2px 8px rgba(0, 0, 0, 0.1)'
+                    textShadow: '2px 2px 12px rgba(0, 0, 0, 0.3), 0 0 30px rgba(255, 255, 255, 0.1)'
                   }}
                   whileHover={{ scale: 1.02, letterSpacing: '0em' }}
                   transition={{ duration: 0.3 }}
@@ -233,7 +233,7 @@ export default function Hero() {
                     Vishal
                     {/* Subtle underline accent */}
                     <motion.div
-                      className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-black to-gray-600 rounded-full"
+                      className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-white to-gray-300 rounded-full shadow-lg"
                       initial={{ width: 0 }}
                       animate={{ width: '100%' }}
                       transition={{ duration: 0.8, delay: 1.5 }}
@@ -241,10 +241,10 @@ export default function Hero() {
                   </span>
                 </motion.span>
                 <motion.span
-                  className="block text-black relative font-extrabold"
+                  className="block text-white relative font-extrabold"
                   style={{
                     letterSpacing: '-0.02em',
-                    textShadow: '2px 2px 8px rgba(0, 0, 0, 0.15)'
+                    textShadow: '2px 2px 12px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 255, 255, 0.15)'
                   }}
                   whileHover={{ scale: 1.02, letterSpacing: '0em' }}
                   transition={{ duration: 0.3 }}
@@ -253,7 +253,7 @@ export default function Hero() {
                     Panwar
                     {/* Accent dot */}
                     <motion.span
-                      className="inline-block w-2 h-2 bg-black rounded-full ml-2 mb-4"
+                      className="inline-block w-2 h-2 bg-white rounded-full ml-2 mb-4 shadow-lg"
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ duration: 0.5, delay: 2 }}
