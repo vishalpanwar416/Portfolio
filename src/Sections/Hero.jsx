@@ -129,10 +129,10 @@ export default function Hero() {
                   transition={{ duration: 1, delay: 0.7 }}
                 >
                   <motion.span
-                    className="block bg-gradient-to-r from-black via-gray-900 to-gray-700 bg-clip-text text-transparent mb-2 relative drop-shadow-lg"
+                    className="block text-black mb-2 relative"
                     style={{
-                      textShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                      letterSpacing: '-0.02em'
+                      letterSpacing: '-0.02em',
+                      textShadow: '2px 2px 8px rgba(0, 0, 0, 0.1)'
                     }}
                     whileHover={{ scale: 1.02, letterSpacing: '0em' }}
                     transition={{ duration: 0.3 }}
@@ -149,15 +149,15 @@ export default function Hero() {
                     </span>
                   </motion.span>
                   <motion.span
-                    className="block bg-gradient-to-r from-gray-800 via-black to-gray-900 bg-clip-text text-transparent relative drop-shadow-lg"
+                    className="block text-black relative font-extrabold"
                     style={{
-                      textShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                      letterSpacing: '-0.02em'
+                      letterSpacing: '-0.02em',
+                      textShadow: '2px 2px 8px rgba(0, 0, 0, 0.15)'
                     }}
                     whileHover={{ scale: 1.02, letterSpacing: '0em' }}
                     transition={{ duration: 0.3 }}
                   >
-                    <span className="relative inline-block font-extrabold">
+                    <span className="relative inline-block">
                       Panwar
                       {/* Accent dot */}
                       <motion.span
@@ -221,10 +221,10 @@ export default function Hero() {
                 transition={{ duration: 1, delay: 0.7 }}
               >
                 <motion.span
-                  className="block bg-gradient-to-r from-black via-gray-900 to-gray-700 bg-clip-text text-transparent mb-1 relative drop-shadow-lg"
+                  className="block text-black mb-1 relative"
                   style={{
-                    textShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                    letterSpacing: '-0.02em'
+                    letterSpacing: '-0.02em',
+                    textShadow: '2px 2px 8px rgba(0, 0, 0, 0.1)'
                   }}
                   whileHover={{ scale: 1.02, letterSpacing: '0em' }}
                   transition={{ duration: 0.3 }}
@@ -241,15 +241,15 @@ export default function Hero() {
                   </span>
                 </motion.span>
                 <motion.span
-                  className="block bg-gradient-to-r from-gray-800 via-black to-gray-900 bg-clip-text text-transparent relative drop-shadow-lg"
+                  className="block text-black relative font-extrabold"
                   style={{
-                    textShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                    letterSpacing: '-0.02em'
+                    letterSpacing: '-0.02em',
+                    textShadow: '2px 2px 8px rgba(0, 0, 0, 0.15)'
                   }}
                   whileHover={{ scale: 1.02, letterSpacing: '0em' }}
                   transition={{ duration: 0.3 }}
                 >
-                  <span className="relative inline-block font-extrabold">
+                  <span className="relative inline-block">
                     Panwar
                     {/* Accent dot */}
                     <motion.span
