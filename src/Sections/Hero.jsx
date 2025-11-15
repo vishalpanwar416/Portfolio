@@ -123,24 +123,50 @@ export default function Hero() {
                 </motion.p>
 
                 <motion.h1
-                  className="text-3xl md:text-7xl font-bold text-black leading-tight"
+                  className="text-3xl md:text-7xl font-bold leading-tight"
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 1, delay: 0.7 }}
                 >
                   <motion.span
-                    className="block bg-gradient-to-r from-gray-900 via-black to-gray-800 bg-clip-text text-transparent mb-2 relative"
-                    whileHover={{ scale: 1.05 }}
+                    className="block bg-gradient-to-r from-black via-gray-900 to-gray-700 bg-clip-text text-transparent mb-2 relative drop-shadow-lg"
+                    style={{
+                      textShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                      letterSpacing: '-0.02em'
+                    }}
+                    whileHover={{ scale: 1.02, letterSpacing: '0em' }}
                     transition={{ duration: 0.3 }}
                   >
-                    Vishal
+                    <span className="relative inline-block">
+                      Vishal
+                      {/* Subtle underline accent */}
+                      <motion.div
+                        className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-black to-gray-600 rounded-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: '100%' }}
+                        transition={{ duration: 0.8, delay: 1.5 }}
+                      />
+                    </span>
                   </motion.span>
                   <motion.span
-                    className="block bg-gradient-to-r from-gray-700 via-gray-900 to-black bg-clip-text text-transparent"
-                    whileHover={{ scale: 1.05 }}
+                    className="block bg-gradient-to-r from-gray-800 via-black to-gray-900 bg-clip-text text-transparent relative drop-shadow-lg"
+                    style={{
+                      textShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                      letterSpacing: '-0.02em'
+                    }}
+                    whileHover={{ scale: 1.02, letterSpacing: '0em' }}
                     transition={{ duration: 0.3 }}
                   >
-                    Panwar
+                    <span className="relative inline-block font-extrabold">
+                      Panwar
+                      {/* Accent dot */}
+                      <motion.span
+                        className="inline-block w-2 h-2 bg-black rounded-full ml-2 mb-4"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ duration: 0.5, delay: 2 }}
+                      />
+                    </span>
                   </motion.span>
                 </motion.h1>
               </div>
@@ -189,24 +215,50 @@ export default function Hero() {
               </motion.p>
               
               <motion.h1
-                className="text-3xl md:text-7xl font-bold mb-3 text-black leading-tight"
+                className="text-3xl md:text-7xl font-bold mb-3 leading-tight"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1, delay: 0.7 }}
               >
                 <motion.span
-                  className="block bg-gradient-to-r from-gray-900 via-black to-gray-800 bg-clip-text text-transparent mb-1 relative"
-                  whileHover={{ scale: 1.05 }}
+                  className="block bg-gradient-to-r from-black via-gray-900 to-gray-700 bg-clip-text text-transparent mb-1 relative drop-shadow-lg"
+                  style={{
+                    textShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                    letterSpacing: '-0.02em'
+                  }}
+                  whileHover={{ scale: 1.02, letterSpacing: '0em' }}
                   transition={{ duration: 0.3 }}
                 >
-                  Vishal
+                  <span className="relative inline-block">
+                    Vishal
+                    {/* Subtle underline accent */}
+                    <motion.div
+                      className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-black to-gray-600 rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: '100%' }}
+                      transition={{ duration: 0.8, delay: 1.5 }}
+                    />
+                  </span>
                 </motion.span>
                 <motion.span
-                  className="block bg-gradient-to-r from-gray-700 via-gray-900 to-black bg-clip-text text-transparent"
-                  whileHover={{ scale: 1.05 }}
+                  className="block bg-gradient-to-r from-gray-800 via-black to-gray-900 bg-clip-text text-transparent relative drop-shadow-lg"
+                  style={{
+                    textShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                    letterSpacing: '-0.02em'
+                  }}
+                  whileHover={{ scale: 1.02, letterSpacing: '0em' }}
                   transition={{ duration: 0.3 }}
                 >
-                  Panwar
+                  <span className="relative inline-block font-extrabold">
+                    Panwar
+                    {/* Accent dot */}
+                    <motion.span
+                      className="inline-block w-2 h-2 bg-black rounded-full ml-2 mb-4"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ duration: 0.5, delay: 2 }}
+                    />
+                  </span>
                 </motion.span>
               </motion.h1>
             </motion.div>
