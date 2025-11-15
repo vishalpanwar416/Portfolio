@@ -581,6 +581,7 @@ ${formData.name.trim() ? `My name is ${formData.name}
                 </p>
               </motion.div>
             </div>
+              </div>
             </div>
           </motion.div>
         </div>
