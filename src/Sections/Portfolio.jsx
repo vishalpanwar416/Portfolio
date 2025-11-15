@@ -145,19 +145,21 @@ export default function Portfolio() {
   }
 
   return (
-    <section id="portfolio" className="py-20 bg-gradient-to-br from-gray-50 via-white to-gray-50 relative overflow-hidden font-spartan">
-      {/* Background decorative elements */}
+    <section id="portfolio" className="py-20 bg-white relative overflow-hidden font-spartan">
+      {/* Background decorative elements - Monochromatic */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
-          className="absolute top-20 right-20 w-36 h-36 bg-blue-100 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.4, 1], opacity: [0.2, 0.5, 0.2] }}
+          className="absolute top-20 right-20 w-40 h-40 bg-gray-200 rounded-full blur-3xl"
+          animate={{ scale: [1, 1.4, 1], opacity: [0.15, 0.35, 0.15] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
-          className="absolute bottom-20 left-20 w-28 h-28 bg-purple-100 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.3, 1], opacity: [0.1, 0.4, 0.1] }}
+          className="absolute bottom-20 left-20 w-32 h-32 bg-gray-300 rounded-full blur-3xl"
+          animate={{ scale: [1, 1.3, 1], opacity: [0.1, 0.3, 0.1] }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
         />
+        {/* Geometric patterns */}
+        <div className="absolute top-1/3 right-1/3 w-72 h-72 border border-gray-100 rounded-full opacity-20"></div>
       </div>
 
       <div className="container mx-auto px-4 md:px-8 relative z-10">
@@ -168,11 +170,11 @@ export default function Portfolio() {
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 bg-gradient-to-r from-gray-800 to-blue-600 bg-clip-text text-transparent font-spartan">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 bg-gradient-to-r from-black via-gray-800 to-black bg-clip-text text-transparent font-spartan">
             Featured Projects
           </h2>
-          <motion.div 
-            className="w-24 h-1 bg-gradient-to-r from-blue-600 to-purple-600 mx-auto rounded-full mb-4"
+          <motion.div
+            className="w-24 h-1 bg-gradient-to-r from-gray-800 via-black to-gray-800 mx-auto rounded-full mb-4"
             initial={{ width: 0 }}
             whileInView={{ width: 96 }}
             viewport={{ once: true }}
@@ -203,8 +205,8 @@ export default function Portfolio() {
                   transition={{ duration: 0.3 }}
                 >
                   {/* Project Image */}
-                  <motion.div 
-                    className="relative h-48 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center overflow-hidden"
+                  <motion.div
+                    className="relative h-48 bg-gradient-to-br from-gray-800 via-gray-900 to-black flex items-center justify-center overflow-hidden"
                     variants={imageVariants}
                   >
                     {project.image ? (
@@ -265,20 +267,20 @@ export default function Portfolio() {
                     {/* Features */}
                     <div className="mb-4">
                       <h4 className="text-sm font-semibold text-gray-800 mb-2 flex items-center">
-                        <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                        <span className="w-2 h-2 bg-black rounded-full mr-2"></span>
                         Key Features:
                       </h4>
                       <ul className="space-y-1">
                         {project.features.map((feature, featureIndex) => (
-                          <motion.li 
-                            key={featureIndex} 
+                          <motion.li
+                            key={featureIndex}
                             className="text-sm text-gray-600 flex items-center"
                             initial={{ opacity: 0, x: -20 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.4, delay: featureIndex * 0.1 }}
                           >
-                            <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                            <span className="w-2 h-2 bg-gray-700 rounded-full mr-2"></span>
                             {feature}
                           </motion.li>
                         ))}
@@ -288,14 +290,14 @@ export default function Portfolio() {
                     {/* Tech Stack */}
                     <div className="mb-6">
                       <h4 className="text-sm font-semibold text-gray-800 mb-2 flex items-center">
-                        <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                        <span className="w-2 h-2 bg-gray-700 rounded-full mr-2"></span>
                         Tech Stack:
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {project.tech.map((tech, techIndex) => (
-                          <motion.span 
-                            key={techIndex} 
-                            className="px-3 py-1 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 rounded-full text-xs font-medium border border-blue-200"
+                          <motion.span
+                            key={techIndex}
+                            className="px-3 py-1 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 rounded-full text-xs font-medium border border-gray-300"
                             initial={{ opacity: 0, scale: 0.8 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
@@ -322,14 +324,14 @@ export default function Portfolio() {
                           View Code
                         </motion.a>
                       )}
-                      <motion.a 
-                        href={project.live} 
-                        target="_blank" 
+                      <motion.a
+                        href={project.live}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className={`text-center font-medium py-3 px-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl ${
-                          project.github 
-                            ? 'flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700' 
-                            : 'w-full bg-gradient-to-r from-green-600 to-blue-600 text-white hover:from-green-700 hover:to-blue-700'
+                          project.github
+                            ? 'flex-1 bg-gradient-to-r from-gray-700 to-gray-900 text-white hover:from-gray-800 hover:to-black'
+                            : 'w-full bg-gradient-to-r from-black to-gray-800 text-white hover:from-gray-900 hover:to-gray-700'
                         }`}
                         whileHover={{ scale: 1.05, y: -2 }}
                         whileTap={{ scale: 0.95 }}
@@ -355,7 +357,7 @@ export default function Portfolio() {
                       transition={{ duration: 0.4 }}
                     >
                       {/* Project Image */}
-                      <div className="relative h-48 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center overflow-hidden">
+                      <div className="relative h-48 bg-gradient-to-br from-gray-800 via-gray-900 to-black flex items-center justify-center overflow-hidden">
                         {project.image ? (
                           <div className="w-full h-full flex items-center justify-center bg-white/10 backdrop-blur-sm">
                             <img src={project.image} alt={project.title} className="max-w-full max-h-full object-contain p-4" />
@@ -370,9 +372,9 @@ export default function Portfolio() {
                         <p className="text-gray-600 mb-4 leading-relaxed font-spartan">{project.description}</p>
                         <div className="flex space-x-4">
                           {project.github && (
-                            <a href={project.github} target="_blank" rel="noopener noreferrer" className="flex-1 bg-gradient-to-r from-gray-900 to-gray-800 text-white py-3 px-4 rounded-xl text-center font-medium">View Code</a>
+                            <a href={project.github} target="_blank" rel="noopener noreferrer" className="flex-1 bg-gradient-to-r from-gray-900 to-gray-800 text-white py-3 px-4 rounded-xl text-center font-medium hover:from-black hover:to-gray-900 transition-all">View Code</a>
                           )}
-                          <a href={project.live} target="_blank" rel="noopener noreferrer" className={`text-center font-medium py-3 px-4 rounded-xl ${project.github ? 'flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white' : 'w-full bg-gradient-to-r from-green-600 to-blue-600 text-white'}`}>{project.github ? 'Live Demo' : 'Visit Website'}</a>
+                          <a href={project.live} target="_blank" rel="noopener noreferrer" className={`text-center font-medium py-3 px-4 rounded-xl transition-all ${project.github ? 'flex-1 bg-gradient-to-r from-gray-700 to-gray-900 text-white hover:from-gray-800 hover:to-black' : 'w-full bg-gradient-to-r from-black to-gray-800 text-white hover:from-gray-900 hover:to-gray-700'}`}>{project.github ? 'Live Demo' : 'Visit Website'}</a>
                         </div>
                       </div>
                     </motion.div>
@@ -400,7 +402,7 @@ export default function Portfolio() {
                 variants={projectVariants}
               >
                 {/* Project Image - Mobile grid */}
-                <div className="relative h-40 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center overflow-hidden">
+                <div className="relative h-40 bg-gradient-to-br from-gray-800 via-gray-900 to-black flex items-center justify-center overflow-hidden">
                   {project.image ? (
                     <div className="w-full h-full flex items-center justify-center bg-white/10 backdrop-blur-sm">
                       <img 
@@ -419,9 +421,9 @@ export default function Portfolio() {
                   <p className="text-gray-600 mb-3 leading-relaxed text-sm font-spartan">{project.description}</p>
                   <div className="flex space-x-2">
                     {project.github && (
-                      <a href={project.github} target="_blank" rel="noopener noreferrer" className="flex-1 bg-gray-900 text-white py-2 px-3 rounded-lg text-center text-sm">View Code</a>
+                      <a href={project.github} target="_blank" rel="noopener noreferrer" className="flex-1 bg-gray-900 text-white py-2 px-3 rounded-lg text-center text-sm hover:bg-black transition-all">View Code</a>
                     )}
-                    <a href={project.live} target="_blank" rel="noopener noreferrer" className={`text-white py-2 px-3 rounded-lg text-center text-sm ${project.github ? 'flex-1 bg-gradient-to-r from-blue-600 to-purple-600' : 'w-full bg-gradient-to-r from-green-600 to-blue-600'}`}>{project.github ? 'Demo' : 'Website'}</a>
+                    <a href={project.live} target="_blank" rel="noopener noreferrer" className={`text-white py-2 px-3 rounded-lg text-center text-sm transition-all ${project.github ? 'flex-1 bg-gradient-to-r from-gray-700 to-gray-900 hover:from-gray-800 hover:to-black' : 'w-full bg-gradient-to-r from-black to-gray-800 hover:from-gray-900 hover:to-gray-700'}`}>{project.github ? 'Demo' : 'Website'}</a>
                   </div>
                 </div>
               </motion.div>
@@ -456,7 +458,7 @@ export default function Portfolio() {
                       viewport={{ once: true }}
                     >
                       {/* Project Image - Mobile */}
-                      <div className="relative h-40 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center overflow-hidden">
+                      <div className="relative h-40 bg-gradient-to-br from-gray-800 via-gray-900 to-black flex items-center justify-center overflow-hidden">
                         {project.image ? (
                           <div className="w-full h-full flex items-center justify-center bg-white/10 backdrop-blur-sm">
                             <img 
@@ -500,13 +502,13 @@ export default function Portfolio() {
                         {/* Features */}
                         <div className="mb-3">
                           <h4 className="text-xs font-semibold text-gray-800 mb-1 flex items-center">
-                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1.5"></span>
+                            <span className="w-1.5 h-1.5 bg-black rounded-full mr-1.5"></span>
                             Key Features:
                           </h4>
                           <ul className="space-y-1">
                             {project.features.slice(0, 2).map((feature, featureIndex) => (
                               <li key={featureIndex} className="text-xs text-gray-600 flex items-center">
-                                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1.5"></span>
+                                <span className="w-1.5 h-1.5 bg-gray-700 rounded-full mr-1.5"></span>
                                 {feature}
                               </li>
                             ))}
@@ -516,14 +518,14 @@ export default function Portfolio() {
                         {/* Tech Stack */}
                         <div className="mb-4">
                           <h4 className="text-xs font-semibold text-gray-800 mb-1 flex items-center">
-                            <span className="w-1.5 h-1.5 bg-purple-500 rounded-full mr-1.5"></span>
+                            <span className="w-1.5 h-1.5 bg-gray-700 rounded-full mr-1.5"></span>
                             Tech Stack:
                           </h4>
                           <div className="flex flex-wrap gap-1">
                             {project.tech.slice(0, 3).map((tech, techIndex) => (
-                              <span 
-                                key={techIndex} 
-                                className="px-2 py-1 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 rounded-full text-xs font-medium border border-blue-200"
+                              <span
+                                key={techIndex}
+                                className="px-2 py-1 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 rounded-full text-xs font-medium border border-gray-300"
                               >
                                 {tech}
                               </span>
@@ -549,9 +551,9 @@ export default function Portfolio() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className={`text-white py-2 px-3 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-xl text-center text-sm ${
-                              project.github 
-                                ? 'flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700' 
-                                : 'w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700'
+                              project.github
+                                ? 'flex-1 bg-gradient-to-r from-gray-700 to-gray-900 hover:from-gray-800 hover:to-black'
+                                : 'w-full bg-gradient-to-r from-black to-gray-800 hover:from-gray-900 hover:to-gray-700'
                             }`}
                           >
                             <ExternalLink className="w-3 h-3 inline mr-1" />

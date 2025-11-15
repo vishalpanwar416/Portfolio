@@ -18,38 +18,38 @@ export default function Contact() {
       label: "Email",
       value: "vishalpanwar416@gmail.com",
       link: "mailto:vishalpanwar416@gmail.com",
-      color: "bg-gradient-to-br from-blue-500 to-blue-600",
-      hoverColor: "hover:from-blue-600 hover:to-blue-700"
+      color: "bg-gradient-to-br from-gray-700 to-gray-800",
+      hoverColor: "hover:from-gray-800 hover:to-gray-900"
     },
     {
       icon: Phone,
       label: "Phone",
       value: "+91 7500988212",
       link: "tel:+917500988212",
-      color: "bg-gradient-to-br from-green-500 to-green-600",
-      hoverColor: "hover:from-green-600 hover:to-green-700"
+      color: "bg-gradient-to-br from-gray-800 to-gray-900",
+      hoverColor: "hover:from-gray-900 hover:to-black"
     },
     {
       icon: Linkedin,
       label: "LinkedIn",
       value: "linkedin.com/in/vishalpanwar416",
       link: "https://linkedin.com/in/vishalpanwar416",
-      color: "bg-gradient-to-br from-blue-600 to-blue-700",
-      hoverColor: "hover:from-blue-700 hover:to-blue-800"
+      color: "bg-gradient-to-br from-black to-gray-900",
+      hoverColor: "hover:from-gray-900 hover:to-gray-800"
     },
     {
       icon: Instagram,
       label: "Instagram",
       value: "instagram.com/vee.pyai",
       link: "https://instagram.com/vee.pyai",
-      color: "bg-gradient-to-br from-pink-500 to-purple-600",
-      hoverColor: "hover:from-pink-600 hover:to-purple-700"
+      color: "bg-gradient-to-br from-gray-600 to-gray-700",
+      hoverColor: "hover:from-gray-700 hover:to-gray-800"
     },
     {
       icon: Twitter,
       label: "X (Twitter)",
-      value: "twitter.com/vishalpanwarr",
-      link: "https://twitter.com/vishalpanwarr",
+      value: "twitter.com/vishalpanwar416",
+      link: "https://twitter.com/vishalpanwar416",
       color: "bg-gradient-to-br from-gray-700 to-gray-900",
       hoverColor: "hover:from-gray-800 hover:to-black"
     }
@@ -126,11 +126,13 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" className="py-20 bg-gradient-to-br from-gray-50 via-white to-gray-50 relative overflow-hidden">
-      {/* Background decorative elements */}
+    <section id="contact" className="py-20 bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
+      {/* Background decorative elements - Monochromatic */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full opacity-20 blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-orange-100 to-pink-100 rounded-full opacity-20 blur-3xl"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full opacity-20 blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full opacity-20 blur-3xl"></div>
+        {/* Additional geometric elements */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 border border-gray-100 rounded-full opacity-10"></div>
       </div>
 
       <div className="container mx-auto px-3 md:px-8 relative z-10 max-w-full">
@@ -141,10 +143,10 @@ export default function Contact() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-gray-900 bg-clip-text text-transparent mb-6">
+          <h2 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-black via-gray-800 to-black bg-clip-text text-transparent mb-6">
             Get In Touch
           </h2>
-          <div className="w-32 h-1.5 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 mx-auto rounded-full"></div>
+          <div className="w-32 h-1.5 bg-gradient-to-r from-gray-800 via-black to-gray-800 mx-auto rounded-full"></div>
           <p className="text-xl text-gray-600 mt-6 max-w-3xl mx-auto leading-relaxed">
             I'm always open to discussing new opportunities, interesting projects, and innovative ideas.
             Let's create something amazing together!
@@ -161,7 +163,7 @@ export default function Contact() {
             viewport={{ once: true }}
           >
             <h3 className="text-3xl font-bold text-gray-800 mb-8 flex items-center">
-              <MapPin className="w-8 h-8 text-blue-600 mr-3" />
+              <MapPin className="w-8 h-8 text-black mr-3" />
               Contact Information
             </h3>
             
@@ -239,7 +241,7 @@ export default function Contact() {
             viewport={{ once: true }}
           >
             <h3 className="text-3xl font-bold text-gray-800 mb-8 flex items-center">
-              <MessageSquare className="w-8 h-8 text-blue-600 mr-3" />
+              <MessageSquare className="w-8 h-8 text-black mr-3" />
               Send a Message
             </h3>
             
@@ -247,7 +249,7 @@ export default function Contact() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full overflow-hidden">
                 <div className="space-y-2">
                   <label htmlFor="name" className="block text-sm font-semibold text-gray-700 flex items-center">
-                    <User className="w-4 h-4 mr-2 text-blue-600" />
+                    <User className="w-4 h-4 mr-2 text-black" />
                     Name
                   </label>
                   <div className="relative">
@@ -283,7 +285,7 @@ export default function Contact() {
                 
                 <div className="space-y-2">
                   <label htmlFor="email" className="block text-sm font-semibold text-gray-700 flex items-center">
-                    <Mail className="w-4 h-4 mr-2 text-blue-600" />
+                    <Mail className="w-4 h-4 mr-2 text-black" />
                     Email
                   </label>
                   <div className="relative">
@@ -320,7 +322,7 @@ export default function Contact() {
               
               <div className="space-y-2">
                 <label htmlFor="message" className="block text-sm font-semibold text-gray-700 flex items-center">
-                  <MessageSquare className="w-4 h-4 mr-2 text-blue-600" />
+                  <MessageSquare className="w-4 h-4 mr-2 text-black" />
                   Message
                 </label>
                 <div className="relative">
@@ -361,9 +363,9 @@ export default function Contact() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`w-full py-3 sm:py-4 px-4 sm:px-6 rounded-xl font-bold text-base sm:text-lg shadow-lg transition-all duration-300 transform flex items-center justify-center space-x-2 sm:space-x-3 ${
-                    whatsappSent 
-                      ? 'bg-gradient-to-r from-green-700 to-green-800 cursor-default' 
-                      : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 hover:shadow-xl hover:scale-105 cursor-pointer'
+                    whatsappSent
+                      ? 'bg-gradient-to-r from-gray-800 to-gray-900 cursor-default'
+                      : 'bg-gradient-to-r from-black to-gray-800 hover:from-gray-900 hover:to-gray-700 hover:shadow-xl hover:scale-105 cursor-pointer'
                   } text-white`}
                   whileHover={whatsappSent ? {} : { scale: 1.02 }}
                   whileTap={whatsappSent ? {} : { scale: 0.98 }}

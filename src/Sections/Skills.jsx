@@ -156,11 +156,14 @@ export default function Skills() {
   }
 
   return (
-    <section id="skills" className="py-16 bg-white relative overflow-hidden">
-      {/* Background decorative elements */}
+    <section id="skills" className="py-16 bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
+      {/* Background decorative elements - Monochromatic */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full opacity-20 blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-orange-100 to-pink-100 rounded-full opacity-20 blur-3xl"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full opacity-20 blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full opacity-20 blur-3xl"></div>
+        {/* Geometric lines */}
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 border border-gray-200 rounded-full opacity-10"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-48 h-48 border border-gray-300 rounded-full opacity-10"></div>
       </div>
 
       <div className="container mx-auto px-3 md:px-6 relative z-10">
@@ -171,10 +174,10 @@ export default function Skills() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 bg-gradient-to-r from-gray-800 to-blue-600 bg-clip-text text-transparent">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 bg-gradient-to-r from-black via-gray-800 to-black bg-clip-text text-transparent">
             Skills & Technologies
           </h2>
-          <div className="w-32 h-1.5 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 mx-auto rounded-full"></div>
+          <div className="w-32 h-1.5 bg-gradient-to-r from-gray-800 via-black to-gray-800 mx-auto rounded-full"></div>
           <p className="text-xl text-gray-600 mt-6 max-w-3xl mx-auto leading-relaxed">
             A comprehensive toolkit of technologies and frameworks I've mastered through hands-on experience and continuous learning.
           </p>

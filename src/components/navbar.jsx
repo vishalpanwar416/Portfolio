@@ -75,17 +75,17 @@ export default function Navbar() {
   ]
 
   return (
-    <motion.nav 
-      className={`fixed w-full z-50 transition-all duration-700 ${scrolled ? 'bg-gray-500/70 backdrop-blur-xl py-0 shadow-2xl border-b border-white/20' : 'bg-transparent py-0'}`}
+    <motion.nav
+      className={`fixed w-full z-50 transition-all duration-700 ${scrolled ? 'bg-black/80 backdrop-blur-xl py-0 shadow-2xl border-b border-white/10' : 'bg-transparent py-0'}`}
       initial={{ y: -100, opacity: 0 }}
-      animate={{ 
-        y: isVisible ? 0 : -100, 
-        opacity: isVisible ? 1 : 0 
+      animate={{
+        y: isVisible ? 0 : -100,
+        opacity: isVisible ? 1 : 0
       }}
       transition={{ duration: 0.3 }}
     >
-      {/* Background gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5"></div>
+      {/* Background gradient overlay - Monochromatic */}
+      <div className="absolute inset-0 bg-gradient-to-r from-gray-900/5 via-black/5 to-gray-900/5"></div>
       
       <div className="container mx-auto relative">
         <div className="flex items-center justify-between">
@@ -111,24 +111,24 @@ export default function Navbar() {
                 href={item.href} 
                 onClick={() => handleNavClick(item.href.slice(1))}
                 className={`relative px-6 py-3 rounded-2xl font-medium transition-all duration-300 group overflow-hidden ${
-                  scrolled 
-                    ? 'text-white hover:text-blue-300' 
-                    : 'text-gray-800 hover:text-blue-600'
+                  scrolled
+                    ? 'text-white hover:text-gray-300'
+                    : 'text-gray-800 hover:text-black'
                 }`}
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 whileHover={{ y: -2 }}
               >
-                {/* Background hover effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
-                
+                {/* Background hover effect - Monochromatic */}
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-200/10 to-gray-300/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+
                 {/* Text */}
                 <span className="relative z-10">{item.name}</span>
-                
-                {/* Underline animation */}
+
+                {/* Underline animation - Monochromatic */}
                 <motion.div
-                  className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
+                  className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-gray-800 via-black to-gray-800 rounded-full"
                   initial={{ width: 0, x: "-50%" }}
                   whileHover={{ width: "80%", x: "-50%" }}
                   transition={{ duration: 0.3 }}
@@ -147,12 +147,12 @@ export default function Navbar() {
               whileHover={{ y: -2, scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              {/* Button background */}
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 rounded-2xl"></div>
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
-               
-              {/* Animated border */}
-              <div className="absolute inset-0 rounded-2xl p-[2px] bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400">
+              {/* Button background - Monochromatic */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black via-gray-900 to-black rounded-2xl"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-black to-gray-900 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+
+              {/* Animated border - Monochromatic */}
+              <div className="absolute inset-0 rounded-2xl p-[2px] bg-gradient-to-r from-gray-700 via-gray-800 to-gray-700">
                 <div className="h-full w-full rounded-2xl bg-white"></div>
               </div>
                
@@ -248,16 +248,16 @@ export default function Navbar() {
                       transition={{ duration: 0.3, delay: index * 0.1 }}
                       whileHover={{ x: 5 }}
                     >
-                      {/* Background hover effect */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+                      {/* Background hover effect - Monochromatic */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-gray-200/5 to-gray-300/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
                       {/* Text */}
                       <div className="relative z-10 flex items-center justify-between">
                         <span>{item.name}</span>
                         <ChevronRight size={18} className="opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
                       </div>
-                      {/* Left border indicator */}
+                      {/* Left border indicator - Monochromatic */}
                       <motion.div
-                        className="absolute left-0 top-1/2 w-1 h-0 bg-gradient-to-b from-blue-500 to-purple-500 rounded-r-full"
+                        className="absolute left-0 top-1/2 w-1 h-0 bg-gradient-to-b from-gray-800 to-black rounded-r-full"
                         initial={{ height: 0, y: "-50%" }}
                         whileHover={{ height: "80%", y: "-50%" }}
                         transition={{ duration: 0.3 }}
@@ -279,12 +279,12 @@ export default function Navbar() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
-                      {/* Button background */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 rounded-2xl" />
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300" />
+                      {/* Button background - Monochromatic */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-black via-gray-900 to-black rounded-2xl" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-black to-gray-900 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300" />
 
-                      {/* Animated border */}
-                      <div className="absolute inset-0 rounded-2xl p-[2px] bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400">
+                      {/* Animated border - Monochromatic */}
+                      <div className="absolute inset-0 rounded-2xl p-[2px] bg-gradient-to-r from-gray-700 via-gray-800 to-gray-700">
                         <div className="h-full w-full rounded-2xl bg-white/0" />
                       </div>
 
