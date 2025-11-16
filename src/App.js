@@ -10,7 +10,6 @@ import Contact from './Sections/Contacts'
 import Footer from './Sections/Footer'
 import LoadingScreen from './components/LoadingScreen'
 import ScrollProgress from './components/ScrollProgress'
-import SectionDivider from './components/SectionDivider'
 import ParticleBackground from './components/ParticleBackground'
 import BackToTop from './components/BackToTop'
 
@@ -46,15 +45,10 @@ export default function App() {
 
             <Navbar />
             <Hero />
-            <SectionDivider />
             <About />
-            <SectionDivider />
             <Skills />
-            <SectionDivider />
             <Certifications />
-            <SectionDivider />
             <Portfolio />
-            <SectionDivider />
             <Contact />
             <Footer />
           </div>

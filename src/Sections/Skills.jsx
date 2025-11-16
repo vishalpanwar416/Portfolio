@@ -5,7 +5,7 @@ import { skillCategories, personalInfo, sectionContent } from '../data'
 export default function Skills() {
 
   return (
-    <section id="skills" className="py-24 bg-[#0a0a0a] relative overflow-hidden border-t border-gray-800/50">
+    <section id="skills" className="py-24 bg-[#0a0a0a] relative overflow-hidden border-t border-gray-800/20">
       {/* Background effects */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/3 right-0 w-96 h-96 bg-gradient-to-bl from-gray-800/10 to-transparent rounded-full blur-3xl"></div>
@@ -18,13 +18,13 @@ export default function Skills() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-12 md:mb-16"
         >
-          <h2 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-gray-300 to-gray-500 bg-clip-text text-transparent">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-gray-300 to-gray-500 bg-clip-text text-transparent px-4">
             {sectionContent.skills.title}
           </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-gray-600 via-gray-400 to-gray-600 mx-auto rounded-full"></div>
-          <p className="text-gray-400 mt-6 text-lg max-w-2xl mx-auto">
+          <div className="w-16 md:w-24 h-1 bg-gradient-to-r from-gray-600 via-gray-400 to-gray-600 mx-auto rounded-full"></div>
+          <p className="text-gray-400 mt-4 md:mt-6 text-sm sm:text-base md:text-lg max-w-2xl mx-auto px-4">
             {sectionContent.skills.subtitle}
           </p>
         </motion.div>
@@ -51,7 +51,7 @@ export default function Skills() {
                 },
               }}
             >
-              <h3 className="text-xl font-semibold text-gray-200 mb-4 flex items-center gap-2">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-200 mb-4 flex items-center gap-2">
                 <div className="w-1 h-6 bg-gray-500 rounded-full"></div>
                 {category.category}
               </h3>

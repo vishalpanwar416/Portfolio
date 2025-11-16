@@ -6,7 +6,7 @@ import { socialLinks, footerLinks, sectionContent, externalLinks } from '../data
 export default function Footer() {
 
   return (
-    <footer className="bg-[#0a0a0a] border-t border-gray-800/50 text-gray-300 py-12 relative overflow-hidden">
+    <footer className="bg-[#0a0a0a] border-t border-gray-800/20 text-gray-300 py-12 relative overflow-hidden">
       {/* Static background effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-gray-800/5 to-transparent rounded-full blur-3xl"></div>
@@ -66,7 +66,7 @@ export default function Footer() {
         </div>
 
         {/* Divider */}
-        <div className="border-t border-gray-800/50 my-8"></div>
+        <div className="border-t border-gray-800/20 my-8"></div>
 
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">

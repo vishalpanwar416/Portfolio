@@ -11,7 +11,7 @@ export default function Hero() {
   const magneticButton2 = useMagneticButton(0.3)
 
   return (
-    <section id="hero" className="min-h-screen relative overflow-hidden pt-20 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a]">
+    <section id="hero" className="min-h-screen relative overflow-hidden pt-12 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a]">
       {/* Ambient background effects with animated gradient mesh */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Animated gradient orbs */}
@@ -88,7 +88,7 @@ export default function Hero() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className="text-gray-400 text-lg mb-2"
+                className="text-gray-400 text-sm md:text-base mb-2"
               >
                 {sectionContent.hero.greeting}
               </motion.p>
@@ -96,7 +96,7 @@ export default function Hero() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="text-6xl md:text-7xl lg:text-8xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent"
+                className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent"
                 style={{
                   fontFamily: "'Playfair Display', serif",
                   letterSpacing: '-0.02em',
@@ -105,7 +105,7 @@ export default function Hero() {
                 }}
               >
                 <span className="block">{personalInfo.name.first}</span>
-                <span className="block mt-2">{personalInfo.name.last}</span>
+                <span className="block mt-1 md:mt-2">{personalInfo.name.last}</span>
               </motion.h1>
             </div>
 
@@ -114,7 +114,7 @@ export default function Hero() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="text-xl md:text-2xl text-gray-400 max-w-xl"
+              className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-400 max-w-xl"
             >
               I build <TypingAnimation
                 texts={typingAnimationTexts}
@@ -129,7 +129,7 @@ export default function Hero() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="text-gray-500 text-lg max-w-xl leading-relaxed"
+              className="text-gray-500 text-sm sm:text-base md:text-lg max-w-xl leading-relaxed"
             >
               {sectionContent.hero.description}
             </motion.p>
@@ -144,7 +144,7 @@ export default function Hero() {
               <motion.button
                 ref={magneticButton1}
                 onClick={() => smoothScrollTo('portfolio')}
-                className="group relative px-8 py-4 bg-white text-black rounded-xl font-semibold overflow-hidden transition-all hover:scale-105 active:scale-95 ripple"
+                className="group relative px-6 py-3 md:px-8 md:py-4 bg-white text-black rounded-xl font-semibold overflow-hidden transition-all hover:scale-105 active:scale-95 ripple text-sm md:text-base"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -155,7 +155,7 @@ export default function Hero() {
               <motion.button
                 ref={magneticButton2}
                 onClick={() => smoothScrollTo('contact')}
-                className="group px-8 py-4 border-2 border-white/20 text-white rounded-xl font-semibold hover:bg-white/5 transition-all hover:scale-105 active:scale-95 ripple backdrop-blur-sm glass"
+                className="group px-6 py-3 md:px-8 md:py-4 border-2 border-white/20 text-white rounded-xl font-semibold hover:bg-white/5 transition-all hover:scale-105 active:scale-95 ripple backdrop-blur-sm glass text-sm md:text-base"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >

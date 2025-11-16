@@ -13,7 +13,7 @@ export const skillCategories = [
   },
   {
     category: "Cloud & DevOps",
-    skills: ["AWS", "Azure", "Docker", "Kubernetes", "CI/CD", "Git", "Linux", "Nginx"]
+    skills: ["AWS", "Azure", "GCP", "Docker", "Kubernetes", "Terraform", "CI/CD", "Git", "Linux", "Nginx"]
   },
   {
     category: "AI & ML",

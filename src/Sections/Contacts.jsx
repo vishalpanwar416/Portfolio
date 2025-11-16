@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Mail, Phone, Linkedin, User, MessageSquare, Instagram, Twitter, ExternalLink, Calendar } from 'lucide-react'
+import { User, MessageSquare, Mail } from 'lucide-react'
+import { contactLinks } from '../data/social'
 import QRCodeGenerator from '../components/QRCodeGenerator'
 import AvailabilityCalendar from '../components/AvailabilityCalendar'
 import InteractiveMap from '../components/InteractiveMap'
@@ -15,51 +16,6 @@ export default function Contact() {
   const [errors, setErrors] = useState({})
   const [isFocused, setIsFocused] = useState({})
   const [whatsappSent, setWhatsappSent] = useState(false)
-
-  const contactInfo = [
-    {
-      icon: Mail,
-      label: "Email",
-      value: "vishalpanwar416@gmail.com",
-      link: "mailto:vishalpanwar416@gmail.com"
-    },
-    {
-      icon: Phone,
-      label: "Phone",
-      value: "+91 7500988212",
-      link: "tel:+917500988212"
-    },
-    {
-      icon: Linkedin,
-      label: "LinkedIn",
-      value: "linkedin.com/in/vishalpanwar416",
-      link: "https://linkedin.com/in/vishalpanwar416"
-    },
-    {
-      icon: Instagram,
-      label: "Instagram",
-      value: "instagram.com/vee.pyai",
-      link: "https://instagram.com/vee.pyai"
-    },
-    {
-      icon: Twitter,
-      label: "X (Twitter)",
-      value: "twitter.com/vishalpanwar416",
-      link: "https://twitter.com/vishalpanwar416"
-    },
-    {
-      icon: ExternalLink,
-      label: "Digital Card",
-      value: "blinq.me/cTA1XtayJD14xDIFFz33",
-      link: "https://blinq.me/cTA1XtayJD14xDIFFz33"
-    },
-    {
-      icon: Calendar,
-      label: "Book a Meeting",
-      value: "cal.com/vishal-panwar-mz0tfc",
-      link: "https://cal.com/vishal-panwar-mz0tfc"
-    }
-  ]
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -102,7 +58,7 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" className="py-24 pb-16 bg-[#0a0a0a] relative overflow-hidden border-t border-gray-800/50">
+    <section id="contact" className="py-24 pb-16 bg-[#0a0a0a] relative overflow-hidden border-t border-gray-800/20">
       {/* Static background effects */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/3 right-0 w-96 h-96 bg-gradient-to-bl from-gray-800/10 to-transparent rounded-full blur-3xl"></div>
@@ -112,16 +68,16 @@ export default function Contact() {
       <div className="container mx-auto px-6 relative z-10">
         {/* Section Header */}
         <motion.div
-          className="text-center mb-16"
+          className="text-center mb-12 md:mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-gray-300 to-gray-500 bg-clip-text text-transparent">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-gray-300 to-gray-500 bg-clip-text text-transparent px-4">
             Let's Connect
           </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-gray-600 via-gray-400 to-gray-600 mx-auto rounded-full"></div>
-          <p className="text-gray-400 mt-6 text-lg max-w-2xl mx-auto">
+          <div className="w-16 md:w-24 h-1 bg-gradient-to-r from-gray-600 via-gray-400 to-gray-600 mx-auto rounded-full"></div>
+          <p className="text-gray-400 mt-4 md:mt-6 text-sm sm:text-base md:text-lg max-w-2xl mx-auto px-4">
             I'm always excited to discuss new opportunities, innovative projects, and creative collaborations.
           </p>
         </motion.div>
@@ -136,7 +92,7 @@ export default function Contact() {
             transition={{ delay: 0.1 }}
           >
             <div className="mb-8">
-              <h3 className="text-3xl font-semibold text-gray-200 mb-2 flex items-center gap-2">
+              <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-200 mb-2 flex items-center gap-2">
                 <div className="w-1 h-6 bg-gray-500 rounded-full"></div>
                 Contact Details
               </h3>
@@ -144,7 +100,7 @@ export default function Contact() {
             </div>
 
             <div className="space-y-4">
-              {contactInfo.map((contact, index) => (
+              {contactLinks.map((contact, index) => (
                 <motion.a
                   key={index}
                   href={contact.link}
@@ -192,7 +148,7 @@ export default function Contact() {
           >
             <div className="p-8 rounded-2xl bg-gradient-to-br from-gray-900/50 to-gray-800/30 border border-gray-800">
               <div className="mb-8">
-                <h3 className="text-3xl font-semibold text-gray-200 mb-2 flex items-center gap-2">
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-200 mb-2 flex items-center gap-2">
                   <div className="w-1 h-6 bg-gray-500 rounded-full"></div>
                   Send Message
                 </h3>

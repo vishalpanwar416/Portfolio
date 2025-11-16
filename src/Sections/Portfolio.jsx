@@ -1,8 +1,7 @@
 import { motion } from 'framer-motion'
 import { useState, useEffect, useRef } from 'react'
 import { ChevronLeft, ChevronRight, ExternalLink, Github } from 'lucide-react'
-import tableTapLogo from '../assets/Tabletap.png'
-import tarzbygazalaLogo from '../assets/tarzbygazala.png'
+import { projects } from '../data/projects'
 
 export default function Portfolio() {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -48,54 +47,6 @@ export default function Portfolio() {
     setTouchEnd(null)
   }
 
-  const projects = [
-    {
-      title: "Table Tap",
-      description: "Food ordering platform with contactless QR ordering, AI-assisted restaurant manager, and real-time order tracking.",
-      tech: ["React", "MERN", "Firebase", "LLM", "AWS", "Azure"],
-      features: ["Contactless QR ordering", "AI restaurant manager", "Real-time tracking", "Multi-cloud deployment"],
-      image: tableTapLogo,
-      github: "https://github.com/vishalpanwar416",
-      live: "https://table-tap-qr.vercel.app"
-    },
-    {
-      title: "Tarzbygazala",
-      description: "Modern e-commerce clothing store website with responsive design, product catalog, and seamless shopping experience.",
-      tech: ["React", "Next.js", "Tailwind CSS", "Stripe", "MongoDB", "Vercel"],
-      features: ["Responsive design", "Product catalog", "Shopping cart", "Secure payments", "Admin dashboard"],
-      image: tarzbygazalaLogo,
-      github: null,
-      live: "https://tarzbygazala.com"
-    },
-    {
-      title: "PG Flow",
-      description: "Wholesome PG management & growth tool for efficient resident management and operations analytics.",
-      tech: ["Flutter", "Dart", "Firebase", "Analytics"],
-      features: ["Resident management", "Operations dashboard", "Analytics & insights", "Mobile-first design"],
-      image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/flutter/flutter-original.svg",
-      github: "https://github.com/vishalpanwar416",
-      live: "#"
-    },
-    {
-      title: "Smart Parking System",
-      description: "YOLOv8-powered parking detection system achieving 90%+ accuracy with scalable video stream processing.",
-      tech: ["Python", "YOLOv8", "OpenCV", "ML", "Computer Vision"],
-      features: ["90%+ detection accuracy", "100+ concurrent streams", "Real-time processing", "Scalable architecture"],
-      image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg",
-      github: "https://github.com/vishalpanwar416",
-      live: "#"
-    },
-    {
-      title: "AI/ML & Cloud Projects",
-      description: "Comprehensive AI/ML solutions including predictive analytics, data pipelines, and LLM integrations.",
-      tech: ["Python", "scikit-learn", "MLflow", "Apache Airflow", "Azure Data Factory", "ChatGPT API"],
-      features: ["Predictive analytics", "Data pipelines", "LLM integrations", "Twilio & Nodemailer"],
-      image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original.svg",
-      github: "https://github.com/vishalpanwar416",
-      live: "#"
-    }
-  ]
-
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % projects.length)
   }
@@ -109,7 +60,7 @@ export default function Portfolio() {
   }
 
   return (
-    <section id="portfolio" className="py-24 bg-[#0a0a0a] relative overflow-hidden border-t border-gray-800/50">
+    <section id="portfolio" className="py-24 bg-[#0a0a0a] relative overflow-hidden border-t border-gray-800/20">
       {/* Static background effects */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/3 right-0 w-96 h-96 bg-gradient-to-bl from-gray-800/10 to-transparent rounded-full blur-3xl"></div>
@@ -124,7 +75,7 @@ export default function Portfolio() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-gray-300 to-gray-500 bg-clip-text text-transparent">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-gray-300 to-gray-500 bg-clip-text text-transparent">
             Featured Projects
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-gray-600 via-gray-400 to-gray-600 mx-auto rounded-full"></div>
@@ -164,7 +115,7 @@ export default function Portfolio() {
                   </div>
 
                   {/* Project Content */}
-                  <h3 className="text-2xl font-semibold text-gray-200 mb-3">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-200 mb-3">
                     {project.title}
                   </h3>
 
@@ -266,7 +217,7 @@ export default function Portfolio() {
                       </div>
 
                       {/* Content */}
-                      <h3 className="text-2xl font-semibold text-gray-200 mb-3">{project.title}</h3>
+                      <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-200 mb-3">{project.title}</h3>
                       <p className="text-gray-400 mb-4 leading-relaxed">{project.description}</p>
 
                       {/* Project Links */}
@@ -331,7 +282,7 @@ export default function Portfolio() {
                 </div>
 
                 {/* Content */}
-                <h3 className="text-xl font-semibold text-gray-200 mb-2">{project.title}</h3>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-200 mb-2">{project.title}</h3>
                 <p className="text-gray-400 mb-3 text-sm leading-relaxed">{project.description}</p>
 
                 {/* Project Links */}
@@ -397,7 +348,7 @@ export default function Portfolio() {
                       </div>
 
                       {/* Project Content - Mobile */}
-                      <h3 className="text-xl font-semibold text-gray-200 mb-2">
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-200 mb-2">
                         {project.title}
                       </h3>
 

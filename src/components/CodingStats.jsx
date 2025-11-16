@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
-import { TrendingUp, Code2, Flame, Star, GitFork } from 'lucide-react'
+import { TrendingUp, Code2, Flame } from 'lucide-react'
 
 export default function CodingStats({
   githubUsername = 'vishalpanwar416',
@@ -45,7 +45,12 @@ export default function CodingStats({
 
         setLeetcodeStats({ total, easy, medium, hard })
       } catch (e) {
+        // Silently handle CORS and network errors
+        // These are expected when LeetCode API blocks browser requests
         setLeetcodeError(true)
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('LeetCode API error (expected):', e.message)
+        }
       }
     }
 
@@ -69,17 +74,17 @@ export default function CodingStats({
           initial={{ opacity: 0, x: -30 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
-          className="p-6 rounded-2xl bg-gradient-to-br from-gray-900/50 to-gray-800/30 border border-gray-800 hover:border-gray-700 transition-all"
+          className="p-5 rounded-2xl bg-gradient-to-br from-gray-900/50 to-gray-800/30 border border-gray-800 hover:border-gray-700 transition-all"
         >
           <div className="flex items-center gap-3 mb-4">
             <Flame className="w-6 h-6 text-gray-400" />
             <h4 className="text-xl font-semibold text-gray-200">GitHub Streak</h4>
           </div>
-          <div className="flex justify-center bg-gray-900/50 rounded-xl p-4 border border-gray-800/50">
+          <div className="flex justify-center bg-gray-900/50 rounded-xl p-3 border border-gray-800/50">
             <img
               src={`https://github-readme-streak-stats.herokuapp.com/?user=${githubUsername}&theme=dark&background=00000000&border=1f2937&stroke=4b5563&ring=6b7280&fire=9ca3af&currStreakNum=d1d5db&sideNums=9ca3af&currStreakLabel=9ca3af&sideLabels=6b7280&dates=6b7280&hide_border=true`}
               alt="GitHub Streak Stats"
-              className="w-full max-w-lg"
+              className="w-full max-w-lg max-h-40 object-contain"
               loading="lazy"
             />
           </div>
@@ -90,7 +95,7 @@ export default function CodingStats({
           initial={{ opacity: 0, x: 30 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
-          className="p-6 rounded-2xl bg-gradient-to-br from-gray-900/50 to-gray-800/30 border border-gray-800 hover:border-gray-700 transition-all"
+          className="p-5 rounded-2xl bg-gradient-to-br from-gray-900/50 to-gray-800/30 border border-gray-800 hover:border-gray-700 transition-all"
         >
           <div className="flex items-center gap-3 mb-4">
             <Code2 className="w-6 h-6 text-gray-400" />
@@ -102,7 +107,7 @@ export default function CodingStats({
               <img
                 src={`https://leetcard.jacoblin.cool/${leetcodeUsername}?theme=dark&font=Source%20Code%20Pro&ext=contest`}
                 alt="LeetCode Stats"
-                className="w-full"
+                className="w-full max-h-52 object-contain"
                 loading="lazy"
               />
             </div>
@@ -117,67 +122,22 @@ export default function CodingStats({
         </motion.div>
       </div>
 
-      {/* GitHub Stats Cards */}
-      <div className="grid lg:grid-cols-2 gap-8">
-        {/* GitHub Stats */}
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          className="p-6 rounded-2xl bg-gradient-to-br from-gray-900/50 to-gray-800/30 border border-gray-800 hover:border-gray-700 transition-all"
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <Star className="w-6 h-6 text-gray-400" />
-            <h4 className="text-xl font-semibold text-gray-200">GitHub Stats</h4>
-          </div>
-          <div className="flex justify-center bg-gray-900/50 rounded-xl p-4 border border-gray-800/50">
-            <img
-              src={`https://github-readme-stats.vercel.app/api?username=${githubUsername}&show_icons=true&theme=dark&bg_color=00000000&title_color=d1d5db&text_color=9ca3af&icon_color=6b7280&border_color=1f2937&hide_border=true`}
-              alt="GitHub Stats"
-              className="w-full max-w-lg"
-              loading="lazy"
-            />
-          </div>
-        </motion.div>
-
-        {/* Top Languages */}
-        <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          className="p-6 rounded-2xl bg-gradient-to-br from-gray-900/50 to-gray-800/30 border border-gray-800 hover:border-gray-700 transition-all"
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <Code2 className="w-6 h-6 text-gray-400" />
-            <h4 className="text-xl font-semibold text-gray-200">Most Used Languages</h4>
-          </div>
-          <div className="flex justify-center bg-gray-900/50 rounded-xl p-4 border border-gray-800/50">
-            <img
-              src={`https://github-readme-stats.vercel.app/api/top-langs/?username=${githubUsername}&layout=compact&theme=dark&bg_color=00000000&title_color=d1d5db&text_color=9ca3af&border_color=1f2937&hide_border=true`}
-              alt="Top Languages"
-              className="w-full max-w-lg"
-              loading="lazy"
-            />
-          </div>
-        </motion.div>
-      </div>
-
       {/* GitHub Contribution Graph */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="p-6 rounded-2xl bg-gradient-to-br from-gray-900/50 to-gray-800/30 border border-gray-800 hover:border-gray-700 transition-all"
+        className="p-5 rounded-2xl bg-gradient-to-br from-gray-900/50 to-gray-800/30 border border-gray-800 hover:border-gray-700 transition-all"
       >
         <div className="flex items-center gap-3 mb-4">
           <TrendingUp className="w-6 h-6 text-gray-400" />
           <h4 className="text-xl font-semibold text-gray-200">GitHub Contributions</h4>
         </div>
-        <div className="flex justify-center bg-gray-900/50 rounded-xl p-4 border border-gray-800/50 overflow-x-auto">
+        <div className="flex justify-center bg-gray-900/50 rounded-xl p-3 border border-gray-800/50 overflow-x-auto">
           <img
             src={`https://ghchart.rshah.org/404040/${githubUsername}`}
             alt="GitHub Contribution Chart"
-            className="w-full min-w-[600px]"
+            className="w-full min-w-[600px] max-h-32 object-contain"
             loading="lazy"
             style={{ filter: 'brightness(1.1) contrast(1.1)' }}
           />

@@ -42,7 +42,12 @@ export default function LeetCodeStats({ username = 'vishalpanwar416' }) {
 
         setStats({ total, easy, medium, hard, ranking })
       } catch (e) {
+        // Silently handle CORS and network errors
+        // These are expected when LeetCode API blocks browser requests
         setError(e.message || 'Failed to load LeetCode stats')
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('LeetCode API error (expected):', e.message)
+        }
       }
     }
 

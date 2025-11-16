@@ -1,4 +1,4 @@
-import { Github, Linkedin, Mail, Instagram, Twitter, ExternalLink, Calendar } from 'lucide-react'
+import { Github, Linkedin, Mail, Instagram, Twitter, ExternalLink, Calendar, Phone } from 'lucide-react'
 
 export const socialLinks = [
   {
@@ -47,7 +47,7 @@ export const contactLinks = [
     link: "mailto:vishalpanwar416@gmail.com"
   },
   {
-    icon: Mail, // Will be replaced with Phone icon in component
+    icon: Phone,
     label: "Phone",
     value: "+91 7500988212",
     link: "tel:+917500988212"
