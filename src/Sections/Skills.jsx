@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import LeetCodeStats from '../components/LeetCodeStats'
+import CodingStats from '../components/CodingStats'
 
 export default function Skills() {
   const skillCategories = [
@@ -94,14 +94,17 @@ export default function Skills() {
           ))}
         </div>
 
-        {/* LeetCode Stats */}
+        {/* Coding Stats - GitHub & LeetCode */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="mt-16"
         >
-          <LeetCodeStats />
+          <CodingStats
+            githubUsername="vishalpanwar416"
+            leetcodeUsername="vishalpanwar416"
+          />
         </motion.div>
       </div>
     </section>
