@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { smoothScrollTo } from '../lib/utils.js'
 import profilePhoto from '../assets/vishal-panwar-profile.jpeg'
 import { useMagneticButton } from '../hooks/useMagneticButton'
+import TypingAnimation from '../components/TypingAnimation'
 
 export default function Hero() {
   const magneticButton1 = useMagneticButton(0.3)
@@ -107,14 +108,19 @@ export default function Hero() {
               </motion.h1>
             </div>
 
-            {/* Title */}
+            {/* Title with Typing Animation */}
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
               className="text-xl md:text-2xl text-gray-400 max-w-xl"
             >
-              Full-Stack Developer | AI & Cloud Engineer | Flutter Enthusiast
+              I build <TypingAnimation
+                texts={['Web Applications', 'AI Solutions', 'Cloud Infrastructure', 'Mobile Apps', 'REST APIs', 'ML Models']}
+                typingSpeed={80}
+                deletingSpeed={40}
+                delayBetween={2000}
+              />
             </motion.p>
 
             {/* Description */}

@@ -1,5 +1,6 @@
 import { Github, Linkedin, Mail, ExternalLink, Twitter, Instagram } from 'lucide-react'
 import logo from '../assets/logo.png'
+import VisitorCounter from '../components/VisitorCounter'
 
 export default function Footer() {
   const socialLinks = [
@@ -100,9 +101,12 @@ export default function Footer() {
 
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-gray-500 text-sm text-center md:text-left">
-            © 2025 Vishal Panwar. All rights reserved.
-          </p>
+          <div className="flex flex-col md:flex-row items-center gap-4">
+            <p className="text-gray-500 text-sm text-center md:text-left">
+              © 2025 Vishal Panwar. All rights reserved.
+            </p>
+            <VisitorCounter />
+          </div>
 
           <div className="flex items-center gap-6 text-sm text-gray-500">
             <a

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
-import { TrendingUp, Code2, Flame } from 'lucide-react'
+import { TrendingUp, Code2, Flame, Star, GitFork } from 'lucide-react'
 
 export default function CodingStats({
   githubUsername = 'vishalpanwar416',
@@ -114,6 +114,51 @@ export default function CodingStats({
               <StatCard label="Hard" value={leetcodeStats.hard} />
             </div>
           )}
+        </motion.div>
+      </div>
+
+      {/* GitHub Stats Cards */}
+      <div className="grid lg:grid-cols-2 gap-8">
+        {/* GitHub Stats */}
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          className="p-6 rounded-2xl bg-gradient-to-br from-gray-900/50 to-gray-800/30 border border-gray-800 hover:border-gray-700 transition-all"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <Star className="w-6 h-6 text-gray-400" />
+            <h4 className="text-xl font-semibold text-gray-200">GitHub Stats</h4>
+          </div>
+          <div className="flex justify-center bg-gray-900/50 rounded-xl p-4 border border-gray-800/50">
+            <img
+              src={`https://github-readme-stats.vercel.app/api?username=${githubUsername}&show_icons=true&theme=dark&bg_color=00000000&title_color=d1d5db&text_color=9ca3af&icon_color=6b7280&border_color=1f2937&hide_border=true`}
+              alt="GitHub Stats"
+              className="w-full max-w-lg"
+              loading="lazy"
+            />
+          </div>
+        </motion.div>
+
+        {/* Top Languages */}
+        <motion.div
+          initial={{ opacity: 0, x: 30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          className="p-6 rounded-2xl bg-gradient-to-br from-gray-900/50 to-gray-800/30 border border-gray-800 hover:border-gray-700 transition-all"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <Code2 className="w-6 h-6 text-gray-400" />
+            <h4 className="text-xl font-semibold text-gray-200">Most Used Languages</h4>
+          </div>
+          <div className="flex justify-center bg-gray-900/50 rounded-xl p-4 border border-gray-800/50">
+            <img
+              src={`https://github-readme-stats.vercel.app/api/top-langs/?username=${githubUsername}&layout=compact&theme=dark&bg_color=00000000&title_color=d1d5db&text_color=9ca3af&border_color=1f2937&hide_border=true`}
+              alt="Top Languages"
+              className="w-full max-w-lg"
+              loading="lazy"
+            />
+          </div>
         </motion.div>
       </div>
 
