@@ -38,14 +38,13 @@ export default function LoadingScreen({ onComplete }) {
 
       <div className="relative z-10 text-center">
         <motion.h1
-          className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent mb-8"
+          className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent mb-8 whitespace-nowrap"
           style={{ fontFamily: "'Playfair Display', serif", letterSpacing: '-0.02em' }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <span className="block">Vishal</span>
-          <span className="block">Panwar</span>
+          Vishal Panwar
         </motion.h1>
         
         <motion.div
