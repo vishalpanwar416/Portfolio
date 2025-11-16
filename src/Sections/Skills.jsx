@@ -1,472 +1,108 @@
 import { motion } from 'framer-motion'
-import { useState, useEffect, useRef } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import LeetCodeStats from '../components/LeetCodeStats'
 
 export default function Skills() {
-  const [currentSlide, setCurrentSlide] = useState(0)
-  const [isMobile, setIsMobile] = useState(false)
-  const [touchStart, setTouchStart] = useState(null)
-  const [touchEnd, setTouchEnd] = useState(null)
-  const carouselRef = useRef(null)
-  const [expanded, setExpanded] = useState(false)
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
-  // Touch gesture handlers
-  const handleTouchStart = (e) => {
-    setTouchStart(e.targetTouches[0].clientX)
-  }
-
-  const handleTouchMove = (e) => {
-    setTouchEnd(e.targetTouches[0].clientX)
-  }
-
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return
-    
-    const distance = touchStart - touchEnd
-    const isLeftSwipe = distance > 50
-    const isRightSwipe = distance < -50
-
-    if (isLeftSwipe) {
-      nextSlide()
-    } else if (isRightSwipe) {
-      prevSlide()
-    }
-
-    setTouchStart(null)
-    setTouchEnd(null)
-  }
-
   const skillCategories = [
     {
-      title: "Programming Languages",
-      skills: [
-        { name: "Python", icon: "🐍", color: "bg-blue-500", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" },
-        { name: "Java", icon: "☕", color: "bg-orange-500", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg" },
-        { name: "JavaScript", icon: "⚡", color: "bg-yellow-500", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" },
-        { name: "TypeScript", icon: "🔷", color: "bg-blue-600", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" },
-        { name: "Dart", icon: "🎯", color: "bg-blue-400", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dart/dart-original.svg" }
-      ]
+      category: "Frontend",
+      skills: ["React.js", "Next.js", "Vue.js", "Tailwind CSS", "JavaScript", "TypeScript", "HTML5", "CSS3"]
     },
     {
-      title: "Frontend Development",
-      skills: [
-        { name: "React", icon: "⚛️", color: "bg-cyan-500", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" },
-        { name: "Next.js", icon: "⚡", color: "bg-black", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg" },
-        { name: "Flutter", icon: "📱", color: "bg-blue-500", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/flutter/flutter-original.svg" },
-        { name: "Tailwind CSS", icon: "🎨", color: "bg-cyan-400", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-plain.svg" }
-      ]
+      category: "Backend",
+      skills: ["Node.js", "Express.js", "Python", "Django", "Flask", "FastAPI", "REST APIs", "GraphQL"]
     },
     {
-      title: "Backend Development",
-      skills: [
-        { name: "Node.js", icon: "🟢", color: "bg-green-500", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" },
-        { name: "Express", icon: "🚂", color: "bg-gray-600", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/express/express-original.svg" },
-        { name: "Django", icon: "🐍", color: "bg-green-600", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/django/django-plain.svg" }
-      ]
+      category: "Database",
+      skills: ["MongoDB", "PostgreSQL", "MySQL", "Redis", "Firebase", "DynamoDB"]
     },
     {
-      title: "Databases",
-      skills: [
-        { name: "MySQL", icon: "🐬", color: "bg-blue-600", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg" },
-        { name: "PostgreSQL", icon: "🐘", color: "bg-blue-700", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg" },
-        { name: "Supabase", icon: "🟩", color: "bg-emerald-600", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/supabase/supabase-original.svg" },
-        { name: "MongoDB", icon: "🐳", color: "bg-green-500", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg" },
-        { name: "Redis", icon: "🔴", color: "bg-red-500", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redis/redis-original.svg" },
-        { name: "Firebase", icon: "🔥", color: "bg-orange-500", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain.svg" }
-      ]
+      category: "Cloud & DevOps",
+      skills: ["AWS", "Azure", "Docker", "Kubernetes", "CI/CD", "Git", "Linux", "Nginx"]
     },
     {
-      title: "Cloud & DevOps",
-      skills: [
-        { name: "AWS", icon: "☁️", color: "bg-orange-500", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original.svg" },
-        { name: "Azure", icon: "🔵", color: "bg-blue-600", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azure/azure-original.svg" },
-        { name: "Docker", icon: "🐳", color: "bg-blue-500", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" },
-        { name: "Kubernetes", icon: "⚓", color: "bg-blue-600", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg" },
-        { name: "Terraform", icon: "🏗️", color: "bg-purple-600", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/terraform/terraform-original.svg" }
-      ]
+      category: "AI & ML",
+      skills: ["TensorFlow", "PyTorch", "Scikit-learn", "Pandas", "NumPy", "OpenCV", "NLP", "Computer Vision"]
     },
     {
-      title: "Tools & Others",
-      skills: [
-        { name: "Git", icon: "📚", color: "bg-orange-600", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg" },
-        { name: "Linux", icon: "🐧", color: "bg-yellow-500", logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg" }
-      ]
+      category: "Mobile",
+      skills: ["Flutter", "Dart", "React Native", "Android", "iOS"]
     }
   ]
 
-  const nextSlide = () => {
-    const total = isMobile ? skillCategories.length + 1 : skillCategories.length
-    setCurrentSlide((prev) => (prev + 1) % total)
-  }
-
-  const prevSlide = () => {
-    const total = isMobile ? skillCategories.length + 1 : skillCategories.length
-    setCurrentSlide((prev) => (prev - 1 + total) % total)
-  }
-
-  const goToSlide = (index) => {
-    setCurrentSlide(index)
-  }
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2
-      }
-    }
-  }
-
-  const cardVariants = {
-    hidden: { y: 50, opacity: 0, scale: 0.9 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      scale: 1,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut"
-      }
-    }
-  }
-
-  const skillVariants = {
-    hidden: { scale: 0, opacity: 0 },
-    visible: {
-      scale: 1,
-      opacity: 1,
-      transition: {
-        duration: 0.4,
-        ease: "backOut"
-      }
-    }
-  }
-
   return (
-    <section id="skills" className="py-16 bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
-      {/* Background decorative elements - Monochromatic */}
+    <section id="skills" className="py-24 bg-[#0a0a0a] relative overflow-hidden border-t border-gray-800/50">
+      {/* Background effects */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full opacity-20 blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full opacity-20 blur-3xl"></div>
-        {/* Geometric lines */}
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 border border-gray-200 rounded-full opacity-10"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-48 h-48 border border-gray-300 rounded-full opacity-10"></div>
+        <div className="absolute top-1/3 right-0 w-96 h-96 bg-gradient-to-bl from-gray-800/10 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/3 left-0 w-96 h-96 bg-gradient-to-tr from-gray-700/10 to-transparent rounded-full blur-3xl"></div>
       </div>
 
-      <div className="container mx-auto px-3 md:px-6 relative z-10">
-        <motion.div 
-          className="text-center mb-12"
-          initial={{ opacity: 0, y: 30 }}
+      <div className="container mx-auto px-6 relative z-10">
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
           viewport={{ once: true }}
+          className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 bg-gradient-to-r from-black via-gray-800 to-black bg-clip-text text-transparent">
+          <h2 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-gray-300 to-gray-500 bg-clip-text text-transparent">
             Skills & Technologies
           </h2>
-          <div className="w-32 h-1.5 bg-gradient-to-r from-gray-800 via-black to-gray-800 mx-auto rounded-full"></div>
-          <p className="text-xl text-gray-600 mt-6 max-w-3xl mx-auto leading-relaxed">
-            A comprehensive toolkit of technologies and frameworks I've mastered through hands-on experience and continuous learning.
+          <div className="w-24 h-1 bg-gradient-to-r from-gray-600 via-gray-400 to-gray-600 mx-auto rounded-full"></div>
+          <p className="text-gray-400 mt-6 text-lg max-w-2xl mx-auto">
+            A comprehensive toolkit of technologies I've mastered through hands-on experience
           </p>
         </motion.div>
 
-        {/* Desktop layout: expanded => grid, collapsed => horizontal scroll */}
-        {!isMobile && (
-          <>
-          {expanded ? (
-            <motion.div 
-              className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-            >
-              {/* Competitive Programming - LeetCode Stats Card (always first) */}
-              <motion.div
-                className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
-                variants={cardVariants}
-              >
-                <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">Competitive Programming</h3>
-                <LeetCodeStats username="vishalpanwar416" />
-              </motion.div>
-
-              {skillCategories.map((category, index) => (
-                <motion.div
-                  key={index}
-                  className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
-                  variants={cardVariants}
-                >
-                  <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">{category.title}</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    {category.skills.map((skill, skillIndex) => (
-                      <motion.div
-                        key={skillIndex}
-                        className="flex flex-col items-center p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200"
-                        variants={skillVariants}
-                      >
-                        <div className="w-12 h-12 rounded-xl bg-white shadow-md flex items-center justify-center mb-2 p-2">
-                          <img 
-                            src={skill.logo} 
-                            alt={skill.name}
-                            className="w-8 h-8 object-contain"
-                            onError={(e) => {
-                              e.target.style.display = 'none'
-                              e.target.nextSibling.style.display = 'block'
-                            }}
-                          />
-                          <span className="text-2xl hidden">{skill.icon}</span>
-                        </div>
-                        <span className="text-sm font-semibold text-gray-700 text-center">{skill.name}</span>
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-          ) : (
-            <div className="-mx-2">
-              <div className="overflow-x-auto overflow-y-hidden no-scrollbar px-2">
-                <div className="flex gap-6 snap-x snap-mandatory">
-                  {/* CP first */}
-                  <motion.div
-                    className="min-w-[300px] md:min-w-[360px] lg:min-w-[380px] snap-start bg-white p-8 rounded-3xl shadow-xl border border-gray-100"
-                    initial={{ opacity: 0, scale: 0.96, y: 20 }}
-                    whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4 }}
-                  >
-                    <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">Competitive Programming</h3>
-                    <LeetCodeStats username="vishalpanwar416" />
-                  </motion.div>
-
-                  {/* Then categories horizontally */}
-                  {skillCategories.map((category, index) => (
-                    <motion.div
-                      key={index}
-                      className="min-w-[300px] md:min-w-[360px] lg:min-w-[380px] snap-start bg-white p-8 rounded-3xl shadow-xl border border-gray-100"
-                      initial={{ opacity: 0, scale: 0.96, y: 20 }}
-                      whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.4 }}
-                    >
-                      <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">{category.title}</h3>
-                      <div className="grid grid-cols-2 gap-4">
-                        {category.skills.map((skill, skillIndex) => (
-                          <div key={skillIndex} className="flex flex-col items-center p-4 bg-gray-50 rounded-xl">
-                            <div className="w-12 h-12 rounded-xl bg-white shadow-md flex items-center justify-center mb-2 p-2">
-                              <img 
-                                src={skill.logo} 
-                                alt={skill.name}
-                                className="w-8 h-8 object-contain"
-                                onError={(e) => {
-                                  e.target.style.display = 'none'
-                                  e.target.nextSibling.style.display = 'block'
-                                }}
-                              />
-                              <span className="text-2xl hidden">{skill.icon}</span>
-                            </div>
-                            <span className="text-sm font-semibold text-gray-700 text-center">{skill.name}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-          </>
-        )}
-
-        {/* Mobile: when expanded, show stacked list (CP first, then all categories) */}
-        {isMobile && expanded && (
-          <motion.div 
-            className="grid grid-cols-1 gap-6"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-          >
-            {/* CP first */}
+        {/* Skills Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+          {skillCategories.map((category, index) => (
             <motion.div
-              className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100"
-              variants={cardVariants}
-            >
-              <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">Competitive Programming</h3>
-              <LeetCodeStats username="vishalpanwar416" />
-            </motion.div>
-
-            {/* Then all categories */}
-            {skillCategories.map((category, index) => (
-              <motion.div
-                key={index}
-                className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100"
-                variants={cardVariants}
-              >
-                <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">{category.title}</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {category.skills.map((skill, skillIndex) => (
-                    <motion.div
-                      key={skillIndex}
-                      className="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: skillIndex * 0.05 }}
-                      viewport={{ once: true }}
-                    >
-                      <div className="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center mb-2 p-1.5">
-                        <img src={skill.logo} alt={skill.name} className="w-7 h-7 object-contain" onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block' }} />
-                        <span className="text-xl hidden">{skill.icon}</span>
-                      </div>
-                      <span className="text-xs font-semibold text-gray-700 text-center">{skill.name}</span>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-
-        {/* Mobile Carousel Layout - Touch Friendly */}
-        {isMobile && !expanded && (
-          <div className="relative">
-            <motion.div 
-              className="overflow-hidden touch-pan-y"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              ref={carouselRef}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
+              className="p-6 rounded-2xl bg-gradient-to-br from-gray-900/50 to-gray-800/30 border border-gray-800 hover:border-gray-700 transition-all group backdrop-blur-sm glass"
+              whileHover={{ scale: 1.02, y: -5 }}
+              animate={{
+                y: [0, -10, 0],
+              }}
+              transition={{
+                opacity: { delay: index * 0.1 },
+                y: {
+                  duration: 4 + index * 0.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                },
+              }}
             >
-              <motion.div
-                className="flex transition-transform duration-300 ease-in-out will-change-transform"
-                style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-              >
-                {/* Competitive Programming - LeetCode Stats Slide FIRST */}
-                <div className="w-full flex-shrink-0 px-2">
-                  <motion.div
-                    className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100 touch-manipulation"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5 }}
-                    viewport={{ once: true }}
+              <h3 className="text-xl font-semibold text-gray-200 mb-4 flex items-center gap-2">
+                <div className="w-1 h-6 bg-gray-500 rounded-full"></div>
+                {category.category}
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {category.skills.map((skill, skillIndex) => (
+                  <span
+                    key={skillIndex}
+                    className="px-3 py-1.5 text-sm rounded-lg bg-white/5 text-gray-400 border border-gray-800 hover:border-gray-600 hover:text-gray-300 transition-all"
                   >
-                    <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">Competitive Programming</h3>
-                    <LeetCodeStats username="vishalpanwar416" />
-                  </motion.div>
-                </div>
-
-                {skillCategories.map((category, index) => (
-                  <div key={index} className="w-full flex-shrink-0 px-2">
-                    <motion.div
-                      className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100 touch-manipulation"
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.5 }}
-                      viewport={{ once: true }}
-                    >
-                      <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">{category.title}</h3>
-                      <div className="grid grid-cols-2 gap-3">
-                        {category.skills.map((skill, skillIndex) => (
-                          <motion.div
-                            key={skillIndex}
-                            className="flex flex-col items-center p-3 bg-gray-50 rounded-lg touch-manipulation"
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.4, delay: skillIndex * 0.1 }}
-                            viewport={{ once: true }}
-                          >
-                            <div className="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center mb-2 p-1.5">
-                              <img 
-                                src={skill.logo} 
-                                alt={skill.name}
-                                className="w-7 h-7 object-contain"
-                                onError={(e) => {
-                                  // Fallback to emoji if logo fails to load
-                                  e.target.style.display = 'none'
-                                  e.target.nextSibling.style.display = 'block'
-                                }}
-                              />
-                              <span className="text-xl hidden">{skill.icon}</span>
-                            </div>
-                            <span className="text-xs font-semibold text-gray-700 text-center">{skill.name}</span>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  </div>
-                ))}
-              </motion.div>
-            </motion.div>
-
-            {/* Enhanced Touch-Friendly Navigation */}
-            <div className="flex justify-center items-center mt-8 space-x-4">
-              <button
-                onClick={prevSlide}
-                className="p-3 rounded-full bg-white shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors duration-200 touch-manipulation active:scale-95"
-                aria-label="Previous slide"
-              >
-                <ChevronLeft className="w-6 h-6 text-gray-600" />
-              </button>
-              
-              <div className="flex space-x-3">
-                {[{ title: 'Competitive Programming' }, ...skillCategories].map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => goToSlide(index)}
-                    className={`w-4 h-4 rounded-full transition-all duration-200 touch-manipulation active:scale-110 ${
-                      index === currentSlide ? 'bg-blue-600 scale-110' : 'bg-gray-300'
-                    }`}
-                    aria-label={`Go to slide ${index + 1}`}
-                  />
+                    {skill}
+                  </span>
                 ))}
               </div>
-              
-              <button
-                onClick={nextSlide}
-                className="p-3 rounded-full bg-white shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors duration-200 touch-manipulation active:scale-95"
-                aria-label="Next slide"
-              >
-                <ChevronRight className="w-6 h-6 text-gray-600" />
-              </button>
-            </div>
-
-            {/* Touch Instructions */}
-            <div className="text-center mt-4">
-              <p className="text-sm text-gray-500">
-                💡 Swipe left/right or use arrows to navigate
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Show More / Show Less Button - visible on both desktop and mobile */}
-        <div className="text-center mt-10">
-          <motion.button
-            onClick={() => setExpanded((v) => !v)}
-            className="inline-flex items-center px-6 py-3 rounded-xl font-semibold text-white bg-black hover:bg-gray-900 shadow-lg hover:shadow-xl transition-all duration-300"
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
-            aria-expanded={expanded}
-          >
-            {expanded ? 'Show Less' : 'Show More'}
-          </motion.button>
+            </motion.div>
+          ))}
         </div>
+
+        {/* LeetCode Stats */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-16"
+        >
+          <LeetCodeStats />
+        </motion.div>
       </div>
     </section>
   )

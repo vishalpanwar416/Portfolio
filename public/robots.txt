@@ -1,5 +1,30 @@
 # https://www.robotstxt.org/robotstxt.html
+# Robots.txt for Vishal Panwar Portfolio
+
+# Allow all search engines
 User-agent: *
 Allow: /
+Allow: /#about
+Allow: /#skills
+Allow: /#portfolio
+Allow: /#contact
 
-Sitemap: http://vishalpanwar.vercel.app/sitemap.xml
+# Disallow admin or private areas (if any)
+# Disallow: /admin/
+# Disallow: /private/
+
+# Crawl-delay (optional, helps prevent server overload)
+Crawl-delay: 1
+
+# Specific rules for major search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# Sitemap location
+Sitemap: https://vishalpanwar.vercel.app/sitemap.xml

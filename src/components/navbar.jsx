@@ -76,7 +76,7 @@ export default function Navbar() {
 
   return (
     <motion.nav
-      className={`fixed w-full z-50 transition-all duration-700 ${scrolled ? 'bg-black/80 backdrop-blur-xl py-0 shadow-2xl border-b border-white/10' : 'bg-transparent py-0'}`}
+      className={`fixed w-full z-50 transition-all duration-700 ${scrolled ? 'bg-[#0a0a0a]/95 backdrop-blur-xl py-0 shadow-2xl border-b border-white/5' : 'bg-transparent py-0'}`}
       initial={{ y: -100, opacity: 0 }}
       animate={{
         y: isVisible ? 0 : -100,
@@ -84,8 +84,8 @@ export default function Navbar() {
       }}
       transition={{ duration: 0.3 }}
     >
-      {/* Background gradient overlay - Monochromatic */}
-      <div className="absolute inset-0 bg-gradient-to-r from-gray-900/5 via-black/5 to-gray-900/5"></div>
+      {/* Background gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/5 via-[#1a1a1a]/5 to-[#0a0a0a]/5"></div>
       
       <div className="container mx-auto relative">
         <div className="flex items-center justify-between">
@@ -106,29 +106,25 @@ export default function Navbar() {
           {/* Enhanced Desktop Navigation */}
           <div className="hidden md:flex space-x-1">
             {navItems.map((item, index) => (
-              <motion.a 
+              <motion.a
                 key={item.name}
-                href={item.href} 
+                href={item.href}
                 onClick={() => handleNavClick(item.href.slice(1))}
-                className={`relative px-6 py-3 rounded-2xl font-medium transition-all duration-300 group overflow-hidden ${
-                  scrolled
-                    ? 'text-white hover:text-gray-300'
-                    : 'text-gray-800 hover:text-black'
-                }`}
+                className="relative px-6 py-3 rounded-xl font-medium transition-all duration-300 group overflow-hidden text-gray-300 hover:text-white"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 whileHover={{ y: -2 }}
               >
-                {/* Background hover effect - Monochromatic */}
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-200/10 to-gray-300/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+                {/* Background hover effect */}
+                <div className="absolute inset-0 bg-white/5 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
 
                 {/* Text */}
                 <span className="relative z-10">{item.name}</span>
 
-                {/* Underline animation - Monochromatic */}
+                {/* Underline animation */}
                 <motion.div
-                  className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-gray-800 via-black to-gray-800 rounded-full"
+                  className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-gray-500 via-white to-gray-500 rounded-full"
                   initial={{ width: 0, x: "-50%" }}
                   whileHover={{ width: "80%", x: "-50%" }}
                   transition={{ duration: 0.3 }}
@@ -137,32 +133,19 @@ export default function Navbar() {
             ))}
             
             {/* Enhanced Contact Button */}
-            <motion.a 
-              href="#contact" 
+            <motion.a
+              href="#contact"
               onClick={() => handleNavClick('contact')}
-              className="relative px-8 py-3 rounded-2xl font-medium overflow-hidden group ml-4"
+              className="relative px-8 py-3 rounded-xl font-semibold overflow-hidden group ml-4 bg-white text-black border border-white/20 hover:bg-gray-200 transition-all duration-300"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.5 }}
               whileHover={{ y: -2, scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              {/* Button background - Monochromatic */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black via-gray-900 to-black rounded-2xl"></div>
-              <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-black to-gray-900 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
-
-              {/* Animated border - Monochromatic */}
-              <div className="absolute inset-0 rounded-2xl p-[2px] bg-gradient-to-r from-gray-700 via-gray-800 to-gray-700">
-                <div className="h-full w-full rounded-2xl bg-white"></div>
-              </div>
-               
-              {/* Text */}
-              <span className="relative z-10 text-gray-800 group-hover:text-white transition-colors duration-300 font-semibold">
-                Contact
-              </span>
-               
+              Contact
               {/* Shine effect */}
-              <div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              <div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
             </motion.a>
 
           </div>

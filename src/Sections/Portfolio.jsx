@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { useState, useEffect, useRef } from 'react'
 import { ChevronLeft, ChevronRight, ExternalLink, Github } from 'lucide-react'
 import tableTapLogo from '../assets/Tabletap.png'
-import tarzbygazalaLogo from '../assets/tarzbygazala.png' // Add this import
+import tarzbygazalaLogo from '../assets/tarzbygazala.png'
 
 export default function Portfolio() {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -16,7 +16,7 @@ export default function Portfolio() {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
     }
-    
+
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
@@ -33,7 +33,7 @@ export default function Portfolio() {
 
   const handleTouchEnd = () => {
     if (!touchStart || !touchEnd) return
-    
+
     const distance = touchStart - touchEnd
     const isLeftSwipe = distance > 50
     const isRightSwipe = distance < -50
@@ -63,7 +63,7 @@ export default function Portfolio() {
       description: "Modern e-commerce clothing store website with responsive design, product catalog, and seamless shopping experience.",
       tech: ["React", "Next.js", "Tailwind CSS", "Stripe", "MongoDB", "Vercel"],
       features: ["Responsive design", "Product catalog", "Shopping cart", "Secure payments", "Admin dashboard"],
-      image: tarzbygazalaLogo, // Use the imported logo
+      image: tarzbygazalaLogo,
       github: null,
       live: "https://tarzbygazala.com"
     },
@@ -108,79 +108,27 @@ export default function Portfolio() {
     setCurrentSlide(index)
   }
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.1
-      }
-    }
-  }
-
-  const projectVariants = {
-    hidden: { y: 100, opacity: 0, scale: 0.9 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      scale: 1,
-      transition: {
-        duration: 0.8,
-        ease: "easeOut"
-      }
-    }
-  }
-
-  const imageVariants = {
-    hidden: { scale: 1.2, opacity: 0 },
-    visible: {
-      scale: 1,
-      opacity: 1,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut"
-      }
-    }
-  }
-
   return (
-    <section id="portfolio" className="py-20 bg-white relative overflow-hidden font-spartan">
-      {/* Background decorative elements - Monochromatic */}
+    <section id="portfolio" className="py-24 bg-[#0a0a0a] relative overflow-hidden border-t border-gray-800/50">
+      {/* Static background effects */}
       <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          className="absolute top-20 right-20 w-40 h-40 bg-gray-200 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.4, 1], opacity: [0.15, 0.35, 0.15] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute bottom-20 left-20 w-32 h-32 bg-gray-300 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.3, 1], opacity: [0.1, 0.3, 0.1] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        />
-        {/* Geometric patterns */}
-        <div className="absolute top-1/3 right-1/3 w-72 h-72 border border-gray-100 rounded-full opacity-20"></div>
+        <div className="absolute top-1/3 right-0 w-96 h-96 bg-gradient-to-bl from-gray-800/10 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/3 left-0 w-96 h-96 bg-gradient-to-tr from-gray-700/10 to-transparent rounded-full blur-3xl"></div>
       </div>
 
-      <div className="container mx-auto px-4 md:px-8 relative z-10">
-        <motion.div 
+      <div className="container mx-auto px-6 relative z-10">
+        {/* Section Header */}
+        <motion.div
           className="text-center mb-16"
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 bg-gradient-to-r from-black via-gray-800 to-black bg-clip-text text-transparent font-spartan">
+          <h2 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-gray-300 to-gray-500 bg-clip-text text-transparent">
             Featured Projects
           </h2>
-          <motion.div
-            className="w-24 h-1 bg-gradient-to-r from-gray-800 via-black to-gray-800 mx-auto rounded-full mb-4"
-            initial={{ width: 0 }}
-            whileInView={{ width: 96 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1, delay: 0.3 }}
-          />
-          <p className="text-xl text-gray-600 mt-4 max-w-3xl mx-auto font-spartan">
+          <div className="w-24 h-1 bg-gradient-to-r from-gray-600 via-gray-400 to-gray-600 mx-auto rounded-full"></div>
+          <p className="text-gray-400 mt-6 text-lg max-w-2xl mx-auto">
             Showcasing innovative solutions across web, mobile, and AI domains
           </p>
         </motion.div>
@@ -189,193 +137,164 @@ export default function Portfolio() {
         {!isMobile && (
           <>
           {expanded ? (
-            <motion.div 
-              className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-            >
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {projects.map((project, index) => (
-                <motion.div 
-                  key={index} 
-                  className="bg-white/80 backdrop-blur-sm rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 border border-gray-100"
-                  variants={projectVariants}
-                  whileHover={{ y: -10, scale: 1.02 }}
-                  transition={{ duration: 0.3 }}
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="p-6 rounded-2xl bg-gradient-to-br from-gray-900/50 to-gray-800/30 border border-gray-800 hover:border-gray-700 transition-all group backdrop-blur-sm glass"
+                  whileHover={{ scale: 1.02, y: -5 }}
+                  style={{ transformStyle: "preserve-3d" }}
                 >
                   {/* Project Image */}
-                  <motion.div
-                    className="relative h-48 bg-gradient-to-br from-gray-800 via-gray-900 to-black flex items-center justify-center overflow-hidden"
-                    variants={imageVariants}
-                  >
-                    {project.image ? (
-                      <motion.div className="w-full h-full flex items-center justify-center bg-white/10 backdrop-blur-sm">
-                        <motion.img 
-                          src={project.image} 
+                  <div className="relative h-48 bg-gradient-to-br from-gray-900/80 to-black/60 rounded-xl flex items-center justify-center overflow-hidden mb-6">
+                    {project.image && (
+                      <div className="w-full h-full flex items-center justify-center p-4">
+                        <motion.img
+                          src={project.image}
                           alt={project.title}
-                          className="max-w-full max-h-full object-contain p-4"
+                          className="max-w-full max-h-full object-contain transition-all duration-500"
                           whileHover={{ scale: 1.1 }}
-                          transition={{ duration: 0.6 }}
                         />
-                      </motion.div>
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-white/20 backdrop-blur-sm">
-                        <div className="text-center text-white">
-                          <div className="w-20 h-20 mx-auto mb-3 bg-white/30 rounded-full flex items-center justify-center">
-                            <svg className="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
-                              {project.title.includes("Tarzbygazala") && (
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                              )}
-                              {project.title.includes("PG Flow") && (
-                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                              )}
-                              {project.title.includes("Smart Parking") && (
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v12h16V6H4zm2 2h12v2H6V8zm0 4h8v2H6v-2z"/>
-                              )}
-                              {project.title.includes("AI/ML") && (
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                              )}
-                            </svg>
-                          </div>
-                        </div>
                       </div>
                     )}
-                  </motion.div>
+                  </div>
+
                   {/* Project Content */}
-                  <div className="p-6">
-                    <motion.h3 
-                      className="text-2xl font-bold text-gray-800 mb-4 text-center font-spartan"
-                      initial={{ opacity: 0, y: -10 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.6, delay: 0.1 }}
-                    >
-                      {project.title}
-                    </motion.h3>
-                    
-                    <motion.p 
-                      className="text-gray-600 mb-4 leading-relaxed font-spartan"
-                      initial={{ opacity: 0 }}
-                      whileInView={{ opacity: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.6, delay: 0.2 }}
-                    >
-                      {project.description}
-                    </motion.p>
-                    
-                    {/* Features */}
-                    <div className="mb-4">
-                      <h4 className="text-sm font-semibold text-gray-800 mb-2 flex items-center">
-                        <span className="w-2 h-2 bg-black rounded-full mr-2"></span>
-                        Key Features:
-                      </h4>
-                      <ul className="space-y-1">
-                        {project.features.map((feature, featureIndex) => (
-                          <motion.li
-                            key={featureIndex}
-                            className="text-sm text-gray-600 flex items-center"
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.4, delay: featureIndex * 0.1 }}
-                          >
-                            <span className="w-2 h-2 bg-gray-700 rounded-full mr-2"></span>
-                            {feature}
-                          </motion.li>
-                        ))}
-                      </ul>
-                    </div>
+                  <h3 className="text-2xl font-semibold text-gray-200 mb-3">
+                    {project.title}
+                  </h3>
 
-                    {/* Tech Stack */}
-                    <div className="mb-6">
-                      <h4 className="text-sm font-semibold text-gray-800 mb-2 flex items-center">
-                        <span className="w-2 h-2 bg-gray-700 rounded-full mr-2"></span>
-                        Tech Stack:
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {project.tech.map((tech, techIndex) => (
-                          <motion.span
-                            key={techIndex}
-                            className="px-3 py-1 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 rounded-full text-xs font-medium border border-gray-300"
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.3, delay: techIndex * 0.05 }}
-                            whileHover={{ scale: 1.1, y: -2 }}
-                          >
-                            {tech}
-                          </motion.span>
-                        ))}
-                      </div>
-                    </div>
+                  <p className="text-gray-400 mb-4 leading-relaxed">
+                    {project.description}
+                  </p>
 
-                    {/* Project Links */}
-                    <div className="flex space-x-4">
-                      {project.github && (
-                        <motion.a 
-                          href={project.github} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="flex-1 bg-gradient-to-r from-gray-900 to-gray-800 text-white py-3 px-4 rounded-xl text-center font-medium hover:from-gray-800 hover:to-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-                          whileHover={{ scale: 1.05, y: -2 }}
-                          whileTap={{ scale: 0.95 }}
+                  {/* Features */}
+                  <div className="mb-4">
+                    <h4 className="text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
+                      <div className="w-1 h-4 bg-gray-500 rounded-full"></div>
+                      Key Features
+                    </h4>
+                    <ul className="space-y-1">
+                      {project.features.map((feature, featureIndex) => (
+                        <li
+                          key={featureIndex}
+                          className="text-sm text-gray-500 flex items-center gap-2"
                         >
-                          View Code
-                        </motion.a>
-                      )}
-                      <motion.a
-                        href={project.live}
+                          <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Tech Stack */}
+                  <div className="mb-6">
+                    <h4 className="text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
+                      <div className="w-1 h-4 bg-gray-500 rounded-full"></div>
+                      Tech Stack
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {project.tech.map((tech, techIndex) => (
+                        <span
+                          key={techIndex}
+                          className="px-3 py-1 text-xs rounded-lg bg-white/5 text-gray-400 border border-gray-800 hover:border-gray-600 hover:text-gray-300 transition-all"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Project Links */}
+                  <div className="flex gap-3">
+                    {project.github && (
+                      <a
+                        href={project.github}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`text-center font-medium py-3 px-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl ${
-                          project.github
-                            ? 'flex-1 bg-gradient-to-r from-gray-700 to-gray-900 text-white hover:from-gray-800 hover:to-black'
-                            : 'w-full bg-gradient-to-r from-black to-gray-800 text-white hover:from-gray-900 hover:to-gray-700'
-                        }`}
-                        whileHover={{ scale: 1.05, y: -2 }}
-                        whileTap={{ scale: 0.95 }}
+                        className="flex-1 px-4 py-2.5 rounded-lg bg-white/5 text-gray-300 border border-gray-800 hover:border-gray-600 hover:bg-white/10 transition-all text-center text-sm font-medium"
                       >
-                        {project.github ? 'Live Demo' : 'Visit Website'}
-                      </motion.a>
-                    </div>
+                        <Github className="w-4 h-4 inline mr-1.5" />
+                        Code
+                      </a>
+                    )}
+                    <a
+                      href={project.live}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`px-4 py-2.5 rounded-lg text-center text-sm font-medium transition-all ${
+                        project.github
+                          ? 'flex-1 bg-white text-black hover:bg-gray-200'
+                          : 'w-full bg-white text-black hover:bg-gray-200'
+                      }`}
+                    >
+                      <ExternalLink className="w-4 h-4 inline mr-1.5" />
+                      {project.github ? 'Demo' : 'Visit'}
+                    </a>
                   </div>
                 </motion.div>
               ))}
-            </motion.div>
+            </div>
           ) : (
             <div className="-mx-2">
               <div className="overflow-x-auto overflow-y-hidden no-scrollbar px-2">
-                <div className="flex gap-6 snap-x snap-mandatory">
+                <div className="flex gap-6 snap-x snap-mandatory pb-4">
                   {projects.map((project, index) => (
-                    <motion.div 
+                    <motion.div
                       key={index}
-                      className="min-w-[340px] lg:min-w-[380px] xl:min-w-[420px] snap-start bg-white/80 backdrop-blur-sm rounded-3xl overflow-hidden shadow-xl border border-gray-100"
-                      initial={{ opacity: 0, scale: 0.96, y: 20 }}
-                      whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
-                      transition={{ duration: 0.4 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="min-w-[340px] lg:min-w-[380px] xl:min-w-[420px] snap-start p-6 rounded-2xl bg-gradient-to-br from-gray-900/50 to-gray-800/30 border border-gray-800 hover:border-gray-700 transition-all"
                     >
                       {/* Project Image */}
-                      <div className="relative h-48 bg-gradient-to-br from-gray-800 via-gray-900 to-black flex items-center justify-center overflow-hidden">
-                        {project.image ? (
-                          <div className="w-full h-full flex items-center justify-center bg-white/10 backdrop-blur-sm">
-                            <img src={project.image} alt={project.title} className="max-w-full max-h-full object-contain p-4" />
+                      <div className="relative h-48 bg-gradient-to-br from-gray-900/80 to-black/60 rounded-xl flex items-center justify-center overflow-hidden mb-6">
+                        {project.image && (
+                          <div className="w-full h-full flex items-center justify-center p-4">
+                            <img
+                              src={project.image}
+                              alt={project.title}
+                              className="max-w-full max-h-full object-contain transition-all duration-500"
+                            />
                           </div>
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-white/20 backdrop-blur-sm"/>
                         )}
                       </div>
+
                       {/* Content */}
-                      <div className="p-6">
-                        <h3 className="text-2xl font-bold text-gray-800 mb-3 text-center font-spartan">{project.title}</h3>
-                        <p className="text-gray-600 mb-4 leading-relaxed font-spartan">{project.description}</p>
-                        <div className="flex space-x-4">
-                          {project.github && (
-                            <a href={project.github} target="_blank" rel="noopener noreferrer" className="flex-1 bg-gradient-to-r from-gray-900 to-gray-800 text-white py-3 px-4 rounded-xl text-center font-medium hover:from-black hover:to-gray-900 transition-all">View Code</a>
-                          )}
-                          <a href={project.live} target="_blank" rel="noopener noreferrer" className={`text-center font-medium py-3 px-4 rounded-xl transition-all ${project.github ? 'flex-1 bg-gradient-to-r from-gray-700 to-gray-900 text-white hover:from-gray-800 hover:to-black' : 'w-full bg-gradient-to-r from-black to-gray-800 text-white hover:from-gray-900 hover:to-gray-700'}`}>{project.github ? 'Live Demo' : 'Visit Website'}</a>
-                        </div>
+                      <h3 className="text-2xl font-semibold text-gray-200 mb-3">{project.title}</h3>
+                      <p className="text-gray-400 mb-4 leading-relaxed">{project.description}</p>
+
+                      {/* Project Links */}
+                      <div className="flex gap-3">
+                        {project.github && (
+                          <a
+                            href={project.github}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 px-4 py-2.5 rounded-lg bg-white/5 text-gray-300 border border-gray-800 hover:border-gray-600 hover:bg-white/10 transition-all text-center text-sm font-medium"
+                          >
+                            <Github className="w-4 h-4 inline mr-1.5" />
+                            Code
+                          </a>
+                        )}
+                        <a
+                          href={project.live}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`px-4 py-2.5 rounded-lg text-center text-sm font-medium transition-all ${
+                            project.github
+                              ? 'flex-1 bg-white text-black hover:bg-gray-200'
+                              : 'w-full bg-white text-black hover:bg-gray-200'
+                          }`}
+                        >
+                          <ExternalLink className="w-4 h-4 inline mr-1.5" />
+                          {project.github ? 'Demo' : 'Visit'}
+                        </a>
                       </div>
                     </motion.div>
                   ))}
@@ -386,242 +305,222 @@ export default function Portfolio() {
           </>
         )}
 
-        {/* Mobile: when expanded, show stacked grid of all projects instead of carousel */}
+        {/* Mobile: when expanded, show stacked grid of all projects */}
         {isMobile && expanded && (
-          <motion.div 
-            className="grid grid-cols-1 gap-6"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-          >
+          <div className="grid grid-cols-1 gap-6">
             {projects.map((project, index) => (
-              <motion.div 
-                key={index} 
-                className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-xl border border-gray-100"
-                variants={projectVariants}
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="p-5 rounded-2xl bg-gradient-to-br from-gray-900/50 to-gray-800/30 border border-gray-800"
               >
                 {/* Project Image - Mobile grid */}
-                <div className="relative h-40 bg-gradient-to-br from-gray-800 via-gray-900 to-black flex items-center justify-center overflow-hidden">
-                  {project.image ? (
-                    <div className="w-full h-full flex items-center justify-center bg-white/10 backdrop-blur-sm">
-                      <img 
-                        src={project.image} 
+                <div className="relative h-40 bg-gradient-to-br from-gray-900/80 to-black/60 rounded-xl flex items-center justify-center overflow-hidden mb-4">
+                  {project.image && (
+                    <div className="w-full h-full flex items-center justify-center p-3">
+                      <img
+                        src={project.image}
                         alt={project.title}
-                        className="max-w-full max-h-full object-contain p-3"
+                        className="max-w-full max-h-full object-contain"
                       />
                     </div>
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-white/20 backdrop-blur-sm"/>
                   )}
                 </div>
+
                 {/* Content */}
-                <div className="p-4">
-                  <h3 className="text-xl font-bold text-gray-800 mb-3 text-center font-spartan">{project.title}</h3>
-                  <p className="text-gray-600 mb-3 leading-relaxed text-sm font-spartan">{project.description}</p>
-                  <div className="flex space-x-2">
-                    {project.github && (
-                      <a href={project.github} target="_blank" rel="noopener noreferrer" className="flex-1 bg-gray-900 text-white py-2 px-3 rounded-lg text-center text-sm hover:bg-black transition-all">View Code</a>
-                    )}
-                    <a href={project.live} target="_blank" rel="noopener noreferrer" className={`text-white py-2 px-3 rounded-lg text-center text-sm transition-all ${project.github ? 'flex-1 bg-gradient-to-r from-gray-700 to-gray-900 hover:from-gray-800 hover:to-black' : 'w-full bg-gradient-to-r from-black to-gray-800 hover:from-gray-900 hover:to-gray-700'}`}>{project.github ? 'Demo' : 'Website'}</a>
-                  </div>
+                <h3 className="text-xl font-semibold text-gray-200 mb-2">{project.title}</h3>
+                <p className="text-gray-400 mb-3 text-sm leading-relaxed">{project.description}</p>
+
+                {/* Project Links */}
+                <div className="flex gap-2">
+                  {project.github && (
+                    <a
+                      href={project.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 px-3 py-2 rounded-lg bg-white/5 text-gray-300 border border-gray-800 hover:border-gray-600 transition-all text-center text-sm"
+                    >
+                      <Github className="w-3 h-3 inline mr-1" />
+                      Code
+                    </a>
+                  )}
+                  <a
+                    href={project.live}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`px-3 py-2 rounded-lg text-center text-sm transition-all ${
+                      project.github
+                        ? 'flex-1 bg-white text-black'
+                        : 'w-full bg-white text-black'
+                    }`}
+                  >
+                    <ExternalLink className="w-3 h-3 inline mr-1" />
+                    {project.github ? 'Demo' : 'Visit'}
+                  </a>
                 </div>
               </motion.div>
             ))}
-          </motion.div>
+          </div>
         )}
 
         {/* Mobile Carousel Layout - Touch Friendly */}
         {isMobile && !expanded && (
           <div className="relative">
-            <motion.div 
+            <div
               className="overflow-hidden touch-pan-y"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
               ref={carouselRef}
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
             >
-              <motion.div
+              <div
                 className="flex transition-transform duration-300 ease-in-out will-change-transform"
                 style={{ transform: `translateX(-${currentSlide * 100}%)` }}
               >
                 {projects.map((project, index) => (
                   <div key={index} className="w-full flex-shrink-0 px-2">
-                    <motion.div
-                      className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-xl border border-gray-100 touch-manipulation"
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.5 }}
-                      viewport={{ once: true }}
-                    >
+                    <div className="p-5 rounded-2xl bg-gradient-to-br from-gray-900/50 to-gray-800/30 border border-gray-800 touch-manipulation">
                       {/* Project Image - Mobile */}
-                      <div className="relative h-40 bg-gradient-to-br from-gray-800 via-gray-900 to-black flex items-center justify-center overflow-hidden">
-                        {project.image ? (
-                          <div className="w-full h-full flex items-center justify-center bg-white/10 backdrop-blur-sm">
-                            <img 
-                              src={project.image} 
+                      <div className="relative h-40 bg-gradient-to-br from-gray-900/80 to-black/60 rounded-xl flex items-center justify-center overflow-hidden mb-4">
+                        {project.image && (
+                          <div className="w-full h-full flex items-center justify-center p-3">
+                            <img
+                              src={project.image}
                               alt={project.title}
-                              className="max-w-full max-h-full object-contain p-3"
+                              className="max-w-full max-h-full object-contain"
                             />
-                          </div>
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-white/20 backdrop-blur-sm">
-                            <div className="text-center text-white">
-                              <div className="w-16 h-16 mx-auto mb-2 bg-white/30 rounded-full flex items-center justify-center">
-                                <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                  {project.title.includes("Tarzbygazala") && (
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                  )}
-                                  {project.title.includes("PG Flow") && (
-                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                                  )}
-                                  {project.title.includes("Smart Parking") && (
-                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v12h16V6H4zm2 2h12v2H6V8zm0 4h8v2H6v-2z"/>
-                                  )}
-                                  {project.title.includes("AI/ML") && (
-                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                                  )}
-                                </svg>
-                              </div>
-                            </div>
                           </div>
                         )}
                       </div>
-                      
-                      {/* Project Content - Mobile */}
-                      <div className="p-4">
-                        <h3 className="text-xl font-bold text-gray-800 mb-3 text-center font-spartan">
-                          {project.title}
-                        </h3>
-                        
-                        <p className="text-gray-600 mb-3 leading-relaxed text-sm font-spartan">{project.description}</p>
-                        
-                        {/* Features */}
-                        <div className="mb-3">
-                          <h4 className="text-xs font-semibold text-gray-800 mb-1 flex items-center">
-                            <span className="w-1.5 h-1.5 bg-black rounded-full mr-1.5"></span>
-                            Key Features:
-                          </h4>
-                          <ul className="space-y-1">
-                            {project.features.slice(0, 2).map((feature, featureIndex) => (
-                              <li key={featureIndex} className="text-xs text-gray-600 flex items-center">
-                                <span className="w-1.5 h-1.5 bg-gray-700 rounded-full mr-1.5"></span>
-                                {feature}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
 
-                        {/* Tech Stack */}
-                        <div className="mb-4">
-                          <h4 className="text-xs font-semibold text-gray-800 mb-1 flex items-center">
-                            <span className="w-1.5 h-1.5 bg-gray-700 rounded-full mr-1.5"></span>
-                            Tech Stack:
-                          </h4>
-                          <div className="flex flex-wrap gap-1">
-                            {project.tech.slice(0, 3).map((tech, techIndex) => (
-                              <span
-                                key={techIndex}
-                                className="px-2 py-1 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 rounded-full text-xs font-medium border border-gray-300"
-                              >
-                                {tech}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        
-                        {/* Project Links - Mobile */}
-                        <div className="flex space-x-2">
-                          {project.github && (
-                            <a
-                              href={project.github}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex-1 bg-gradient-to-r from-gray-900 to-gray-800 text-white py-2 px-3 rounded-lg font-medium hover:from-gray-800 hover:to-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl text-center text-sm"
+                      {/* Project Content - Mobile */}
+                      <h3 className="text-xl font-semibold text-gray-200 mb-2">
+                        {project.title}
+                      </h3>
+
+                      <p className="text-gray-400 mb-3 text-sm leading-relaxed">{project.description}</p>
+
+                      {/* Features */}
+                      <div className="mb-3">
+                        <h4 className="text-xs font-semibold text-gray-300 mb-1 flex items-center gap-1">
+                          <div className="w-1 h-3 bg-gray-500 rounded-full"></div>
+                          Key Features
+                        </h4>
+                        <ul className="space-y-1">
+                          {project.features.slice(0, 2).map((feature, featureIndex) => (
+                            <li key={featureIndex} className="text-xs text-gray-500 flex items-center gap-1">
+                              <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
+                              {feature}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {/* Tech Stack */}
+                      <div className="mb-4">
+                        <h4 className="text-xs font-semibold text-gray-300 mb-1 flex items-center gap-1">
+                          <div className="w-1 h-3 bg-gray-500 rounded-full"></div>
+                          Tech Stack
+                        </h4>
+                        <div className="flex flex-wrap gap-1">
+                          {project.tech.slice(0, 3).map((tech, techIndex) => (
+                            <span
+                              key={techIndex}
+                              className="px-2 py-0.5 text-xs rounded bg-white/5 text-gray-400 border border-gray-800"
                             >
-                              <Github className="w-3 h-3 inline mr-1" />
-                              Code
-                            </a>
-                          )}
-                          <a
-                            href={project.live}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`text-white py-2 px-3 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-xl text-center text-sm ${
-                              project.github
-                                ? 'flex-1 bg-gradient-to-r from-gray-700 to-gray-900 hover:from-gray-800 hover:to-black'
-                                : 'w-full bg-gradient-to-r from-black to-gray-800 hover:from-gray-900 hover:to-gray-700'
-                            }`}
-                          >
-                            <ExternalLink className="w-3 h-3 inline mr-1" />
-                            {project.github ? 'Demo' : 'Website'}
-                          </a>
+                              {tech}
+                            </span>
+                          ))}
                         </div>
                       </div>
-                    </motion.div>
+
+                      {/* Project Links - Mobile */}
+                      <div className="flex gap-2">
+                        {project.github && (
+                          <a
+                            href={project.github}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 px-3 py-2 rounded-lg bg-white/5 text-gray-300 border border-gray-800 transition-all text-center text-sm"
+                          >
+                            <Github className="w-3 h-3 inline mr-1" />
+                            Code
+                          </a>
+                        )}
+                        <a
+                          href={project.live}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`px-3 py-2 rounded-lg text-center text-sm transition-all ${
+                            project.github
+                              ? 'flex-1 bg-white text-black'
+                              : 'w-full bg-white text-black'
+                          }`}
+                        >
+                          <ExternalLink className="w-3 h-3 inline mr-1" />
+                          {project.github ? 'Demo' : 'Visit'}
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 ))}
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
 
             {/* Enhanced Touch-Friendly Navigation */}
-            <div className="flex justify-center items-center mt-6 space-x-4">
+            <div className="flex justify-center items-center mt-6 gap-4">
               <button
                 onClick={prevSlide}
-                className="p-3 rounded-full bg-white shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors duration-200 touch-manipulation active:scale-95"
+                className="p-3 rounded-full bg-white/5 border border-gray-800 hover:bg-white/10 transition-all touch-manipulation active:scale-95"
                 aria-label="Previous project"
               >
-                <ChevronLeft className="w-6 h-6 text-gray-600" />
+                <ChevronLeft className="w-5 h-5 text-gray-400" />
               </button>
-              
-              <div className="flex space-x-3">
+
+              <div className="flex gap-2">
                 {projects.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => goToSlide(index)}
-                    className={`w-4 h-4 rounded-full transition-all duration-200 touch-manipulation active:scale-110 ${
-                      index === currentSlide ? 'bg-blue-600 scale-110' : 'bg-gray-300'
+                    className={`w-2 h-2 rounded-full transition-all duration-200 touch-manipulation ${
+                      index === currentSlide ? 'bg-white w-6' : 'bg-gray-600'
                     }`}
                     aria-label={`Go to project ${index + 1}`}
                   />
                 ))}
               </div>
-              
+
               <button
                 onClick={nextSlide}
-                className="p-3 rounded-full bg-white shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors duration-200 touch-manipulation active:scale-95"
+                className="p-3 rounded-full bg-white/5 border border-gray-800 hover:bg-white/10 transition-all touch-manipulation active:scale-95"
                 aria-label="Next project"
               >
-                <ChevronRight className="w-6 h-6 text-gray-600" />
+                <ChevronRight className="w-5 h-5 text-gray-400" />
               </button>
             </div>
 
             {/* Touch Instructions */}
             <div className="text-center mt-4">
               <p className="text-sm text-gray-500">
-                💡 Swipe left/right or use arrows to browse projects
+                Swipe left/right or use arrows to browse projects
               </p>
             </div>
           </div>
         )}
 
-        {/* Show More / Show Less Button - visible on both desktop and mobile */}
-        <div className="text-center mt-10">
-          <motion.button
+        {/* Show More / Show Less Button */}
+        <div className="text-center mt-12">
+          <button
             onClick={() => setExpanded((v) => !v)}
-            className="inline-flex items-center px-6 py-3 rounded-xl font-semibold text-white bg-black hover:bg-gray-900 shadow-lg hover:shadow-xl transition-all duration-300"
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
+            className="px-8 py-3 rounded-xl font-semibold bg-white text-black hover:bg-gray-200 transition-all"
             aria-expanded={expanded}
           >
             {expanded ? 'Show Less' : 'Show More'}
-          </motion.button>
+          </button>
         </div>
-
-        
       </div>
     </section>
   )
