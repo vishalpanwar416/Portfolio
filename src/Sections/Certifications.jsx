@@ -1,60 +1,8 @@
 import { motion } from 'framer-motion'
-import { Award, Trophy, Star, CheckCircle2 } from 'lucide-react'
+import { CheckCircle2 } from 'lucide-react'
+import { certifications, achievements, sectionContent } from '../data'
 
 export default function Certifications() {
-  const certifications = [
-    {
-      title: "AWS Certified Cloud Practitioner",
-      issuer: "Amazon Web Services",
-      date: "2024",
-      icon: Award,
-      verified: true
-    },
-    {
-      title: "Microsoft Azure Fundamentals",
-      issuer: "Microsoft",
-      date: "2024",
-      icon: Award,
-      verified: true
-    },
-    {
-      title: "React - The Complete Guide",
-      issuer: "Udemy",
-      date: "2023",
-      icon: Award,
-      verified: true
-    },
-    {
-      title: "Python for Data Science",
-      issuer: "Coursera",
-      date: "2023",
-      icon: Award,
-      verified: true
-    }
-  ]
-
-  const achievements = [
-    {
-      title: "500+ LeetCode Problems Solved",
-      description: "Consistent problem-solving across Easy, Medium, and Hard",
-      icon: Trophy
-    },
-    {
-      title: "Open Source Contributor",
-      description: "Active contributor to various open-source projects",
-      icon: Star
-    },
-    {
-      title: "Hackathon Winner",
-      description: "1st place in College Tech Fest 2023",
-      icon: Trophy
-    },
-    {
-      title: "Tech Blogger",
-      description: "Sharing knowledge through technical articles",
-      icon: Star
-    }
-  ]
 
   return (
     <section id="certifications" className="py-24 bg-[#0a0a0a] relative overflow-hidden border-t border-gray-800/50">
@@ -73,11 +21,11 @@ export default function Certifications() {
           className="text-center mb-16"
         >
           <h2 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-gray-300 to-gray-500 bg-clip-text text-transparent">
-            Certifications & Achievements
+            {sectionContent.certifications.title}
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-gray-600 via-gray-400 to-gray-600 mx-auto rounded-full"></div>
           <p className="text-gray-400 mt-6 text-lg max-w-2xl mx-auto">
-            Continuous learning and recognition of expertise
+            {sectionContent.certifications.subtitle}
           </p>
         </motion.div>
 
@@ -90,7 +38,7 @@ export default function Certifications() {
             className="text-3xl font-semibold text-gray-200 mb-8 flex items-center gap-2"
           >
             <div className="w-1 h-8 bg-gray-500 rounded-full"></div>
-            Professional Certifications
+            {sectionContent.certifications.professionalCerts}
           </motion.h3>
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -135,7 +83,7 @@ export default function Certifications() {
             className="text-3xl font-semibold text-gray-200 mb-8 flex items-center gap-2"
           >
             <div className="w-1 h-8 bg-gray-500 rounded-full"></div>
-            Key Achievements
+            {sectionContent.certifications.keyAchievements}
           </motion.h3>
 
           <div className="grid md:grid-cols-2 gap-6">

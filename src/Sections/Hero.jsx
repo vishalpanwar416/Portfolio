@@ -1,9 +1,10 @@
-import { Github, Linkedin, Mail, Instagram, Twitter, Download, ExternalLink } from 'lucide-react'
+import { Download } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { smoothScrollTo } from '../lib/utils.js'
 import profilePhoto from '../assets/vishal-panwar-profile.jpeg'
 import { useMagneticButton } from '../hooks/useMagneticButton'
 import TypingAnimation from '../components/TypingAnimation'
+import { personalInfo, socialLinks, externalLinks, sectionContent, typingAnimationTexts } from '../data'
 
 export default function Hero() {
   const magneticButton1 = useMagneticButton(0.3)
@@ -78,7 +79,7 @@ export default function Hero() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm"
             >
               <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-              <span className="text-sm text-gray-400">Available for opportunities</span>
+              <span className="text-sm text-gray-400">{personalInfo.availability.status}</span>
               </motion.div>
 
             {/* Name */}
@@ -89,22 +90,22 @@ export default function Hero() {
                 transition={{ delay: 0.3 }}
                 className="text-gray-400 text-lg mb-2"
               >
-                Hey, I'm
+                {sectionContent.hero.greeting}
               </motion.p>
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
                 className="text-6xl md:text-7xl lg:text-8xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent"
-                style={{ 
+                style={{
                   fontFamily: "'Playfair Display', serif",
                   letterSpacing: '-0.02em',
                   fontWeight: 700,
                   fontStyle: 'normal'
                 }}
               >
-                <span className="block">Vishal</span>
-                <span className="block mt-2">Panwar</span>
+                <span className="block">{personalInfo.name.first}</span>
+                <span className="block mt-2">{personalInfo.name.last}</span>
               </motion.h1>
             </div>
 
@@ -116,7 +117,7 @@ export default function Hero() {
               className="text-xl md:text-2xl text-gray-400 max-w-xl"
             >
               I build <TypingAnimation
-                texts={['Web Applications', 'AI Solutions', 'Cloud Infrastructure', 'Mobile Apps', 'REST APIs', 'ML Models']}
+                texts={typingAnimationTexts}
                 typingSpeed={80}
                 deletingSpeed={40}
                 delayBetween={2000}
@@ -130,7 +131,7 @@ export default function Hero() {
               transition={{ delay: 0.6 }}
               className="text-gray-500 text-lg max-w-xl leading-relaxed"
             >
-              Building scalable solutions with MERN, Python, Cloud (AWS/Azure), and modern technologies.
+              {sectionContent.hero.description}
             </motion.p>
 
             {/* CTA Buttons with magnetic effect */}
@@ -147,7 +148,7 @@ export default function Hero() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <span className="relative z-10">View My Work</span>
+                <span className="relative z-10">{sectionContent.hero.cta.primary}</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-white opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </motion.button>
 
@@ -158,7 +159,7 @@ export default function Hero() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Get In Touch
+                {sectionContent.hero.cta.secondary}
               </motion.button>
             </motion.div>
 
@@ -169,20 +170,14 @@ export default function Hero() {
               transition={{ delay: 0.8 }}
               className="flex items-center gap-4"
             >
-              {[
-                { icon: Github, href: "https://github.com/vishalpanwar416" },
-                { icon: Linkedin, href: "https://linkedin.com/in/vishalpanwar416" },
-                { icon: Mail, href: "mailto:vishalpanwar416@gmail.com" },
-                { icon: Instagram, href: "https://instagram.com/vee.pyai" },
-                { icon: Twitter, href: "https://twitter.com/vishalpanwar416" },
-                { icon: ExternalLink, href: "https://blinq.me/cTA1XtayJD14xDIFFz33" }
-              ].map((social, index) => (
+              {socialLinks.map((social, index) => (
                 <a
                   key={index}
-                  href={social.href}
+                  href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-3 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 transition-all hover:scale-110"
+                  aria-label={social.name}
                 >
                   <social.icon className="w-5 h-5" />
                 </a>
@@ -191,15 +186,15 @@ export default function Hero() {
 
             {/* Download Resume */}
             <motion.a
-              href="/resume/Vishal_Panwar_Resume.pdf"
-              download="Vishal_Panwar_Resume.pdf"
+              href={externalLinks.resume}
+              download={`${personalInfo.name.full}_Resume.pdf`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.9 }}
               className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors group"
             >
               <Download className="w-5 h-5" />
-              <span className="border-b border-gray-600 group-hover:border-white transition-colors">Download Resume</span>
+              <span className="border-b border-gray-600 group-hover:border-white transition-colors">{sectionContent.hero.downloadResume}</span>
             </motion.a>
           </motion.div>
 

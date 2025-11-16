@@ -3,6 +3,7 @@ import { Menu, X, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { smoothScrollTo } from '../lib/utils.js'
 import logo from '../assets/logo.png'
+import { navItems, sectionContent } from '../data'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
@@ -67,13 +68,6 @@ export default function Navbar() {
     smoothScrollTo(sectionId)
     setIsOpen(false)
   }
-
-  const navItems = [
-    { name: "About", href: "#about" },
-    { name: "Skills", href: "#skills" },
-    { name: "Certifications", href: "#certifications" },
-    { name: "Portfolio", href: "#portfolio" }
-  ]
 
   return (
     <motion.nav
@@ -144,7 +138,7 @@ export default function Navbar() {
               whileHover={{ y: -2, scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              Contact
+              {sectionContent.navigation.contact}
               {/* Shine effect */}
               <div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
             </motion.a>

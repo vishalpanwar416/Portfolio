@@ -1,40 +1,9 @@
-import { Github, Linkedin, Mail, ExternalLink, Twitter, Instagram } from 'lucide-react'
+import { ExternalLink } from 'lucide-react'
 import logo from '../assets/logo.png'
 import VisitorCounter from '../components/VisitorCounter'
+import { socialLinks, footerLinks, sectionContent, externalLinks } from '../data'
 
 export default function Footer() {
-  const socialLinks = [
-    {
-      name: "GitHub",
-      icon: Github,
-      url: "https://github.com/vishalpanwar416"
-    },
-    {
-      name: "LinkedIn",
-      icon: Linkedin,
-      url: "https://linkedin.com/in/vishalpanwar416"
-    },
-    {
-      name: "Email",
-      icon: Mail,
-      url: "mailto:vishalpanwar416@gmail.com"
-    },
-    {
-      name: "Instagram",
-      icon: Instagram,
-      url: "https://instagram.com/vee.pyai"
-    },
-    {
-      name: "Twitter",
-      icon: Twitter,
-      url: "https://twitter.com/vishalpanwar416"
-    },
-    {
-      name: "Blinq",
-      icon: ExternalLink,
-      url: "https://blinq.me/cTA1XtayJD14xDIFFz33"
-    }
-  ]
 
   return (
     <footer className="bg-[#0a0a0a] border-t border-gray-800/50 text-gray-300 py-12 relative overflow-hidden">
@@ -56,15 +25,15 @@ export default function Footer() {
               />
             </div>
             <p className="text-gray-400 text-sm leading-relaxed">
-              Full-Stack Developer | AI & Cloud Engineer | Flutter Enthusiast
+              {sectionContent.footer.tagline}
             </p>
           </div>
 
           {/* Quick Links */}
           <div className="text-center">
-            <h4 className="text-lg font-semibold mb-4 text-gray-200">Quick Links</h4>
+            <h4 className="text-lg font-semibold mb-4 text-gray-200">{sectionContent.footer.quickLinks}</h4>
             <div className="flex flex-wrap justify-center gap-4">
-              {["About", "Skills", "Portfolio", "Contact"].map((link) => (
+              {footerLinks.map((link) => (
                 <a
                   key={link}
                   href={`#${link.toLowerCase()}`}
@@ -78,7 +47,7 @@ export default function Footer() {
 
           {/* Social Links */}
           <div className="text-center md:text-right">
-            <h4 className="text-lg font-semibold mb-4 text-gray-200">Connect With Me</h4>
+            <h4 className="text-lg font-semibold mb-4 text-gray-200">{sectionContent.footer.connectWithMe}</h4>
             <div className="flex justify-center md:justify-end flex-wrap gap-3">
               {socialLinks.map((social) => (
                 <a
@@ -103,28 +72,28 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex flex-col md:flex-row items-center gap-4">
             <p className="text-gray-500 text-sm text-center md:text-left">
-              © 2025 Vishal Panwar. All rights reserved.
+              {sectionContent.footer.copyright}
             </p>
             <VisitorCounter />
           </div>
 
           <div className="flex items-center gap-6 text-sm text-gray-500">
             <a
-              href="https://leetcode.com/vishalpanwar416"
+              href={externalLinks.leetcode}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 hover:text-gray-300 transition-colors"
             >
-              <span>LeetCode</span>
+              <span>{sectionContent.footer.links.leetcode}</span>
               <ExternalLink size={14} />
             </a>
             <a
-              href="https://github.com/vishalpanwar416"
+              href={externalLinks.github}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 hover:text-gray-300 transition-colors"
             >
-              <span>Source Code</span>
+              <span>{sectionContent.footer.links.sourceCode}</span>
               <ExternalLink size={14} />
             </a>
           </div>

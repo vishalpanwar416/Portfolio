@@ -1,33 +1,8 @@
 import { motion } from 'framer-motion'
 import CodingStats from '../components/CodingStats'
+import { skillCategories, personalInfo, sectionContent } from '../data'
 
 export default function Skills() {
-  const skillCategories = [
-    {
-      category: "Frontend",
-      skills: ["React.js", "Next.js", "Vue.js", "Tailwind CSS", "JavaScript", "TypeScript", "HTML5", "CSS3"]
-    },
-    {
-      category: "Backend",
-      skills: ["Node.js", "Express.js", "Python", "Django", "Flask", "FastAPI", "REST APIs", "GraphQL"]
-    },
-    {
-      category: "Database",
-      skills: ["MongoDB", "PostgreSQL", "MySQL", "Redis", "Firebase", "DynamoDB"]
-    },
-    {
-      category: "Cloud & DevOps",
-      skills: ["AWS", "Azure", "Docker", "Kubernetes", "CI/CD", "Git", "Linux", "Nginx"]
-    },
-    {
-      category: "AI & ML",
-      skills: ["TensorFlow", "PyTorch", "Scikit-learn", "Pandas", "NumPy", "OpenCV", "NLP", "Computer Vision"]
-    },
-    {
-      category: "Mobile",
-      skills: ["Flutter", "Dart", "React Native", "Android", "iOS"]
-    }
-  ]
 
   return (
     <section id="skills" className="py-24 bg-[#0a0a0a] relative overflow-hidden border-t border-gray-800/50">
@@ -46,11 +21,11 @@ export default function Skills() {
           className="text-center mb-16"
         >
           <h2 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-gray-300 to-gray-500 bg-clip-text text-transparent">
-            Skills & Technologies
+            {sectionContent.skills.title}
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-gray-600 via-gray-400 to-gray-600 mx-auto rounded-full"></div>
           <p className="text-gray-400 mt-6 text-lg max-w-2xl mx-auto">
-            A comprehensive toolkit of technologies I've mastered through hands-on experience
+            {sectionContent.skills.subtitle}
           </p>
         </motion.div>
 
@@ -102,8 +77,8 @@ export default function Skills() {
           className="mt-16"
         >
           <CodingStats
-            githubUsername="vishalpanwar416"
-            leetcodeUsername="vishalpanwar416"
+            githubUsername={personalInfo.username.github}
+            leetcodeUsername={personalInfo.username.leetcode}
           />
         </motion.div>
       </div>
