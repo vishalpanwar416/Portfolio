@@ -81,21 +81,28 @@ export default function Hero() {
               >
                 {sectionContent.hero.greeting}
               </motion.p>
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent"
-                style={{
-                  fontFamily: "'Playfair Display', serif",
-                  letterSpacing: '-0.02em',
-                  fontWeight: 700,
-                  fontStyle: 'normal'
-                }}
-              >
-                <span className="block">{personalInfo.name.first}</span>
-                <span className="block mt-1 md:mt-2">{personalInfo.name.last}</span>
-              </motion.h1>
+              <div className="flex items-start gap-3 lg:block">
+                <div className="flex-1">
+                  <motion.h1
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="text-3xl sm:text-4xl md:text-7xl lg:text-8xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent"
+                    style={{
+                      fontFamily: "'Playfair Display', serif",
+                      letterSpacing: '-0.02em',
+                      fontWeight: 700,
+                      fontStyle: 'normal'
+                    }}
+                  >
+                    <span className="block">{personalInfo.name.first}</span>
+                    <span className="block mt-1 md:mt-2">{personalInfo.name.last}</span>
+                  </motion.h1>
+                </div>
+                <div className="lg:hidden w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] rounded-2xl overflow-hidden border border-gray-700/30 bg-gradient-to-br from-gray-800/20 to-gray-900/40 backdrop-blur-sm shadow-xl flex-shrink-0">
+                  <img src={profilePhoto} alt="Vishal Panwar" className="w-full h-full object-cover" />
+                </div>
+              </div>
             </div>
 
             {/* Title with Typing Animation */}
@@ -187,12 +194,12 @@ export default function Hero() {
             </motion.a>
           </motion.div>
 
-          {/* Right - Profile Image with 3D tilt effect */}
+          {/* Right - Profile Image with 3D tilt effect - Hidden on mobile */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="relative flex justify-center items-center"
+            className="relative hidden lg:flex justify-center items-center"
           >
             <motion.div
               className="relative"
