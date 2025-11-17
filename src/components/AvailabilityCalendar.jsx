@@ -67,12 +67,6 @@ export default function AvailabilityCalendar() {
       </div>
 
       <div className="space-y-4">
-        {/* Status Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-gray-700">
-          <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
-          <span className="text-sm text-gray-300 font-medium">Available for opportunities</span>
-        </div>
-
         {/* Availability Info */}
         <div className="p-6 rounded-xl bg-white/5 border border-gray-700">
           <div className="flex items-start gap-4 mb-4">
