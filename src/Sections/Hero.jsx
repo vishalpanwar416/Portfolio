@@ -11,7 +11,7 @@ export default function Hero() {
   const magneticButton2 = useMagneticButton(0.3)
 
   return (
-    <section id="hero" className="min-h-screen relative overflow-hidden pt-0 lg:pt-12 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a]">
+    <section id="hero" className="min-h-screen relative overflow-hidden pt-20 lg:pt-12 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a]">
       {/* Ambient background effects with animated gradient mesh */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Animated gradient orbs */}
