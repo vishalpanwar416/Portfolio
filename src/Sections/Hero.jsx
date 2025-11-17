@@ -11,7 +11,7 @@ export default function Hero() {
   const magneticButton2 = useMagneticButton(0.3)
 
   return (
-    <section id="hero" className="min-h-screen relative overflow-hidden pt-12 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a]">
+    <section id="hero" className="min-h-screen relative overflow-hidden pt-0 lg:pt-12 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a]">
       {/* Ambient background effects with animated gradient mesh */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Animated gradient orbs */}
@@ -62,8 +62,8 @@ export default function Hero() {
         <div className="absolute inset-0 bg-gradient-to-b from-gray-900/50 via-transparent to-gray-900/50"></div>
       </div>
       
-      <div className="relative z-10 container mx-auto px-6 h-screen flex items-center">
-        <div className="grid lg:grid-cols-2 gap-12 items-center w-full">
+      <div className="relative z-10 container mx-auto px-6 min-h-screen flex items-center py-8 lg:py-0">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center w-full">
           {/* Left Content */}
         <motion.div 
                   initial={{ opacity: 0, x: -50 }}
@@ -199,11 +199,11 @@ export default function Hero() {
           </motion.div>
 
           {/* Right - Profile Image with 3D tilt effect */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="relative hidden lg:flex justify-center items-center"
+            className="relative flex justify-center items-center"
           >
             <motion.div
               className="relative"
@@ -226,7 +226,7 @@ export default function Hero() {
 
               {/* Image container with glassmorphism and 3D tilt */}
               <motion.div
-                className="relative w-[400px] h-[400px] rounded-3xl overflow-hidden border border-gray-700/30 bg-gradient-to-br from-gray-800/20 to-gray-900/40 backdrop-blur-sm shadow-2xl"
+                className="relative w-[250px] h-[250px] sm:w-[300px] sm:h-[300px] lg:w-[400px] lg:h-[400px] rounded-3xl overflow-hidden border border-gray-700/30 bg-gradient-to-br from-gray-800/20 to-gray-900/40 backdrop-blur-sm shadow-2xl"
                 whileHover={{ rotateY: 5, rotateX: 5 }}
                 transition={{ type: "spring", stiffness: 300 }}
                 style={{ transformStyle: "preserve-3d" }}
@@ -242,22 +242,22 @@ export default function Hero() {
 
               {/* Floating decorative gray elements */}
               <motion.div
-                className="absolute -top-4 -right-4 w-24 h-24 border-2 border-gray-700/40 rounded-full"
+                className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 w-16 h-16 sm:w-24 sm:h-24 border-2 border-gray-700/40 rounded-full"
                 animate={{ rotate: [0, 360], y: [0, -10, 0] }}
                 transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
               />
               <motion.div
-                className="absolute -bottom-4 -left-4 w-32 h-32 border-2 border-gray-800/30 rounded-full"
+                className="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 w-20 h-20 sm:w-32 sm:h-32 border-2 border-gray-800/30 rounded-full"
                 animate={{ rotate: [360, 0], y: [0, 10, 0] }}
                 transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
               />
               <motion.div
-                className="absolute top-1/2 -left-8 w-16 h-16 bg-gray-700/10 rounded-full blur-xl"
+                className="absolute top-1/2 -left-4 sm:-left-8 w-12 h-12 sm:w-16 sm:h-16 bg-gray-700/10 rounded-full blur-xl"
                 animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
                 transition={{ duration: 4, repeat: Infinity }}
               />
               <motion.div
-                className="absolute bottom-1/4 -right-8 w-20 h-20 bg-gray-600/10 rounded-full blur-xl"
+                className="absolute bottom-1/4 -right-4 sm:-right-8 w-14 h-14 sm:w-20 sm:h-20 bg-gray-600/10 rounded-full blur-xl"
                 animate={{ scale: [1, 1.3, 1], opacity: [0.1, 0.25, 0.1] }}
                 transition={{ duration: 5, repeat: Infinity, delay: 1 }}
               />

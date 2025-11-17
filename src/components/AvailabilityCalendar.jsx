@@ -1,8 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Calendar, Clock } from 'lucide-react'
 
 export default function AvailabilityCalendar() {
+  const [calLoaded, setCalLoaded] = useState(false)
+
   useEffect(() => {
     // Load Cal.com embed script only once
     if (!document.querySelector('script[src*="cal.com/embed"]')) {
@@ -10,24 +12,44 @@ export default function AvailabilityCalendar() {
       script.type = 'text/javascript'
       script.src = 'https://app.cal.com/embed/embed.js'
       script.async = true
+
+      script.onload = () => {
+        setCalLoaded(true)
+      }
+
+      script.onerror = () => {
+        console.warn('Cal.com script failed to load')
+      }
+
       document.head.appendChild(script)
+    } else {
+      setCalLoaded(true)
     }
   }, [])
 
   const handleBookMeeting = () => {
-    if (window.Cal) {
-      window.Cal('init')
-      window.Cal('ui', {
-        styles: { branding: { brandColor: '#6b7280' } },
-        hideEventTypeDetails: false
-      })
-      window.Cal('openModal', {
-        calLink: 'vishal-panwar-mz0tfc/30min',
-        config: {
-          layout: 'month_view',
-          theme: 'dark'
-        }
-      })
+    if (calLoaded && window.Cal) {
+      try {
+        window.Cal('init', { origin: 'https://app.cal.com' })
+        window.Cal('ui', {
+          styles: { branding: { brandColor: '#6b7280' } },
+          hideEventTypeDetails: false
+        })
+        window.Cal('openModal', {
+          calLink: 'vishal-panwar-mz0tfc/30min',
+          config: {
+            layout: 'month_view',
+            theme: 'dark'
+          }
+        })
+      } catch (error) {
+        console.error('Error opening Cal.com modal:', error)
+        // Fallback to direct Cal.com link
+        window.open('https://cal.com/vishal-panwar-mz0tfc/30min', '_blank')
+      }
+    } else {
+      // If Cal isn't loaded, open direct link
+      window.open('https://cal.com/vishal-panwar-mz0tfc/30min', '_blank')
     }
   }
 
