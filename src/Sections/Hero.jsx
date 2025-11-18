@@ -2,18 +2,14 @@ import { Download } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { smoothScrollTo } from '../lib/utils.js'
 import profilePhoto from '../assets/vishal-panwar-profile.jpeg'
-import { useMagneticButton } from '../hooks/useMagneticButton'
 import TypingAnimation from '../components/TypingAnimation'
 import { personalInfo, socialLinks, externalLinks, sectionContent, typingAnimationTexts } from '../data'
 
 export default function Hero() {
-  const magneticButton1 = useMagneticButton(0.3)
-  const magneticButton2 = useMagneticButton(0.3)
-
   return (
     <section id="hero" className="min-h-screen relative overflow-hidden pt-20 lg:pt-12 bg-black lg:bg-gradient-to-br lg:from-[#0a0a0a] lg:via-[#1a1a1a] lg:to-[#0a0a0a]">
       {/* Ambient background effects with animated gradient mesh */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none hidden lg:block">
         {/* Animated gradient orbs */}
         <motion.div
           className="absolute top-1/4 -left-48 w-96 h-96 bg-gradient-to-br from-gray-800/20 to-gray-900/10 rounded-full blur-3xl"
@@ -62,14 +58,14 @@ export default function Hero() {
         <div className="absolute inset-0 bg-gradient-to-b from-gray-900/50 via-transparent to-gray-900/50"></div>
       </div>
       
-      <div className="relative z-10 container mx-auto px-6 min-h-screen flex items-center py-8 lg:py-0">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center w-full">
+      <div className="relative z-10 container mx-auto px-6 min-h-screen flex items-center py-12 lg:py-0">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-12 items-center w-full">
           {/* Left Content */}
-        <motion.div 
+        <motion.div
                   initial={{ opacity: 0, x: -50 }}
                   animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
-            className="space-y-8"
+            className="space-y-6 lg:space-y-8"
           >
             {/* Name */}
             <div>
@@ -77,7 +73,7 @@ export default function Hero() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className="text-gray-400 text-sm md:text-base mb-2"
+                className="text-gray-500 text-xs md:text-sm mb-3 tracking-wide uppercase font-medium"
               >
                 {sectionContent.hero.greeting}
               </motion.p>
@@ -87,7 +83,7 @@ export default function Hero() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="text-3xl sm:text-4xl md:text-7xl lg:text-8xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent"
+                    className="text-3xl sm:text-4xl md:text-7xl lg:text-8xl font-bold text-white lg:bg-gradient-to-r lg:from-white lg:via-gray-200 lg:to-gray-400 lg:bg-clip-text lg:text-transparent"
                     style={{
                       fontFamily: "'Playfair Display', serif",
                       letterSpacing: '-0.02em',
@@ -96,10 +92,10 @@ export default function Hero() {
                     }}
                   >
                     <span className="block">{personalInfo.name.first}</span>
-                    <span className="block mt-1 md:mt-2">{personalInfo.name.last}</span>
+                    <span className="block mt-1">{personalInfo.name.last}</span>
                   </motion.h1>
                 </div>
-                <div className="lg:hidden w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] rounded-2xl overflow-hidden border border-gray-700/30 bg-gradient-to-br from-gray-800/20 to-gray-900/40 backdrop-blur-sm shadow-xl flex-shrink-0">
+                <div className="lg:hidden w-[90px] h-[90px] sm:w-[100px] sm:h-[100px] rounded-lg overflow-hidden border border-gray-800 flex-shrink-0">
                   <img src={profilePhoto} alt="Vishal Panwar" className="w-full h-full object-cover" />
                 </div>
               </div>
@@ -110,7 +106,7 @@ export default function Hero() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-400 max-w-xl"
+              className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-400 max-w-xl font-light"
             >
               I build <TypingAnimation
                 texts={typingAnimationTexts}
@@ -125,38 +121,31 @@ export default function Hero() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="text-gray-500 text-sm sm:text-base md:text-lg max-w-xl leading-relaxed"
+              className="text-gray-600 text-xs sm:text-sm md:text-base max-w-xl leading-relaxed font-light"
             >
               {sectionContent.hero.description}
             </motion.p>
 
-            {/* CTA Buttons with magnetic effect */}
-            <motion.div 
+            {/* CTA Buttons */}
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
-              className="flex flex-wrap gap-4"
+              className="flex flex-wrap gap-3"
             >
-              <motion.button
-                ref={magneticButton1}
+              <button
                 onClick={() => smoothScrollTo('portfolio')}
-                className="group relative px-6 py-3 md:px-8 md:py-4 bg-white text-black rounded-xl font-semibold overflow-hidden transition-all hover:scale-105 active:scale-95 ripple text-sm md:text-base"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                className="px-6 py-3 md:px-8 md:py-4 bg-white text-black rounded-lg font-medium transition-opacity hover:opacity-90 text-xs sm:text-sm md:text-base"
               >
-                <span className="relative z-10">{sectionContent.hero.cta.primary}</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-white opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              </motion.button>
+                {sectionContent.hero.cta.primary}
+              </button>
 
-              <motion.button
-                ref={magneticButton2}
+              <button
                 onClick={() => smoothScrollTo('contact')}
-                className="group px-6 py-3 md:px-8 md:py-4 border-2 border-white/20 text-white rounded-xl font-semibold hover:bg-white/5 transition-all hover:scale-105 active:scale-95 ripple backdrop-blur-sm glass text-sm md:text-base"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                className="px-6 py-3 md:px-8 md:py-4 border border-gray-700 text-white rounded-lg font-medium hover:border-gray-600 transition-colors text-xs sm:text-sm md:text-base"
               >
                 {sectionContent.hero.cta.secondary}
-              </motion.button>
+              </button>
             </motion.div>
 
             {/* Social Links */}
@@ -164,7 +153,7 @@ export default function Hero() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8 }}
-              className="flex items-center gap-4"
+              className="flex items-center gap-3"
             >
               {socialLinks.map((social, index) => (
                 <a
@@ -172,10 +161,10 @@ export default function Hero() {
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-3 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 transition-all hover:scale-110"
+                  className="p-2.5 rounded-lg border border-gray-800 text-gray-500 hover:text-gray-400 hover:border-gray-700 transition-colors"
                   aria-label={social.name}
                 >
-                  <social.icon className="w-5 h-5" />
+                  <social.icon className="w-4 h-4" />
                 </a>
               ))}
             </motion.div>
@@ -187,10 +176,10 @@ export default function Hero() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.9 }}
-              className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors group"
+              className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-400 transition-colors text-xs sm:text-sm"
             >
-              <Download className="w-5 h-5" />
-              <span className="border-b border-gray-600 group-hover:border-white transition-colors">{sectionContent.hero.downloadResume}</span>
+              <Download className="w-4 h-4" />
+              <span className="border-b border-gray-700 hover:border-gray-600 transition-colors">{sectionContent.hero.downloadResume}</span>
             </motion.a>
           </motion.div>
 
