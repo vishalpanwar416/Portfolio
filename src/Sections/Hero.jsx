@@ -15,15 +15,15 @@ export default function Hero() {
           alt={personalInfo.name.full}
           className="w-full h-full object-cover"
         />
-        {/* Dark gradient overlays for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-purple-900/70 to-black/80" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/50" />
+        {/* Dark gradient overlays for text readability - Monochromatic */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black/85 via-gray-900/75 to-black/85" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60" />
       </div>
 
-      {/* Animated gradient background orbs */}
+      {/* Animated gradient background orbs - Monochromatic */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
-          className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-3xl"
+          className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-r from-gray-500/15 to-gray-600/15 rounded-full blur-3xl"
           animate={{
             scale: [1, 1.2, 1],
             x: [0, 50, 0],
@@ -36,7 +36,7 @@ export default function Hero() {
           }}
         />
         <motion.div
-          className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full blur-3xl"
+          className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-gray-400/15 to-gray-500/15 rounded-full blur-3xl"
           animate={{
             scale: [1, 1.3, 1],
             x: [0, -50, 0],
@@ -50,7 +50,7 @@ export default function Hero() {
           }}
         />
         <motion.div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-violet-500/15 to-fuchsia-500/15 rounded-full blur-3xl"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-gray-600/10 to-gray-700/10 rounded-full blur-3xl"
           animate={{
             scale: [1, 1.15, 1],
             rotate: [0, 90, 0],
@@ -102,12 +102,12 @@ export default function Hero() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="text-sm sm:text-base font-medium text-cyan-400 uppercase tracking-widest"
+              className="text-sm sm:text-base font-medium text-gray-400 uppercase tracking-widest"
             >
               {sectionContent.hero.greeting}
             </motion.p>
 
-            {/* Name with gradient */}
+            {/* Name with gradient - Monochromatic */}
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -117,10 +117,10 @@ export default function Hero() {
                 fontFamily: "'Playfair Display', serif",
               }}
             >
-              <span className="block bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-r from-white via-gray-200 to-gray-300 bg-clip-text text-transparent">
                 {personalInfo.name.first}
               </span>
-              <span className="block bg-gradient-to-r from-cyan-200 via-pink-200 to-white bg-clip-text text-transparent mt-2">
+              <span className="block bg-gradient-to-r from-gray-300 via-gray-200 to-white bg-clip-text text-transparent mt-2">
                 {personalInfo.name.last}
               </span>
             </motion.h1>
@@ -166,7 +166,7 @@ export default function Hero() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 transition-transform group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 transition-transform group-hover:scale-110" />
               <span className="relative z-10 flex items-center gap-2">
                 {sectionContent.hero.cta.primary}
                 <ArrowDown className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
@@ -196,7 +196,7 @@ export default function Hero() {
                 href={social.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 rounded-xl backdrop-blur-2xl bg-black/30 border border-white/30 text-gray-200 hover:text-white hover:bg-black/40 hover:border-purple-500/70 transition-all"
+                className="p-3 rounded-xl backdrop-blur-2xl bg-black/30 border border-white/30 text-gray-200 hover:text-white hover:bg-black/40 hover:border-white/60 transition-all"
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 whileTap={{ scale: 0.9 }}
                 aria-label={social.name}
