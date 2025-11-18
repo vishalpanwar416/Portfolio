@@ -7,11 +7,23 @@ import { personalInfo, socialLinks, externalLinks, sectionContent, typingAnimati
 
 export default function Hero() {
   return (
-    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900">
+    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Background image with overlay */}
+      <div className="absolute inset-0">
+        <img
+          src={profilePhoto}
+          alt={personalInfo.name.full}
+          className="w-full h-full object-cover"
+        />
+        {/* Dark gradient overlays for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-purple-900/70 to-black/80" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/50" />
+      </div>
+
       {/* Animated gradient background orbs */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
-          className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-full blur-3xl"
+          className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-3xl"
           animate={{
             scale: [1, 1.2, 1],
             x: [0, 50, 0],
@@ -24,7 +36,7 @@ export default function Hero() {
           }}
         />
         <motion.div
-          className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-cyan-500/30 to-blue-500/30 rounded-full blur-3xl"
+          className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full blur-3xl"
           animate={{
             scale: [1, 1.3, 1],
             x: [0, -50, 0],
@@ -38,7 +50,7 @@ export default function Hero() {
           }}
         />
         <motion.div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 rounded-full blur-3xl"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-violet-500/15 to-fuchsia-500/15 rounded-full blur-3xl"
           animate={{
             scale: [1, 1.15, 1],
             rotate: [0, 90, 0],
@@ -78,65 +90,6 @@ export default function Hero() {
       {/* Main content */}
       <div className="relative z-10 container mx-auto px-6 py-20">
         <div className="flex flex-col items-center justify-center text-center space-y-8">
-          {/* Profile photo with glassmorphism */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, type: "spring" }}
-            className="relative group"
-          >
-            {/* Animated gradient ring */}
-            <motion.div
-              className="absolute -inset-4 bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 rounded-full blur-xl opacity-75"
-              animate={{
-                rotate: [0, 360],
-                scale: [1, 1.1, 1],
-              }}
-              transition={{
-                duration: 8,
-                repeat: Infinity,
-                ease: "linear",
-              }}
-            />
-
-            {/* Glass container for photo */}
-            <div className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 rounded-full overflow-hidden border-2 border-white/20 backdrop-blur-xl bg-white/10 shadow-2xl">
-              <img
-                src={profilePhoto}
-                alt={personalInfo.name.full}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-purple-900/40 via-transparent to-transparent" />
-            </div>
-
-            {/* Floating decorative elements */}
-            <motion.div
-              className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full blur-sm"
-              animate={{
-                y: [0, -10, 0],
-                scale: [1, 1.2, 1],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-            <motion.div
-              className="absolute -bottom-2 -left-2 w-6 h-6 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full blur-sm"
-              animate={{
-                y: [0, 10, 0],
-                scale: [1, 1.3, 1],
-              }}
-              transition={{
-                duration: 2.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.5,
-              }}
-            />
-          </motion.div>
-
           {/* Text content with glassmorphism */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -192,9 +145,9 @@ export default function Hero() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 1 }}
-              className="mt-6 p-6 rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10 shadow-2xl max-w-2xl mx-auto"
+              className="mt-6 p-6 sm:p-8 rounded-2xl backdrop-blur-2xl bg-black/40 border border-white/20 shadow-2xl max-w-2xl mx-auto"
             >
-              <p className="text-base sm:text-lg text-gray-300 leading-relaxed">
+              <p className="text-base sm:text-lg text-gray-200 leading-relaxed">
                 {sectionContent.hero.description}
               </p>
             </motion.div>
@@ -222,7 +175,7 @@ export default function Hero() {
 
             <motion.button
               onClick={() => smoothScrollTo('contact')}
-              className="px-8 py-4 rounded-xl font-semibold text-white backdrop-blur-xl bg-white/10 border border-white/20 hover:bg-white/20 transition-all"
+              className="px-8 py-4 rounded-xl font-semibold text-white backdrop-blur-2xl bg-black/30 border border-white/30 hover:bg-black/40 hover:border-white/50 transition-all"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -243,7 +196,7 @@ export default function Hero() {
                 href={social.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 rounded-xl backdrop-blur-xl bg-white/10 border border-white/20 text-gray-300 hover:text-white hover:bg-white/20 hover:border-purple-500/50 transition-all"
+                className="p-3 rounded-xl backdrop-blur-2xl bg-black/30 border border-white/30 text-gray-200 hover:text-white hover:bg-black/40 hover:border-purple-500/70 transition-all"
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 whileTap={{ scale: 0.9 }}
                 aria-label={social.name}
@@ -260,7 +213,7 @@ export default function Hero() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.6 }}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl backdrop-blur-xl bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:bg-white/10 transition-all group"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl backdrop-blur-2xl bg-black/30 border border-white/30 text-gray-200 hover:text-white hover:bg-black/40 hover:border-white/50 transition-all group"
             whileHover={{ scale: 1.05 }}
           >
             <Download className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
