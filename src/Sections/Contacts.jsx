@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { User, MessageSquare, Mail } from 'lucide-react'
+import SectionHeader from '../components/SectionHeader'
 import { contactLinks } from '../data/social'
+import { sectionContent } from '../data'
 import QRCodeGenerator from '../components/QRCodeGenerator'
 import AvailabilityCalendar from '../components/AvailabilityCalendar'
 import InteractiveMap from '../components/InteractiveMap'
@@ -58,29 +60,15 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" className="py-24 pb-16 bg-[#0a0a0a] relative overflow-hidden border-t border-gray-800/20">
-      {/* Static background effects */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/3 right-0 w-96 h-96 bg-gradient-to-bl from-gray-800/10 to-transparent rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/3 left-0 w-96 h-96 bg-gradient-to-tr from-gray-700/10 to-transparent rounded-full blur-3xl"></div>
-      </div>
+    <section id="contact" className="section-shell bg-canvas pb-20">
+      <div className="absolute inset-0 bg-hero-glow opacity-40 pointer-events-none" />
 
-      <div className="container mx-auto px-6 relative z-10">
-        {/* Section Header */}
-        <motion.div
-          className="text-center mb-12 md:mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-gray-300 to-gray-500 bg-clip-text text-transparent px-4">
-            Let's Connect
-          </h2>
-          <div className="w-16 md:w-24 h-1 bg-gradient-to-r from-gray-600 via-gray-400 to-gray-600 mx-auto rounded-full"></div>
-          <p className="text-gray-400 mt-4 md:mt-6 text-sm sm:text-base md:text-lg max-w-2xl mx-auto px-4">
-            I'm always excited to discuss new opportunities, innovative projects, and creative collaborations.
-          </p>
-        </motion.div>
+      <div className="container mx-auto px-6 relative z-10 max-w-6xl">
+        <SectionHeader
+          label="Contact"
+          title={sectionContent.contact.title}
+          subtitle={sectionContent.contact.subtitle}
+        />
 
         <div className="grid lg:grid-cols-2 gap-12 items-start">
           {/* Contact Information */}

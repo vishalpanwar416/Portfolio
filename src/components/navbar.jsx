@@ -1,284 +1,112 @@
 import { useState, useEffect } from 'react'
-import { Menu, X, ChevronRight } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { smoothScrollTo } from '../lib/utils.js'
-import logo from '../assets/logo.png'
-import { navItems, sectionContent } from '../data'
+import { navItems, sectionContent, personalInfo } from '../data'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [lastScrollY, setLastScrollY] = useState(0)
-  const [isVisible, setIsVisible] = useState(true)
 
   useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY
-      
-      // Check if scrolled for background effect
-      setScrolled(currentScrollY > 50)
+    const onScroll = () => setScrolled(window.scrollY > 24)
+    window.addEventListener('scroll', onScroll)
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
-      // Close mobile menu on scroll
-      if (isOpen) {
-        setIsOpen(false)
-      }
-
-      // Hide/show navbar on mobile based on scroll direction
-      if (window.innerWidth <= 768) { // Mobile only
-        if (currentScrollY > lastScrollY && currentScrollY > 100) {
-          // Scrolling down - hide navbar
-          setIsVisible(false)
-        } else if (currentScrollY < lastScrollY) {
-          // Scrolling up - show navbar
-          setIsVisible(true)
-        }
-      } else {
-        // Desktop - always show navbar
-        setIsVisible(true)
-      }
-      
-      setLastScrollY(currentScrollY)
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [lastScrollY, isOpen])
-
-  // Lock body scroll when mobile menu is open and close on Escape
   useEffect(() => {
-    const onKeyDown = (e) => {
-      if (e.key === 'Escape') setIsOpen(false)
-    }
-
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-      document.addEventListener('keydown', onKeyDown)
-    } else {
-      document.body.style.overflow = ''
-      document.removeEventListener('keydown', onKeyDown)
-    }
-
-    return () => {
-      document.body.style.overflow = ''
-      document.removeEventListener('keydown', onKeyDown)
-    }
+    document.body.style.overflow = isOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
   }, [isOpen])
 
-  const handleNavClick = (sectionId) => {
-    smoothScrollTo(sectionId)
+  const navigate = (id) => {
+    smoothScrollTo(id)
     setIsOpen(false)
   }
 
   return (
-    <motion.nav
-      className={`fixed w-full z-50 transition-all duration-700 ${scrolled ? 'bg-[#0a0a0a]/95 backdrop-blur-xl py-0 shadow-2xl border-b border-white/5' : 'bg-transparent py-0'}`}
-      initial={{ y: -100, opacity: 0 }}
-      animate={{
-        y: isVisible ? 0 : -100,
-        opacity: isVisible ? 1 : 0
-      }}
-      transition={{ duration: 0.3 }}
+    <motion.header
+      initial={{ y: -80, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
+        scrolled ? 'bg-canvas/90 backdrop-blur-xl border-b border-white/[0.06] shadow-lg shadow-black/20' : 'bg-transparent'
+      }`}
     >
-      {/* Background gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/5 via-[#1a1a1a]/5 to-[#0a0a0a]/5"></div>
-      
-      <div className="container mx-auto relative">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <motion.div 
-            className="flex items-center"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
+      <div className="container mx-auto px-6">
+        <div className="flex items-center justify-between h-16 md:h-[4.5rem]">
+          <button
+            type="button"
+            onClick={() => navigate('hero')}
+            className="font-display font-bold text-lg text-white hover:text-accent transition-colors"
           >
-            <img 
-              src={logo} 
-              alt="Vishal Panwar — Full-Stack Web Developer" 
-              className="h-20 w-auto mix-blend-normal filter brightness-100 drop-shadow-lg"
-            />
-          </motion.div>
+            {personalInfo.name.first}
+            <span className="text-accent">.</span>
+          </button>
 
-          {/* Enhanced Desktop Navigation */}
-          <div className="hidden md:flex space-x-1">
-            {navItems.map((item, index) => (
-              <motion.a
+          <nav className="hidden md:flex items-center gap-1">
+            {navItems.map((item) => (
+              <button
                 key={item.name}
-                href={item.href}
-                onClick={() => handleNavClick(item.href.slice(1))}
-                className="relative px-6 py-3 rounded-xl font-medium transition-all duration-300 group overflow-hidden text-gray-300 hover:text-white"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                whileHover={{ y: -2 }}
+                type="button"
+                onClick={() => navigate(item.href.slice(1))}
+                className="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white rounded-lg hover:bg-white/[0.04] transition-all"
               >
-                {/* Background hover effect */}
-                <div className="absolute inset-0 bg-white/5 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
-
-                {/* Text */}
-                <span className="relative z-10">{item.name}</span>
-
-                {/* Underline animation */}
-                <motion.div
-                  className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-gray-500 via-white to-gray-500 rounded-full"
-                  initial={{ width: 0, x: "-50%" }}
-                  whileHover={{ width: "80%", x: "-50%" }}
-                  transition={{ duration: 0.3 }}
-                />
-              </motion.a>
+                {item.name}
+              </button>
             ))}
-            
-            {/* Enhanced Contact Button */}
-            <motion.a
-              href="#contact"
-              onClick={() => handleNavClick('contact')}
-              className="relative px-8 py-3 rounded-xl font-semibold overflow-hidden group ml-4 bg-white text-black border border-white/20 hover:bg-gray-200 transition-all duration-300"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-              whileHover={{ y: -2, scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <button
+              type="button"
+              onClick={() => navigate('contact')}
+              className="ml-2 btn-primary text-sm py-2.5 px-5"
             >
               {sectionContent.navigation.contact}
-              {/* Shine effect */}
-              <div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-            </motion.a>
+            </button>
+          </nav>
 
-          </div>
-
-          {/* Enhanced Mobile Toggle */}
-          <motion.button 
-            className={`md:hidden p-3 rounded-2xl transition-all duration-300 relative overflow-hidden ${
-              scrolled 
-                ? 'text-white hover:bg-white/10' 
-                : 'text-white hover:bg-white/10'
-            }`}
+          <button
+            type="button"
+            className="md:hidden p-2 text-slate-300 hover:text-white"
             onClick={() => setIsOpen(!isOpen)}
-            aria-label="Toggle mobile menu"
-            aria-expanded={isOpen}
-            aria-controls="mobile-menu"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+            aria-label="Toggle menu"
           >
-            {/* Background effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl opacity-0 hover:opacity-100 transition-all duration-300"></div>
-            
-            {/* Icon */}
-            <AnimatePresence mode="wait">
-              {isOpen ? (
-                <motion.div
-                  key="close"
-                  initial={{ rotate: -90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: 90, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <X size={24} />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="menu"
-                  initial={{ rotate: 90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: -90, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <Menu size={24} />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.button>
+            {isOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
         </div>
-
-        {/* Mobile overlay to close on outside touch and keep blurred bg */}
-        <AnimatePresence>
-          {isOpen && (
-            <div>
-              {/* Full-screen overlay behind the menu */}
-              <motion.div
-                className="fixed inset-0 md:hidden z-40 bg-black/30 backdrop-blur-md"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => setIsOpen(false)}
-              />
-
-              {/* Enhanced Mobile Menu */}
-              <motion.div
-                id="mobile-menu"
-                role="dialog"
-                aria-modal="true"
-                className="md:hidden absolute top-full left-0 w-full z-50 backdrop-blur-xl border-t border-white/20 overflow-hidden rounded-b-2xl shadow-2xl bg-white/5"
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              >
-                <div className="container mx-auto px-4 py-6 space-y-2">
-                  {navItems.map((item, index) => (
-                    <motion.a
-                      key={item.name}
-                      href={item.href}
-                      onClick={() => handleNavClick(item.href.slice(1))}
-                      className="block p-4 rounded-2xl text-white hover:text-blue-300 font-medium transition-all duration-300 relative overflow-hidden group"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
-                      whileHover={{ x: 5 }}
-                    >
-                      {/* Background hover effect - Monochromatic */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-gray-200/5 to-gray-300/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
-                      {/* Text */}
-                      <div className="relative z-10 flex items-center justify-between">
-                        <span>{item.name}</span>
-                        <ChevronRight size={18} className="opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
-                      </div>
-                      {/* Left border indicator - Monochromatic */}
-                      <motion.div
-                        className="absolute left-0 top-1/2 w-1 h-0 bg-gradient-to-b from-gray-800 to-black rounded-r-full"
-                        initial={{ height: 0, y: "-50%" }}
-                        whileHover={{ height: "80%", y: "-50%" }}
-                        transition={{ duration: 0.3 }}
-                      />
-                    </motion.a>
-                  ))}
-                  
-                  {/* Mobile Enhanced Contact Button */}
-                  <motion.div
-                    className="pt-4"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.4 }}
-                  >
-                    <motion.a
-                      href="#contact"
-                      onClick={() => handleNavClick('contact')}
-                      className="block w-full relative px-6 py-4 rounded-2xl font-semibold overflow-hidden group text-center"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      {/* Button background - Monochromatic */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-black via-gray-900 to-black rounded-2xl" />
-                      <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-black to-gray-900 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300" />
-
-                      {/* Animated border - Monochromatic */}
-                      <div className="absolute inset-0 rounded-2xl p-[2px] bg-gradient-to-r from-gray-700 via-gray-800 to-gray-700">
-                        <div className="h-full w-full rounded-2xl bg-white/0" />
-                      </div>
-
-                      {/* Text */}
-                      <span className="relative z-10 text-white">Contact</span>
-
-                      {/* Shine effect */}
-                      <div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                    </motion.a>
-                  </motion.div>
-                </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
       </div>
-    </motion.nav>
+
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm md:hidden z-40"
+              onClick={() => setIsOpen(false)}
+            />
+            <motion.nav
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              className="md:hidden relative z-50 border-t border-white/[0.06] bg-canvas/95 backdrop-blur-xl"
+            >
+              <div className="container mx-auto px-6 py-4 space-y-1">
+                {[...navItems, { name: sectionContent.navigation.contact, href: '#contact' }].map((item) => (
+                  <button
+                    key={item.name}
+                    type="button"
+                    onClick={() => navigate(item.href.slice(1))}
+                    className="block w-full text-left px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-white/[0.04]"
+                  >
+                    {item.name}
+                  </button>
+                ))}
+              </div>
+            </motion.nav>
+          </>
+        )}
+      </AnimatePresence>
+    </motion.header>
   )
 }

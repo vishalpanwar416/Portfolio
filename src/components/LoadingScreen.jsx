@@ -3,74 +3,41 @@ import { useEffect, useState } from 'react'
 
 export default function LoadingScreen({ onComplete }) {
   const [progress, setProgress] = useState(0)
-  const [, setIsExiting] = useState(false)
 
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(interval)
-          setIsExiting(true)
-          setTimeout(() => {
-            onComplete()
-          }, 500)
+          setTimeout(onComplete, 400)
           return 100
         }
-        return prev + 2
+        return prev + 4
       })
-    }, 30)
-
+    }, 25)
     return () => clearInterval(interval)
   }, [onComplete])
 
   return (
     <motion.div
-      className="fixed inset-0 z-[9999] bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a] flex items-center justify-center"
+      className="fixed inset-0 z-[9999] bg-canvas flex items-center justify-center"
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.4 }}
     >
-      {/* Grid pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:100px_100px]"></div>
-      
-      {/* Noise texture */}
-      <div className="absolute inset-0 opacity-[0.03] noise-texture"></div>
-
-      <div className="relative z-10 text-center">
-        <motion.h1
-          className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent mb-8 whitespace-nowrap"
-          style={{ fontFamily: "'Space Grotesk', sans-serif", letterSpacing: '-0.02em', fontWeight: 700 }}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          Vishal Panwar
-        </motion.h1>
-        
-        <motion.div
-          className="w-64 h-1 bg-gray-800 rounded-full overflow-hidden mx-auto"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-        >
+      <div className="absolute inset-0 bg-grid-pattern bg-[size:64px_64px] opacity-50" />
+      <div className="relative text-center">
+        <p className="text-xs uppercase tracking-[0.25em] text-accent mb-4">Portfolio</p>
+        <h1 className="font-display text-4xl md:text-5xl font-bold text-white">Vishal Panwar</h1>
+        <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden mx-auto mt-8">
           <motion.div
-            className="h-full bg-gradient-to-r from-gray-400 via-gray-300 to-gray-400"
-            initial={{ width: 0 }}
+            className="h-full bg-accent rounded-full"
             animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
           />
-        </motion.div>
-        
-        <motion.p
-          className="text-gray-400 mt-4 text-sm"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-        >
-          {progress}%
-        </motion.p>
+        </div>
+        <p className="text-slate-500 text-sm mt-3 tabular-nums">{progress}%</p>
       </div>
     </motion.div>
   )
 }
-

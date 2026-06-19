@@ -20,7 +20,7 @@ export default function ScrollProgress() {
 
   return (
     <motion.div
-      className="fixed top-0 left-0 h-0.5 bg-gradient-to-r from-gray-400 via-gray-300 to-gray-400 z-[9999]"
+      className="scroll-progress"
       style={{ width: `${scrollProgress}%` }}
       initial={{ width: 0 }}
     />
