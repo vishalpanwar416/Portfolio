@@ -1,28 +1,43 @@
 import { ExternalLink } from 'lucide-react'
+import logo from '../assets/logo.png'
+import VisitorCounter from '../components/VisitorCounter'
 import { socialLinks, footerLinks, sectionContent, externalLinks } from '../data'
 
 export default function Footer() {
+
   return (
-    <footer className="border-t border-white/[0.06] bg-surface py-12">
-      <div className="container mx-auto px-6 max-w-6xl">
-        <div className="grid md:grid-cols-3 gap-10 mb-10">
-          <div>
-            <p className="font-display text-xl font-bold text-white">
-              Vishal<span className="text-accent">.</span>
-            </p>
-            <p className="mt-3 text-sm text-slate-400 leading-relaxed max-w-xs">
+    <footer className="bg-[#0a0a0a] border-t border-gray-800/20 text-gray-300 py-12 relative overflow-hidden">
+      {/* Static background effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-gray-800/5 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-tl from-gray-700/5 to-transparent rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="container mx-auto px-6 relative z-10">
+        <div className="grid md:grid-cols-3 gap-10 items-start mb-10">
+          {/* Brand */}
+          <div className="text-center md:text-left">
+            <div className="flex items-center justify-center md:justify-start mb-4">
+              <img
+                src={logo}
+                alt="Vishal Panwar Logo"
+                className="h-12 w-auto"
+              />
+            </div>
+            <p className="text-gray-400 text-sm leading-relaxed">
               {sectionContent.footer.tagline}
             </p>
           </div>
 
-          <div className="md:text-center">
-            <h4 className="text-sm font-semibold text-white mb-3">{sectionContent.footer.quickLinks}</h4>
-            <div className="flex flex-wrap md:justify-center gap-x-4 gap-y-2">
+          {/* Quick Links */}
+          <div className="text-center">
+            <h4 className="text-lg font-semibold mb-4 text-gray-200">{sectionContent.footer.quickLinks}</h4>
+            <div className="flex flex-wrap justify-center gap-4">
               {footerLinks.map((link) => (
                 <a
                   key={link}
                   href={`#${link.toLowerCase()}`}
-                  className="text-sm text-slate-500 hover:text-accent transition-colors"
+                  className="text-gray-400 hover:text-gray-200 transition-colors text-sm"
                 >
                   {link}
                 </a>
@@ -30,33 +45,56 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="md:text-right">
-            <h4 className="text-sm font-semibold text-white mb-3">{sectionContent.footer.connectWithMe}</h4>
-            <div className="flex md:justify-end gap-2">
-              {socialLinks.slice(0, 5).map((social) => (
+          {/* Social Links */}
+          <div className="text-center md:text-right">
+            <h4 className="text-lg font-semibold mb-4 text-gray-200">{sectionContent.footer.connectWithMe}</h4>
+            <div className="flex justify-center md:justify-end flex-wrap gap-3">
+              {socialLinks.map((social) => (
                 <a
                   key={social.name}
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="p-3 rounded-xl bg-white/5 border border-gray-800 text-gray-400 hover:text-gray-200 hover:bg-white/10 hover:border-gray-700 transition-all"
                   aria-label={social.name}
-                  className="p-2.5 rounded-lg border border-white/10 text-slate-400 hover:text-accent hover:border-accent/30 transition-all"
                 >
-                  <social.icon size={16} />
+                  <social.icon size={18} />
                 </a>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="pt-8 border-t border-white/[0.06] flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-slate-500">
-          <p>{sectionContent.footer.copyright}</p>
-          <div className="flex gap-4">
-            <a href={externalLinks.leetcode} target="_blank" rel="noopener noreferrer" className="hover:text-accent inline-flex items-center gap-1">
-              LeetCode <ExternalLink size={12} />
+        {/* Divider */}
+        <div className="border-t border-gray-800/20 my-8"></div>
+
+        {/* Bottom Section */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex flex-col md:flex-row items-center gap-4">
+            <p className="text-gray-500 text-sm text-center md:text-left">
+              {sectionContent.footer.copyright}
+            </p>
+            <VisitorCounter />
+          </div>
+
+          <div className="flex items-center gap-6 text-sm text-gray-500">
+            <a
+              href={externalLinks.leetcode}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 hover:text-gray-300 transition-colors"
+            >
+              <span>{sectionContent.footer.links.leetcode}</span>
+              <ExternalLink size={14} />
             </a>
-            <a href={externalLinks.github} target="_blank" rel="noopener noreferrer" className="hover:text-accent inline-flex items-center gap-1">
-              GitHub <ExternalLink size={12} />
+            <a
+              href={externalLinks.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 hover:text-gray-300 transition-colors"
+            >
+              <span>{sectionContent.footer.links.sourceCode}</span>
+              <ExternalLink size={14} />
             </a>
           </div>
         </div>
