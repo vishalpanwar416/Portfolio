@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Download, FileText, FileCode, BookOpen } from 'lucide-react'
+import { Download, FileText, BookOpen } from 'lucide-react'
 
 export default function DownloadableResources() {
   const resources = [

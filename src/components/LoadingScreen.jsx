@@ -1,9 +1,9 @@
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 
 export default function LoadingScreen({ onComplete }) {
   const [progress, setProgress] = useState(0)
-  const [isExiting, setIsExiting] = useState(false)
+  const [, setIsExiting] = useState(false)
 
   useEffect(() => {
     const interval = setInterval(() => {
