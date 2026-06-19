@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import Navbar from './components/navbar.jsx'
 import Hero from './Sections/Hero'
@@ -15,15 +15,6 @@ import BackToTop from './components/BackToTop'
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    // Simulate loading time
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 2000)
-
-    return () => clearTimeout(timer)
-  }, [])
 
   return (
     <>

@@ -1,244 +1,193 @@
 import { Download, ArrowDown } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useMemo } from 'react'
 import { smoothScrollTo } from '../lib/utils.js'
 import profilePhoto from '../assets/vishal-panwar-profile.jpeg'
 import TypingAnimation from '../components/TypingAnimation'
 import { personalInfo, socialLinks, externalLinks, sectionContent, typingAnimationTexts } from '../data'
 
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 24 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] },
+})
+
 export default function Hero() {
+  const particles = useMemo(
+    () =>
+      Array.from({ length: 14 }, (_, i) => ({
+        id: i,
+        left: `${8 + ((i * 17) % 84)}%`,
+        top: `${10 + ((i * 23) % 80)}%`,
+        duration: 3.5 + (i % 5) * 0.4,
+        delay: (i % 7) * 0.35,
+      })),
+    [],
+  )
+
   return (
-    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background image with overlay */}
+    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 md:pt-24">
+      {/* Background */}
       <div className="absolute inset-0">
         <img
           src={profilePhoto}
           alt={personalInfo.name.full}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover object-[center_20%] sm:object-center scale-105"
+          fetchPriority="high"
         />
-        {/* Dark gradient overlays for text readability - Monochromatic */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black/85 via-gray-900/75 to-black/85" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60" />
+        <div className="absolute inset-0 bg-gradient-to-br from-black/90 via-gray-950/80 to-black/90" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-black/70" />
       </div>
 
-      {/* Animated gradient background orbs - Monochromatic */}
-      <div className="absolute inset-0 overflow-hidden">
+      {/* Ambient orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-r from-gray-500/15 to-gray-600/15 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            x: [0, 50, 0],
-            y: [0, 30, 0],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
+          className="absolute -top-20 left-0 w-[28rem] h-[28rem] bg-gradient-to-r from-gray-500/10 to-gray-600/10 rounded-full blur-3xl"
+          animate={{ scale: [1, 1.15, 1], x: [0, 30, 0] }}
+          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
-          className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-gray-400/15 to-gray-500/15 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.3, 1],
-            x: [0, -50, 0],
-            y: [0, -30, 0],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1,
-          }}
-        />
-        <motion.div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-gray-600/10 to-gray-700/10 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.15, 1],
-            rotate: [0, 90, 0],
-          }}
-          transition={{
-            duration: 12,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
+          className="absolute bottom-0 right-0 w-[24rem] h-[24rem] bg-gradient-to-r from-gray-400/10 to-gray-500/10 rounded-full blur-3xl"
+          animate={{ scale: [1, 1.2, 1], x: [0, -24, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
         />
       </div>
 
-      {/* Floating particles */}
+      {/* Particles — stable positions, no re-render jitter */}
       <div className="absolute inset-0 pointer-events-none">
-        {[...Array(20)].map((_, i) => (
+        {particles.map((p) => (
           <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-white/40 rounded-full"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -100, 0],
-              opacity: [0, 1, 0],
-            }}
+            key={p.id}
+            className="absolute w-1 h-1 bg-white/30 rounded-full"
+            style={{ left: p.left, top: p.top }}
+            animate={{ y: [0, -80, 0], opacity: [0, 0.8, 0] }}
             transition={{
-              duration: 3 + Math.random() * 2,
+              duration: p.duration,
               repeat: Infinity,
-              delay: Math.random() * 5,
-              ease: "easeInOut",
+              delay: p.delay,
+              ease: 'easeInOut',
             }}
           />
         ))}
       </div>
 
-      {/* Main content */}
-      <div className="relative z-10 container mx-auto px-6 py-20">
-        <div className="flex flex-col items-center justify-center text-center space-y-8">
-          {/* Text content with glassmorphism */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.8 }}
-            className="max-w-4xl mx-auto space-y-6"
+      {/* Content */}
+      <div className="relative z-10 container mx-auto px-5 sm:px-6 py-12 md:py-16">
+        <div className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-6 md:space-y-8">
+          <motion.p {...fadeUp(0.15)} className="text-xs sm:text-sm font-medium text-gray-400 uppercase tracking-[0.3em]">
+            {sectionContent.hero.greeting}
+          </motion.p>
+
+          <motion.h1
+            {...fadeUp(0.25)}
+            className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-[1.05]"
+            style={{ fontFamily: "'Playfair Display', serif" }}
           >
-            {/* Greeting */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="text-sm sm:text-base font-medium text-gray-400 uppercase tracking-widest"
-            >
-              {sectionContent.hero.greeting}
-            </motion.p>
+            <span className="block bg-gradient-to-r from-white via-gray-200 to-gray-300 bg-clip-text text-transparent">
+              {personalInfo.name.first}
+            </span>
+            <span className="block bg-gradient-to-r from-gray-300 via-gray-100 to-white bg-clip-text text-transparent mt-1 sm:mt-2">
+              {personalInfo.name.last}
+            </span>
+          </motion.h1>
 
-            {/* Name with gradient - Monochromatic */}
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold"
-              style={{
-                fontFamily: "'Playfair Display', serif",
-              }}
-            >
-              <span className="block bg-gradient-to-r from-white via-gray-200 to-gray-300 bg-clip-text text-transparent">
-                {personalInfo.name.first}
-              </span>
-              <span className="block bg-gradient-to-r from-gray-300 via-gray-200 to-white bg-clip-text text-transparent mt-2">
-                {personalInfo.name.last}
-              </span>
-            </motion.h1>
+          <motion.p
+            {...fadeUp(0.35)}
+            className="text-sm sm:text-base text-gray-400 max-w-xl leading-relaxed"
+          >
+            {personalInfo.title}
+          </motion.p>
 
-            {/* Typing animation */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 }}
-              className="text-xl sm:text-2xl md:text-3xl text-gray-300 font-light"
-            >
-              I build <TypingAnimation
-                texts={typingAnimationTexts}
-                typingSpeed={80}
-                deletingSpeed={40}
-                delayBetween={2000}
-              />
-            </motion.div>
-
-            {/* Description in glass card */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 1 }}
-              className="mt-6 p-6 sm:p-8 rounded-2xl backdrop-blur-2xl bg-black/40 border border-white/20 shadow-2xl max-w-2xl mx-auto"
-            >
-              <p className="text-base sm:text-lg text-gray-200 leading-relaxed">
-                {sectionContent.hero.description}
-              </p>
-            </motion.div>
+          <motion.div
+            {...fadeUp(0.45)}
+            className="text-lg sm:text-xl md:text-2xl text-gray-300 font-light min-h-[2.5rem] sm:min-h-[3rem]"
+          >
+            I build{' '}
+            <TypingAnimation
+              texts={typingAnimationTexts}
+              typingSpeed={70}
+              deletingSpeed={35}
+              delayBetween={2200}
+            />
           </motion.div>
 
-          {/* CTA Buttons with glassmorphism */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2 }}
-            className="flex flex-wrap gap-4 justify-center items-center"
+            {...fadeUp(0.55)}
+            className="w-full max-w-2xl p-5 sm:p-7 rounded-2xl backdrop-blur-xl bg-black/45 border border-white/15 shadow-2xl"
+          >
+            <p className="text-sm sm:text-base md:text-lg text-gray-200 leading-relaxed">
+              {sectionContent.hero.description}
+            </p>
+          </motion.div>
+
+          <motion.div
+            {...fadeUp(0.65)}
+            className="flex flex-wrap gap-3 sm:gap-4 justify-center items-center"
           >
             <motion.button
               onClick={() => smoothScrollTo('portfolio')}
-              className="group relative px-8 py-4 rounded-xl font-semibold text-white overflow-hidden"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="group relative px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl font-semibold text-white overflow-hidden"
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.97 }}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 transition-transform group-hover:scale-110" />
-              <span className="relative z-10 flex items-center gap-2">
+              <div className="absolute inset-0 bg-gradient-to-r from-gray-700 via-gray-500 to-gray-700 transition-transform group-hover:scale-105" />
+              <span className="relative z-10 flex items-center gap-2 text-sm sm:text-base">
                 {sectionContent.hero.cta.primary}
-                <ArrowDown className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
+                <ArrowDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
               </span>
             </motion.button>
 
             <motion.button
               onClick={() => smoothScrollTo('contact')}
-              className="px-8 py-4 rounded-xl font-semibold text-white backdrop-blur-2xl bg-black/30 border border-white/30 hover:bg-black/40 hover:border-white/50 transition-all"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl font-semibold text-white text-sm sm:text-base backdrop-blur-xl bg-black/35 border border-white/25 hover:bg-black/50 hover:border-white/40 transition-all"
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.97 }}
             >
               {sectionContent.hero.cta.secondary}
             </motion.button>
           </motion.div>
 
-          {/* Social Links with glassmorphism */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.4 }}
-            className="flex items-center gap-4 pt-4"
-          >
-            {socialLinks.map((social, index) => (
+          <motion.div {...fadeUp(0.75)} className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            {socialLinks.slice(0, 5).map((social) => (
               <motion.a
-                key={index}
+                key={social.name}
                 href={social.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 rounded-xl backdrop-blur-2xl bg-black/30 border border-white/30 text-gray-200 hover:text-white hover:bg-black/40 hover:border-white/60 transition-all"
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                whileTap={{ scale: 0.9 }}
+                className="p-2.5 sm:p-3 rounded-xl backdrop-blur-xl bg-black/30 border border-white/20 text-gray-300 hover:text-white hover:border-white/50 transition-all"
+                whileHover={{ scale: 1.08, y: -2 }}
+                whileTap={{ scale: 0.95 }}
                 aria-label={social.name}
               >
-                <social.icon className="w-5 h-5" />
+                <social.icon className="w-4 h-4 sm:w-5 sm:h-5" />
               </motion.a>
             ))}
-          </motion.div>
 
-          {/* Download Resume */}
-          <motion.a
-            href={externalLinks.resume}
-            download={`${personalInfo.name.full}_Resume.pdf`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.6 }}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl backdrop-blur-2xl bg-black/30 border border-white/30 text-gray-200 hover:text-white hover:bg-black/40 hover:border-white/50 transition-all group"
-            whileHover={{ scale: 1.05 }}
-          >
-            <Download className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
-            <span>{sectionContent.hero.downloadResume}</span>
-          </motion.a>
-
-          {/* Scroll indicator */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 2 }}
-            className="absolute bottom-8 left-1/2 -translate-x-1/2"
-          >
-            <motion.div
-              animate={{ y: [0, 10, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-              className="flex flex-col items-center gap-2 text-gray-400 cursor-pointer"
-              onClick={() => smoothScrollTo('about')}
+            <motion.a
+              href={externalLinks.resume}
+              download={`${personalInfo.name.full}_Resume.pdf`}
+              className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl backdrop-blur-xl bg-black/30 border border-white/20 text-gray-300 hover:text-white hover:border-white/45 transition-all text-sm"
+              whileHover={{ scale: 1.04 }}
             >
-              <span className="text-xs uppercase tracking-wider">Scroll</span>
-              <ArrowDown className="w-5 h-5" />
-            </motion.div>
+              <Download className="w-4 h-4" />
+              <span>{sectionContent.hero.downloadResume}</span>
+            </motion.a>
           </motion.div>
         </div>
       </div>
+
+      {/* Scroll hint — anchored to section bottom */}
+      <motion.button
+        type="button"
+        {...fadeUp(0.9)}
+        onClick={() => smoothScrollTo('about')}
+        className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1.5 text-gray-500 hover:text-gray-300 transition-colors"
+        animate={{ y: [0, 6, 0] }}
+        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        <span className="text-[10px] uppercase tracking-[0.25em]">Scroll</span>
+        <ArrowDown className="w-4 h-4" />
+      </motion.button>
     </section>
   )
 }

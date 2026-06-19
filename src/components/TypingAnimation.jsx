@@ -40,9 +40,9 @@ export default function TypingAnimation({ texts, typingSpeed = 100, deletingSpee
   }, [currentText, isDeleting, isPaused, currentTextIndex, texts, typingSpeed, deletingSpeed, delayBetween])
 
   return (
-    <span className="inline-flex items-center">
+    <span className="inline-flex items-center text-gray-100">
       {currentText}
-      <span className="ml-1 w-0.5 h-6 bg-gray-400 animate-pulse"></span>
+      <span className="ml-1 w-0.5 h-5 sm:h-6 bg-gray-400 animate-pulse" />
     </span>
   )
 }
