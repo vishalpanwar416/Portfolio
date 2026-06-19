@@ -1,12 +1,16 @@
 export const sectionContent = {
   hero: {
     greeting: "Hey, I'm",
+    metaYear: "Portfolio / 2026",
     description: "Software engineer with 2+ years building cloud-native microservices, observability-first platforms, and AI automation — currently shipping Go + Next.js at Bluecopa.",
     cta: {
       primary: "View My Work",
-      secondary: "Get In Touch"
+      secondary: "Get In Touch",
+      bookMeeting: "Book a Call"
     },
-    downloadResume: "Download Resume"
+    downloadResume: "Download Resume",
+    currentlyLabel: "Currently",
+    experienceLabel: "Experience"
   },
 
   about: {
@@ -53,8 +57,8 @@ export const sectionContent = {
     subtitle: "Open to Backend, Full Stack, SRE/DevOps, and Go roles. Remote (India), US, or Gulf region.",
     contactDetails: "Contact Details",
     contactDetailsSubtitle: "Choose your preferred way to reach out",
-    sendMessage: "Send Message",
-    sendMessageSubtitle: "Fill out the form and I'll get back to you soon",
+    sendMessage: "Message on WhatsApp",
+    sendMessageSubtitle: "Compose a message — opens WhatsApp with your text pre-filled",
     labels: {
       name: "Name",
       email: "Email",

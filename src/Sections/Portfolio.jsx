@@ -1,478 +1,114 @@
 import { motion } from 'framer-motion'
-import { useState, useEffect, useRef } from 'react'
-import { ChevronLeft, ChevronRight, ExternalLink, Github } from 'lucide-react'
-import { projects } from '../data/projects'
+import { ExternalLink, Github, Lock } from 'lucide-react'
+import SectionShell from '../components/SectionShell'
+import SectionHeader from '../components/SectionHeader'
+import { projects, sectionContent } from '../data'
 
-export default function Portfolio() {
-  const [currentSlide, setCurrentSlide] = useState(0)
-  const [isMobile, setIsMobile] = useState(false)
-  const [touchStart, setTouchStart] = useState(null)
-  const [touchEnd, setTouchEnd] = useState(null)
-  const carouselRef = useRef(null)
-  const [expanded, setExpanded] = useState(false)
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
-  // Touch gesture handlers
-  const handleTouchStart = (e) => {
-    setTouchStart(e.targetTouches[0].clientX)
-  }
-
-  const handleTouchMove = (e) => {
-    setTouchEnd(e.targetTouches[0].clientX)
-  }
-
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return
-
-    const distance = touchStart - touchEnd
-    const isLeftSwipe = distance > 50
-    const isRightSwipe = distance < -50
-
-    if (isLeftSwipe) {
-      nextSlide()
-    } else if (isRightSwipe) {
-      prevSlide()
-    }
-
-    setTouchStart(null)
-    setTouchEnd(null)
-  }
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % projects.length)
-  }
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + projects.length) % projects.length)
-  }
-
-  const goToSlide = (index) => {
-    setCurrentSlide(index)
-  }
+function ProjectCard({ project, className = '', index = 0 }) {
+  const hasLive = project.live && !project.private
+  const hasGithub = Boolean(project.github)
 
   return (
-    <section id="portfolio" className="py-24 bg-[#0a0a0a] relative overflow-hidden border-t border-gray-800/20">
-      {/* Static background effects */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/3 right-0 w-96 h-96 bg-gradient-to-bl from-gray-800/10 to-transparent rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/3 left-0 w-96 h-96 bg-gradient-to-tr from-gray-700/10 to-transparent rounded-full blur-3xl"></div>
-      </div>
-
-      <div className="container mx-auto px-6 relative z-10">
-        {/* Section Header */}
-        <motion.div
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-gray-300 to-gray-500 bg-clip-text text-transparent">
-            Featured Projects
-          </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-gray-600 via-gray-400 to-gray-600 mx-auto rounded-full"></div>
-          <p className="text-gray-400 mt-6 text-lg max-w-2xl mx-auto">
-            Showcasing innovative solutions across web, mobile, and AI domains
-          </p>
-        </motion.div>
-
-        {/* Desktop Grid Layout with Show More */}
-        {!isMobile && (
-          <>
-          {expanded ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {projects.map((project, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="p-6 rounded-2xl bg-gradient-to-br from-gray-900/50 to-gray-800/30 border border-gray-800 hover:border-gray-700 transition-all group backdrop-blur-sm glass"
-                  whileHover={{ scale: 1.02, y: -5 }}
-                  style={{ transformStyle: "preserve-3d" }}
-                >
-                  {/* Project Image */}
-                  <div className="relative h-48 bg-gradient-to-br from-gray-900/80 to-black/60 rounded-xl flex items-center justify-center overflow-hidden mb-6">
-                    {project.image && (
-                      <div className="w-full h-full flex items-center justify-center p-4">
-                        <motion.img
-                          src={project.image}
-                          alt={project.title}
-                          className="max-w-full max-h-full object-contain transition-all duration-500"
-                          whileHover={{ scale: 1.1 }}
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Project Content */}
-                  <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-200 mb-3">
-                    {project.title}
-                  </h3>
-
-                  <p className="text-gray-400 mb-4 leading-relaxed">
-                    {project.description}
-                  </p>
-
-                  {/* Features */}
-                  <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
-                      <div className="w-1 h-4 bg-gray-500 rounded-full"></div>
-                      Key Features
-                    </h4>
-                    <ul className="space-y-1">
-                      {project.features.map((feature, featureIndex) => (
-                        <li
-                          key={featureIndex}
-                          className="text-sm text-gray-500 flex items-center gap-2"
-                        >
-                          <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Tech Stack */}
-                  <div className="mb-6">
-                    <h4 className="text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
-                      <div className="w-1 h-4 bg-gray-500 rounded-full"></div>
-                      Tech Stack
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {project.tech.map((tech, techIndex) => (
-                        <span
-                          key={techIndex}
-                          className="px-3 py-1 text-xs rounded-lg bg-white/5 text-gray-400 border border-gray-800 hover:border-gray-600 hover:text-gray-300 transition-all"
-                        >
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Project Links */}
-                  <div className="flex gap-3">
-                    {project.github && (
-                      <a
-                        href={project.github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 px-4 py-2.5 rounded-lg bg-white/5 text-gray-300 border border-gray-800 hover:border-gray-600 hover:bg-white/10 transition-all text-center text-sm font-medium"
-                      >
-                        <Github className="w-4 h-4 inline mr-1.5" />
-                        Code
-                      </a>
-                    )}
-                    <a
-                      href={project.live}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`px-4 py-2.5 rounded-lg text-center text-sm font-medium transition-all ${
-                        project.github
-                          ? 'flex-1 bg-white text-black hover:bg-gray-200'
-                          : 'w-full bg-white text-black hover:bg-gray-200'
-                      }`}
-                    >
-                      <ExternalLink className="w-4 h-4 inline mr-1.5" />
-                      {project.github ? 'Demo' : 'Visit'}
-                    </a>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          ) : (
-            <div className="-mx-2">
-              <div className="overflow-x-auto overflow-y-hidden no-scrollbar px-2">
-                <div className="flex gap-6 snap-x snap-mandatory pb-4">
-                  {projects.map((project, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.1 }}
-                      className="min-w-[340px] lg:min-w-[380px] xl:min-w-[420px] snap-start p-6 rounded-2xl bg-gradient-to-br from-gray-900/50 to-gray-800/30 border border-gray-800 hover:border-gray-700 transition-all"
-                    >
-                      {/* Project Image */}
-                      <div className="relative h-48 bg-gradient-to-br from-gray-900/80 to-black/60 rounded-xl flex items-center justify-center overflow-hidden mb-6">
-                        {project.image && (
-                          <div className="w-full h-full flex items-center justify-center p-4">
-                            <img
-                              src={project.image}
-                              alt={project.title}
-                              className="max-w-full max-h-full object-contain transition-all duration-500"
-                            />
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Content */}
-                      <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-200 mb-3">{project.title}</h3>
-                      <p className="text-gray-400 mb-4 leading-relaxed">{project.description}</p>
-
-                      {/* Project Links */}
-                      <div className="flex gap-3">
-                        {project.github && (
-                          <a
-                            href={project.github}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 px-4 py-2.5 rounded-lg bg-white/5 text-gray-300 border border-gray-800 hover:border-gray-600 hover:bg-white/10 transition-all text-center text-sm font-medium"
-                          >
-                            <Github className="w-4 h-4 inline mr-1.5" />
-                            Code
-                          </a>
-                        )}
-                        <a
-                          href={project.live}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`px-4 py-2.5 rounded-lg text-center text-sm font-medium transition-all ${
-                            project.github
-                              ? 'flex-1 bg-white text-black hover:bg-gray-200'
-                              : 'w-full bg-white text-black hover:bg-gray-200'
-                          }`}
-                        >
-                          <ExternalLink className="w-4 h-4 inline mr-1.5" />
-                          {project.github ? 'Demo' : 'Visit'}
-                        </a>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </div>
+    <motion.article
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.05 }}
+      className={`flex flex-col p-6 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all ${className}`}
+      whileHover={{ y: -4 }}
+    >
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div className="h-14 w-14 rounded-xl bg-black/50 border border-white/10 flex items-center justify-center p-2">
+          {project.image && (
+            <img src={project.image} alt="" className="max-h-full max-w-full object-contain" />
           )}
-          </>
-        )}
-
-        {/* Mobile: when expanded, show stacked grid of all projects */}
-        {isMobile && expanded && (
-          <div className="grid grid-cols-1 gap-6">
-            {projects.map((project, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="p-5 rounded-2xl bg-gradient-to-br from-gray-900/50 to-gray-800/30 border border-gray-800"
-              >
-                {/* Project Image - Mobile grid */}
-                <div className="relative h-40 bg-gradient-to-br from-gray-900/80 to-black/60 rounded-xl flex items-center justify-center overflow-hidden mb-4">
-                  {project.image && (
-                    <div className="w-full h-full flex items-center justify-center p-3">
-                      <img
-                        src={project.image}
-                        alt={project.title}
-                        className="max-w-full max-h-full object-contain"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* Content */}
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-200 mb-2">{project.title}</h3>
-                <p className="text-gray-400 mb-3 text-sm leading-relaxed">{project.description}</p>
-
-                {/* Project Links */}
-                <div className="flex gap-2">
-                  {project.github && (
-                    <a
-                      href={project.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 px-3 py-2 rounded-lg bg-white/5 text-gray-300 border border-gray-800 hover:border-gray-600 transition-all text-center text-sm"
-                    >
-                      <Github className="w-3 h-3 inline mr-1" />
-                      Code
-                    </a>
-                  )}
-                  <a
-                    href={project.live}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`px-3 py-2 rounded-lg text-center text-sm transition-all ${
-                      project.github
-                        ? 'flex-1 bg-white text-black'
-                        : 'w-full bg-white text-black'
-                    }`}
-                  >
-                    <ExternalLink className="w-3 h-3 inline mr-1" />
-                    {project.github ? 'Demo' : 'Visit'}
-                  </a>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        )}
-
-        {/* Mobile Carousel Layout - Touch Friendly */}
-        {isMobile && !expanded && (
-          <div className="relative">
-            <div
-              className="overflow-hidden touch-pan-y"
-              ref={carouselRef}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-            >
-              <div
-                className="flex transition-transform duration-300 ease-in-out will-change-transform"
-                style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-              >
-                {projects.map((project, index) => (
-                  <div key={index} className="w-full flex-shrink-0 px-2">
-                    <div className="p-5 rounded-2xl bg-gradient-to-br from-gray-900/50 to-gray-800/30 border border-gray-800 touch-manipulation">
-                      {/* Project Image - Mobile */}
-                      <div className="relative h-40 bg-gradient-to-br from-gray-900/80 to-black/60 rounded-xl flex items-center justify-center overflow-hidden mb-4">
-                        {project.image && (
-                          <div className="w-full h-full flex items-center justify-center p-3">
-                            <img
-                              src={project.image}
-                              alt={project.title}
-                              className="max-w-full max-h-full object-contain"
-                            />
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Project Content - Mobile */}
-                      <h3 className="text-lg sm:text-xl font-semibold text-gray-200 mb-2">
-                        {project.title}
-                      </h3>
-
-                      <p className="text-gray-400 mb-3 text-sm leading-relaxed">{project.description}</p>
-
-                      {/* Features */}
-                      <div className="mb-3">
-                        <h4 className="text-xs font-semibold text-gray-300 mb-1 flex items-center gap-1">
-                          <div className="w-1 h-3 bg-gray-500 rounded-full"></div>
-                          Key Features
-                        </h4>
-                        <ul className="space-y-1">
-                          {project.features.slice(0, 2).map((feature, featureIndex) => (
-                            <li key={featureIndex} className="text-xs text-gray-500 flex items-center gap-1">
-                              <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
-                              {feature}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      {/* Tech Stack */}
-                      <div className="mb-4">
-                        <h4 className="text-xs font-semibold text-gray-300 mb-1 flex items-center gap-1">
-                          <div className="w-1 h-3 bg-gray-500 rounded-full"></div>
-                          Tech Stack
-                        </h4>
-                        <div className="flex flex-wrap gap-1">
-                          {project.tech.slice(0, 3).map((tech, techIndex) => (
-                            <span
-                              key={techIndex}
-                              className="px-2 py-0.5 text-xs rounded bg-white/5 text-gray-400 border border-gray-800"
-                            >
-                              {tech}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Project Links - Mobile */}
-                      <div className="flex gap-2">
-                        {project.github && (
-                          <a
-                            href={project.github}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 px-3 py-2 rounded-lg bg-white/5 text-gray-300 border border-gray-800 transition-all text-center text-sm"
-                          >
-                            <Github className="w-3 h-3 inline mr-1" />
-                            Code
-                          </a>
-                        )}
-                        <a
-                          href={project.live}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`px-3 py-2 rounded-lg text-center text-sm transition-all ${
-                            project.github
-                              ? 'flex-1 bg-white text-black'
-                              : 'w-full bg-white text-black'
-                          }`}
-                        >
-                          <ExternalLink className="w-3 h-3 inline mr-1" />
-                          {project.github ? 'Demo' : 'Visit'}
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Enhanced Touch-Friendly Navigation */}
-            <div className="flex justify-center items-center mt-6 gap-4">
-              <button
-                onClick={prevSlide}
-                className="p-3 rounded-full bg-white/5 border border-gray-800 hover:bg-white/10 transition-all touch-manipulation active:scale-95"
-                aria-label="Previous project"
-              >
-                <ChevronLeft className="w-5 h-5 text-gray-400" />
-              </button>
-
-              <div className="flex gap-2">
-                {projects.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => goToSlide(index)}
-                    className={`w-2 h-2 rounded-full transition-all duration-200 touch-manipulation ${
-                      index === currentSlide ? 'bg-white w-6' : 'bg-gray-600'
-                    }`}
-                    aria-label={`Go to project ${index + 1}`}
-                  />
-                ))}
-              </div>
-
-              <button
-                onClick={nextSlide}
-                className="p-3 rounded-full bg-white/5 border border-gray-800 hover:bg-white/10 transition-all touch-manipulation active:scale-95"
-                aria-label="Next project"
-              >
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-              </button>
-            </div>
-
-            {/* Touch Instructions */}
-            <div className="text-center mt-4">
-              <p className="text-sm text-gray-500">
-                Swipe left/right or use arrows to browse projects
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Show More / Show Less Button */}
-        <div className="text-center mt-12">
-          <button
-            onClick={() => setExpanded((v) => !v)}
-            className="px-8 py-3 rounded-xl font-semibold bg-white text-black hover:bg-gray-200 transition-all"
-            aria-expanded={expanded}
-          >
-            {expanded ? 'Show Less' : 'Show More'}
-          </button>
         </div>
+        {project.private && (
+          <span className="inline-flex items-center gap-1 px-2 py-1 text-[10px] uppercase tracking-wider text-gray-500 border border-white/10 rounded-full">
+            <Lock className="w-3 h-3" />
+            NDA
+          </span>
+        )}
       </div>
-    </section>
+
+      <h3 className="text-lg font-semibold text-gray-200 mb-2">{project.title}</h3>
+      <p className="text-sm text-gray-400 leading-relaxed mb-4 flex-1">{project.description}</p>
+
+      <div className="flex flex-wrap gap-1.5 mb-4">
+        {project.tech.slice(0, 5).map((tech) => (
+          <span
+            key={tech}
+            className="px-2 py-0.5 text-[10px] uppercase tracking-wide text-gray-500 border border-white/5 rounded"
+          >
+            {tech}
+          </span>
+        ))}
+      </div>
+
+      <div className="flex gap-2 mt-auto">
+        {hasGithub && (
+          <a
+            href={project.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-white/10 text-gray-300 hover:bg-white/5 transition-colors"
+          >
+            <Github className="w-3.5 h-3.5" />
+            {sectionContent.portfolio.viewCode}
+          </a>
+        )}
+        {hasLive ? (
+          <a
+            href={project.live}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-white text-black hover:bg-gray-200 transition-colors ${hasGithub ? 'flex-1' : 'w-full'}`}
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            {sectionContent.portfolio.viewDemo}
+          </a>
+        ) : project.private ? (
+          <span className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs text-gray-500 border border-white/5">
+            Company product
+          </span>
+        ) : hasGithub ? (
+          <span className="flex-1 inline-flex items-center justify-center px-3 py-2 rounded-lg text-xs text-gray-500 border border-white/5">
+            Private repo
+          </span>
+        ) : null}
+      </div>
+    </motion.article>
+  )
+}
+
+export default function Portfolio() {
+  const featured = projects.filter((p) => p.featured)
+  const rest = projects.filter((p) => !p.featured)
+
+  return (
+    <SectionShell id="portfolio">
+      <SectionHeader
+        label="04 / Work"
+        title={sectionContent.portfolio.title}
+        subtitle={sectionContent.portfolio.subtitle}
+      />
+
+      <div className="grid md:grid-cols-2 gap-6 mb-6">
+        {featured.map((project, i) => (
+          <ProjectCard
+            key={project.title}
+            project={project}
+            index={i}
+            className="md:min-h-[320px]"
+          />
+        ))}
+      </div>
+
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {rest.map((project, i) => (
+          <ProjectCard key={project.title} project={project} index={i + featured.length} />
+        ))}
+      </div>
+    </SectionShell>
   )
 }

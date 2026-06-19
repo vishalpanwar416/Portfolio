@@ -1,125 +1,116 @@
 import { motion } from 'framer-motion'
+import SectionShell from '../components/SectionShell'
+import SectionHeader from '../components/SectionHeader'
 import { detailedCertifications } from '../data/certifications'
 import { workExperience, education } from '../data/experience'
+import { sectionContent } from '../data'
 
 export default function About() {
   return (
-    <section id="about" className="py-24 bg-[#0a0a0a] relative overflow-hidden border-t border-gray-800/20">
-      {/* Background effects */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-gray-800/10 to-gray-900/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-tl from-gray-700/10 to-gray-800/5 rounded-full blur-3xl"></div>
+    <SectionShell id="about">
+      <SectionHeader
+        label="01 / About"
+        title={sectionContent.about.title}
+        subtitle={sectionContent.about.subtitle}
+      />
+
+      <div className="space-y-6 mb-12 max-w-3xl">
+        {sectionContent.about.content.map((paragraph, i) => (
+          <motion.p
+            key={i}
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.08 }}
+            className="text-gray-400 text-base sm:text-lg leading-relaxed"
+          >
+            {paragraph}
+          </motion.p>
+        ))}
       </div>
 
-      <div className="container mx-auto px-6 relative z-10">
-        {/* Section Header */}
+      <div className="grid lg:grid-cols-3 gap-10">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="lg:col-span-2 space-y-6"
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-gray-300 to-gray-500 bg-clip-text text-transparent">
-            About Me
-          </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-gray-600 via-gray-400 to-gray-600 mx-auto rounded-full"></div>
+          <h3 className="text-xs uppercase tracking-[0.28em] text-gray-500">Experience</h3>
+          <div className="space-y-4">
+            {workExperience.map((exp, index) => (
+              <motion.div
+                key={exp.company}
+                initial={{ opacity: 0, x: -16 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.06 }}
+                className="relative pl-6 border-l border-white/10 hover:border-white/20 transition-colors"
+              >
+                <span className="absolute -left-[5px] top-2 w-2 h-2 rounded-full bg-gray-500" />
+                <div className="pb-6">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2 mb-1">
+                    <h4 className="font-semibold text-gray-200">{exp.position}</h4>
+                    <span className="text-xs text-gray-500">{exp.duration}</span>
+                  </div>
+                  <p className="text-sm text-gray-400 mb-3">{exp.company}</p>
+                  {exp.highlights?.length > 0 && (
+                    <ul className="space-y-1.5">
+                      {exp.highlights.map((h) => (
+                        <li key={h} className="text-sm text-gray-500 flex gap-2">
+                          <span className="text-gray-600 mt-1.5 shrink-0">—</span>
+                          <span>{h}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-12">
-          {/* Left - Info */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="space-y-6"
-          >
-            <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-200">
-              Software engineer building cloud-native systems, observability platforms, and AI automation.
-            </h3>
-            <p className="text-gray-400 text-lg leading-relaxed">
-              2+ years across Go, Node.js, and GCP — currently at Bluecopa. Previously at Discovr.ai, Implere Tech, and Cognizant.
-              B.Tech CSE (KIET, 2024). Microsoft Azure Data Scientist Associate.
-            </p>
-
-            {/* Experience */}
-            <div className="space-y-4 pt-6">
-              <h4 className="text-lg sm:text-xl font-semibold text-gray-300 flex items-center gap-2">
-                <div className="w-1 h-6 bg-gray-500 rounded-full"></div>
-                Experience
-              </h4>
-
-              <div className="space-y-3">
-                {workExperience.map((experience, index) => (
-                  <motion.div
-                    key={index}
-                    className="p-4 rounded-xl bg-white/5 border border-gray-800 hover:border-gray-700 transition-all backdrop-blur-sm glass"
-                    whileHover={{ scale: 1.02, x: 5 }}
-                  >
-                    <h5 className="font-semibold text-gray-200">{experience.position}</h5>
-                    <p className="text-gray-400">{experience.company}</p>
-                    <p className="text-sm text-gray-500">{experience.duration}</p>
-                  </motion.div>
-                ))}
-              </div>
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="space-y-8"
+        >
+          <div>
+            <h3 className="text-xs uppercase tracking-[0.28em] text-gray-500 mb-4">Education</h3>
+            <div className="space-y-3">
+              {education.map((edu) => (
+                <div
+                  key={edu.degree}
+                  className="p-4 rounded-xl bg-white/[0.03] border border-white/10"
+                >
+                  <h4 className="font-medium text-gray-200 text-sm">{edu.degree}</h4>
+                  <p className="text-gray-400 text-sm mt-1">{edu.institution}</p>
+                  <p className="text-xs text-gray-500 mt-1">{edu.year}</p>
+                </div>
+              ))}
             </div>
+          </div>
 
-            {/* Education */}
-            <div className="space-y-4 pt-6">
-              <h4 className="text-lg sm:text-xl font-semibold text-gray-300 flex items-center gap-2">
-                <div className="w-1 h-6 bg-gray-500 rounded-full"></div>
-                Education
-              </h4>
-
-              <div className="space-y-3">
-                {education.map((edu, index) => (
-                  <motion.div
-                    key={index}
-                    className="p-4 rounded-xl bg-white/5 border border-gray-800 hover:border-gray-700 transition-all backdrop-blur-sm glass"
-                    whileHover={{ scale: 1.02, x: 5 }}
-                  >
-                    <h5 className="font-semibold text-gray-200">{edu.degree}</h5>
-                    <p className="text-gray-400">{edu.institution}</p>
-                    <p className="text-sm text-gray-500">{edu.year}</p>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Right - Certifications */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="space-y-6"
-          >
-            <h4 className="text-xl sm:text-2xl font-semibold text-gray-300 flex items-center gap-2">
-              <div className="w-1 h-6 bg-gray-500 rounded-full"></div>
-              Certifications
-            </h4>
-
-            <div className="space-y-4">
-              {detailedCertifications.map((cert, index) => (
-                <motion.a
-                  key={index}
+          <div>
+            <h3 className="text-xs uppercase tracking-[0.28em] text-gray-500 mb-4">Certifications</h3>
+            <div className="space-y-3">
+              {detailedCertifications.map((cert) => (
+                <a
+                  key={cert.id}
                   href={cert.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="block p-5 rounded-xl bg-gradient-to-br from-gray-900/50 to-gray-800/30 border border-gray-800 hover:border-gray-700 transition-all group"
+                  className="block p-4 rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-colors group"
                 >
-                  <h5 className="font-semibold text-gray-200 mb-2 group-hover:text-white transition-colors">{cert.title}</h5>
-                  <p className="text-sm text-gray-400 mb-2">{cert.date}</p>
-                  <p className="text-xs text-gray-500 font-mono">ID: {cert.id}</p>
-                </motion.a>
+                  <h4 className="font-medium text-gray-200 text-sm group-hover:text-white">{cert.title}</h4>
+                  <p className="text-xs text-gray-500 mt-1">{cert.date}</p>
+                </a>
               ))}
             </div>
-          </motion.div>
-        </div>
+          </div>
+        </motion.div>
       </div>
-    </section>
+    </SectionShell>
   )
 }

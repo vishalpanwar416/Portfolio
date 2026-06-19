@@ -10,11 +10,27 @@ import Contact from './Sections/Contacts'
 import Footer from './Sections/Footer'
 import LoadingScreen from './components/LoadingScreen'
 import ScrollProgress from './components/ScrollProgress'
-import ParticleBackground from './components/ParticleBackground'
 import BackToTop from './components/BackToTop'
 
+const LOADER_KEY = 'portfolio_loader_seen'
+
 export default function App() {
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(() => {
+    try {
+      return !sessionStorage.getItem(LOADER_KEY)
+    } catch {
+      return true
+    }
+  })
+
+  const handleLoadComplete = () => {
+    try {
+      sessionStorage.setItem(LOADER_KEY, '1')
+    } catch {
+      /* ignore */
+    }
+    setIsLoading(false)
+  }
 
   return (
     <>
@@ -22,18 +38,9 @@ export default function App() {
       <BackToTop />
       <AnimatePresence mode="wait">
         {isLoading ? (
-          <LoadingScreen key="loading" onComplete={() => setIsLoading(false)} />
+          <LoadingScreen key="loading" onComplete={handleLoadComplete} />
         ) : (
-          <div
-            key="content"
-            className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a] relative"
-          >
-            {/* Global noise texture overlay */}
-            <div className="fixed inset-0 opacity-[0.02] noise-texture pointer-events-none z-0"></div>
-
-            {/* Particle Background */}
-            <ParticleBackground />
-
+          <div key="content" className="min-h-screen bg-black relative">
             <Navbar />
             <Hero />
             <About />

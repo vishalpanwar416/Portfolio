@@ -1,43 +1,32 @@
 import { ExternalLink } from 'lucide-react'
 import logo from '../assets/logo.png'
-import VisitorCounter from '../components/VisitorCounter'
-import { socialLinks, footerLinks, sectionContent, externalLinks } from '../data'
+import { socialLinks, footerLinks, sectionContent, externalLinks, personalInfo } from '../data'
 
 export default function Footer() {
-
   return (
-    <footer className="bg-[#0a0a0a] border-t border-gray-800/20 text-gray-300 py-12 relative overflow-hidden">
-      {/* Static background effects */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-gray-800/5 to-transparent rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-tl from-gray-700/5 to-transparent rounded-full blur-3xl"></div>
-      </div>
+    <footer className="bg-black border-t border-white/[0.06] text-gray-300 py-12 relative overflow-hidden">
+      <div className="absolute inset-0 noise-texture opacity-[0.01] pointer-events-none" />
 
-      <div className="container mx-auto px-6 relative z-10">
+      <div className="container mx-auto px-5 sm:px-8 relative z-10">
         <div className="grid md:grid-cols-3 gap-10 items-start mb-10">
-          {/* Brand */}
           <div className="text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start mb-4">
-              <img
-                src={logo}
-                alt="Vishal Panwar Logo"
-                className="h-12 w-auto"
-              />
+              <img src={logo} alt="Vishal Panwar Logo" className="h-10 w-auto opacity-90" />
             </div>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              {sectionContent.footer.tagline}
-            </p>
+            <p className="text-gray-500 text-sm leading-relaxed">{sectionContent.footer.tagline}</p>
+            <p className="text-xs text-gray-600 mt-2">{personalInfo.availability.status}</p>
           </div>
 
-          {/* Quick Links */}
           <div className="text-center">
-            <h4 className="text-lg font-semibold mb-4 text-gray-200">{sectionContent.footer.quickLinks}</h4>
+            <h4 className="text-sm font-semibold mb-4 text-gray-300 uppercase tracking-wider">
+              {sectionContent.footer.quickLinks}
+            </h4>
             <div className="flex flex-wrap justify-center gap-4">
               {footerLinks.map((link) => (
                 <a
                   key={link}
                   href={`#${link.toLowerCase()}`}
-                  className="text-gray-400 hover:text-gray-200 transition-colors text-sm"
+                  className="text-gray-500 hover:text-gray-200 transition-colors text-sm"
                 >
                   {link}
                 </a>
@@ -45,47 +34,39 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Social Links */}
           <div className="text-center md:text-right">
-            <h4 className="text-lg font-semibold mb-4 text-gray-200">{sectionContent.footer.connectWithMe}</h4>
-            <div className="flex justify-center md:justify-end flex-wrap gap-3">
+            <h4 className="text-sm font-semibold mb-4 text-gray-300 uppercase tracking-wider">
+              {sectionContent.footer.connectWithMe}
+            </h4>
+            <div className="flex justify-center md:justify-end flex-wrap gap-2">
               {socialLinks.map((social) => (
                 <a
                   key={social.name}
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-3 rounded-xl bg-white/5 border border-gray-800 text-gray-400 hover:text-gray-200 hover:bg-white/10 hover:border-gray-700 transition-all"
+                  className="p-2.5 rounded-full border border-white/10 text-gray-500 hover:text-white hover:border-white/25 transition-all"
                   aria-label={social.name}
                 >
-                  <social.icon size={18} />
+                  <social.icon size={16} />
                 </a>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Divider */}
-        <div className="border-t border-gray-800/20 my-8"></div>
+        <div className="border-t border-white/[0.06] pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-gray-600 text-xs text-center md:text-left">{sectionContent.footer.copyright}</p>
 
-        {/* Bottom Section */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex flex-col md:flex-row items-center gap-4">
-            <p className="text-gray-500 text-sm text-center md:text-left">
-              {sectionContent.footer.copyright}
-            </p>
-            <VisitorCounter />
-          </div>
-
-          <div className="flex items-center gap-6 text-sm text-gray-500">
+          <div className="flex items-center gap-6 text-xs text-gray-600">
             <a
               href={externalLinks.leetcode}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 hover:text-gray-300 transition-colors"
             >
-              <span>{sectionContent.footer.links.leetcode}</span>
-              <ExternalLink size={14} />
+              {sectionContent.footer.links.leetcode}
+              <ExternalLink size={12} />
             </a>
             <a
               href={externalLinks.github}
@@ -93,8 +74,8 @@ export default function Footer() {
               rel="noopener noreferrer"
               className="flex items-center gap-1 hover:text-gray-300 transition-colors"
             >
-              <span>{sectionContent.footer.links.sourceCode}</span>
-              <ExternalLink size={14} />
+              {sectionContent.footer.links.sourceCode}
+              <ExternalLink size={12} />
             </a>
           </div>
         </div>

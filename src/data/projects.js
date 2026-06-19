@@ -8,7 +8,8 @@ export const projects = [
     features: ["Contactless QR ordering", "GPT-4 RAG analytics", "Event-driven notifications", "Cloud Run deployment"],
     image: tableTapLogo,
     github: "https://github.com/vishalpanwar416/table-tap",
-    live: "https://table-tap-qr.vercel.app"
+    live: "https://table-tap-qr.vercel.app",
+    featured: true
   },
   {
     title: "Freddy — Job Automation",
@@ -17,7 +18,8 @@ export const projects = [
     features: ["Multi-platform apply", "ATS resume tailoring", "Personalised outreach", "Dashboard & mobile sync"],
     image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg",
     github: "https://github.com/vishalpanwar416/job-automation",
-    live: "#"
+    live: null,
+    featured: true
   },
   {
     title: "Discovr.ai",
@@ -26,7 +28,8 @@ export const projects = [
     features: ["50K+ posts/day ingestion", "LLM review agents", "Real-time dashboards", "99.9% uptime on Cloud Run"],
     image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg",
     github: null,
-    live: "#"
+    live: null,
+    private: true
   },
   {
     title: "E-Commerce Aggregator",
@@ -35,7 +38,7 @@ export const projects = [
     features: ["500+ req/min throughput", "99.5% success rate", "Multi-layer caching", "Circuit breakers"],
     image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redis/redis-original.svg",
     github: "https://github.com/vishalpanwar416/Scrapper",
-    live: "#"
+    live: null
   },
   {
     title: "Tarzbygazala",
