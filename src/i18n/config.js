@@ -15,15 +15,15 @@ export const translations = {
   en: {
     hero: {
       greeting: "Hey, I'm",
-      title: "Full-Stack Developer | AI & Cloud Engineer | Flutter Enthusiast",
-      description: "Building scalable solutions with MERN, Python, Cloud (AWS/Azure), and modern technologies.",
+      title: "Software Development Engineer | Backend · Cloud · AI",
+      description: "Building cloud-native microservices, observability-first platforms, and AI automation with Go, Node.js, and GCP.",
       viewWork: "View My Work",
       getInTouch: "Get In Touch",
       downloadResume: "Download Resume"
     },
     about: {
       title: "About Me",
-      subtitle: "Full-Stack & Cloud Engineer passionate about AI, Data Science, and scalable systems."
+      subtitle: "Backend & cloud engineer focused on scalable systems and AI automation."
     },
     skills: {
       title: "Skills & Technologies",
@@ -31,7 +31,7 @@ export const translations = {
     },
     portfolio: {
       title: "Featured Projects",
-      subtitle: "Showcasing innovative solutions across web, mobile, and AI domains"
+      subtitle: "Production systems across backend, cloud infrastructure, and AI"
     },
     contact: {
       title: "Let's Connect",

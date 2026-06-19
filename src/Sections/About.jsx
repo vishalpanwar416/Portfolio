@@ -34,11 +34,11 @@ export default function About() {
             className="space-y-6"
           >
             <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-200">
-              Full-Stack & Cloud Engineer passionate about AI, Data Science, and scalable systems.
+              Software engineer building cloud-native systems, observability platforms, and AI automation.
             </h3>
             <p className="text-gray-400 text-lg leading-relaxed">
-              Experienced across MERN, Python, and Cloud (AWS/Azure), with DevOps and Flutter. B.Tech CSE (KIET, 2024).
-              Certifications: AWS Academy Cloud Foundations, IBM AI & ML, Microsoft Azure Data Scientist Associate.
+              2+ years across Go, Node.js, and GCP — currently at Bluecopa. Previously at Discovr.ai, Implere Tech, and Cognizant.
+              B.Tech CSE (KIET, 2024). Microsoft Azure Data Scientist Associate.
             </p>
 
             {/* Experience */}

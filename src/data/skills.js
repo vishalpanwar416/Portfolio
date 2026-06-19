@@ -1,35 +1,35 @@
 export const skillCategories = [
   {
+    category: "Languages",
+    skills: ["Go", "Python", "JavaScript", "TypeScript", "Java", "SQL"]
+  },
+  {
+    category: "Backend & Systems",
+    skills: ["Node.js", "Express.js", "Gin", "REST APIs", "gRPC", "Microservices", "GraphQL"]
+  },
+  {
     category: "Frontend",
-    skills: ["React.js", "Next.js", "Vue.js", "Tailwind CSS", "JavaScript", "TypeScript", "HTML5", "CSS3"]
+    skills: ["React.js", "Next.js", "Redux", "Tailwind CSS", "HTML5", "CSS3"]
   },
   {
-    category: "Backend",
-    skills: ["Node.js", "Express.js", "Python", "Django", "Flask", "FastAPI", "REST APIs", "GraphQL"]
-  },
-  {
-    category: "Database",
-    skills: ["MongoDB", "PostgreSQL", "MySQL", "Redis", "Firebase", "DynamoDB"]
+    category: "Databases & Caching",
+    skills: ["PostgreSQL", "MongoDB", "MySQL", "Redis", "Firebase"]
   },
   {
     category: "Cloud & DevOps",
-    skills: ["AWS", "Azure", "GCP", "Docker", "Kubernetes", "Terraform", "CI/CD", "Git", "Linux", "Nginx"]
+    skills: ["GCP", "AWS", "Azure", "Docker", "Kubernetes", "Terraform", "CI/CD", "Prometheus", "Grafana"]
   },
   {
-    category: "AI & ML",
-    skills: ["TensorFlow", "PyTorch", "Scikit-learn", "Pandas", "NumPy", "OpenCV", "NLP", "Computer Vision"]
-  },
-  {
-    category: "Mobile",
-    skills: ["Flutter", "Dart", "React Native", "Android", "iOS"]
+    category: "AI & LLM",
+    skills: ["OpenAI API", "LangChain", "RAG", "Prompt Engineering", "LLM Agents", "PyTorch", "scikit-learn"]
   }
 ]
 
 export const typingAnimationTexts = [
-  'Web Applications',
-  'AI Solutions',
-  'Cloud Infrastructure',
-  'Mobile Apps',
-  'REST APIs',
-  'ML Models'
+  'Cloud-Native Microservices',
+  'Go Backend Systems',
+  'AI Automation Pipelines',
+  'Observability Platforms',
+  'Full-Stack Products',
+  'Distributed Systems'
 ]

@@ -1,7 +1,7 @@
 export const sectionContent = {
   hero: {
     greeting: "Hey, I'm",
-    description: "Building scalable solutions with MERN, Python, Cloud (AWS/Azure), and modern technologies.",
+    description: "Software engineer with 2+ years building cloud-native microservices, observability-first platforms, and AI automation — currently shipping Go + Next.js at Bluecopa.",
     cta: {
       primary: "View My Work",
       secondary: "Get In Touch"
@@ -11,17 +11,17 @@ export const sectionContent = {
 
   about: {
     title: "About Me",
-    subtitle: "Passionate developer crafting innovative solutions",
+    subtitle: "Backend & cloud engineer focused on measurable outcomes",
     content: [
-      "I'm a Full-Stack Developer with expertise in building scalable web applications and AI-powered solutions. Currently working as a Programmer Analyst Trainee at Cognizant Technology Solutions.",
-      "My journey in software development has been driven by curiosity and a passion for solving complex problems. I specialize in the MERN stack, Python, and cloud technologies (AWS/Azure).",
-      "Beyond coding, I'm actively involved in competitive programming on LeetCode and contribute to open-source projects. I believe in continuous learning and staying updated with the latest technologies."
+      "I'm a Software Development Engineer with 2+ years of experience building scalable backend systems, cloud infrastructure, and AI-powered products. Currently at Bluecopa, shipping Go and Next.js features to production.",
+      "I've designed Go REST APIs with 40% p95 latency reduction, deployed microservices on GCP/Kubernetes with 99.9% uptime, and built LLM-powered automation pipelines that process tens of thousands of events daily.",
+      "Open to Backend, Full Stack, SRE/DevOps, and Go roles — remote (India), US, or Gulf region. 250+ LeetCode problems solved; promoted at Cognizant within 6 months."
     ]
   },
 
   skills: {
     title: "Skills & Technologies",
-    subtitle: "A comprehensive toolkit of technologies I've mastered through hands-on experience"
+    subtitle: "Production stack across backend systems, cloud platform engineering, and AI"
   },
 
   codingActivity: {
@@ -42,7 +42,7 @@ export const sectionContent = {
 
   portfolio: {
     title: "Featured Projects",
-    subtitle: "Showcasing my best work and innovative solutions",
+    subtitle: "Production systems across backend, cloud, and AI automation",
     viewProject: "View Project",
     viewCode: "View Code",
     viewDemo: "Live Demo"
@@ -50,7 +50,7 @@ export const sectionContent = {
 
   contact: {
     title: "Let's Connect",
-    subtitle: "I'm always excited to discuss new opportunities, innovative projects, and creative collaborations.",
+    subtitle: "Open to Backend, Full Stack, SRE/DevOps, and Go roles. Remote (India), US, or Gulf region.",
     contactDetails: "Contact Details",
     contactDetailsSubtitle: "Choose your preferred way to reach out",
     sendMessage: "Send Message",
@@ -61,9 +61,9 @@ export const sectionContent = {
       message: "Message"
     },
     placeholders: {
-      name: "Vishal Panwar",
-      email: "vishalpanwar416@gmail.com",
-      message: "Tell me about your project, ideas, or how we can collaborate..."
+      name: "Your name",
+      email: "you@example.com",
+      message: "Tell me about the role, project, or how we can collaborate..."
     },
     whatsapp: {
       send: "Send via WhatsApp",
@@ -75,10 +75,10 @@ export const sectionContent = {
   },
 
   footer: {
-    tagline: "Full-Stack Developer | AI & Cloud Engineer | Flutter Enthusiast",
+    tagline: "Software Development Engineer | Backend · Cloud · AI",
     quickLinks: "Quick Links",
     connectWithMe: "Connect With Me",
-    copyright: "© 2025 Vishal Panwar. All rights reserved.",
+    copyright: "© 2026 Vishal Panwar. All rights reserved.",
     links: {
       leetcode: "LeetCode",
       sourceCode: "Source Code"
@@ -91,11 +91,11 @@ export const sectionContent = {
   },
 
   meta: {
-    title: "Vishal Panwar | Full-Stack Developer | AI & Cloud Engineer | Flutter Enthusiast",
-    description: "Vishal Panwar - Full-Stack Developer, AI & Cloud Engineer, and Flutter Enthusiast. Specializing in MERN stack, Python, AWS/Azure, and modern web technologies. Building scalable solutions with expertise in React, Node.js, AI/ML, and cloud infrastructure.",
-    keywords: "Vishal Panwar, Full-Stack Developer, Web Developer, React Developer, Node.js Developer, AI Engineer, Cloud Engineer, Flutter Developer, MERN Stack, Python Developer, AWS, Azure, Machine Learning, Software Engineer, Portfolio, Frontend Developer, Backend Developer, JavaScript Developer, TypeScript Developer",
-    ogTitle: "Vishal Panwar | Full-Stack Developer | AI & Cloud Engineer",
-    ogDescription: "Full-Stack Developer, AI & Cloud Engineer, and Flutter Enthusiast. Specializing in MERN stack, Python, AWS/Azure, and modern web technologies.",
+    title: "Vishal Panwar | Software Development Engineer | Backend · Cloud · AI",
+    description: "Vishal Panwar — Software Development Engineer specializing in Go, cloud-native microservices, GCP/Kubernetes, and AI automation. 2+ years experience at Bluecopa, Discovr.ai, Implere Tech, and Cognizant.",
+    keywords: "Vishal Panwar, Software Development Engineer, Backend Engineer, Go Developer, Golang, Full Stack Engineer, SRE, DevOps, Cloud Engineer, GCP, Kubernetes, Node.js, React, Next.js, AI Engineer, LLM, Portfolio, Hyderabad, Remote",
+    ogTitle: "Vishal Panwar | Backend · Cloud · AI Engineer",
+    ogDescription: "Building cloud-native microservices and AI automation systems with Go, Node.js, and GCP. 2+ years shipping production backend and full-stack products.",
     twitterCard: "summary_large_image"
   },
 
@@ -104,7 +104,7 @@ export const sectionContent = {
   },
 
   availability: {
-    statusText: "Available for opportunities",
+    statusText: "Open to opportunities",
     bookMeeting: "Book a Meeting"
   }
 }

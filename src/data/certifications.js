@@ -2,30 +2,30 @@ import { Award, Trophy, Star } from 'lucide-react'
 
 export const certifications = [
   {
-    title: "AWS Certified Cloud Practitioner",
-    issuer: "Amazon Web Services",
-    date: "2024",
-    icon: Award,
-    verified: true
-  },
-  {
-    title: "Microsoft Azure Fundamentals",
+    title: "Microsoft Azure Data Scientist Associate",
     issuer: "Microsoft",
     date: "2024",
     icon: Award,
     verified: true
   },
   {
-    title: "React - The Complete Guide",
-    issuer: "Udemy",
-    date: "2023",
+    title: "AWS Academy Cloud Foundations",
+    issuer: "Amazon Web Services",
+    date: "2024",
     icon: Award,
     verified: true
   },
   {
-    title: "Python for Data Science",
-    issuer: "Coursera",
+    title: "HackMol 4.0 Finalist",
+    issuer: "NIT Jalandhar",
     date: "2023",
+    icon: Trophy,
+    verified: true
+  },
+  {
+    title: "Machine Learning A-Z",
+    issuer: "Udemy",
+    date: "2022",
     icon: Award,
     verified: true
   }
@@ -66,23 +66,23 @@ export const detailedCertifications = [
 
 export const achievements = [
   {
-    title: "500+ LeetCode Problems Solved",
-    description: "Consistent problem-solving across Easy, Medium, and Hard",
+    title: "250+ LeetCode Problems Solved",
+    description: "Consistent DSA practice across Easy, Medium, and Hard",
     icon: Trophy
   },
   {
-    title: "Open Source Contributor",
-    description: "Active contributor to various open-source projects",
+    title: "Promoted in 6 Months",
+    description: "Fast-track promotion at Cognizant for delivery impact",
     icon: Star
   },
   {
-    title: "Hackathon Winner",
-    description: "1st place in College Tech Fest 2023",
-    icon: Trophy
+    title: "99.9% Production Uptime",
+    description: "GCP/Kubernetes deployments at Implere Tech and Discovr.ai",
+    icon: Award
   },
   {
-    title: "Tech Blogger",
-    description: "Sharing knowledge through technical articles",
+    title: "Open Source Contributor",
+    description: "Active on GitHub — job automation, scrapers, and side projects",
     icon: Star
   }
 ]
