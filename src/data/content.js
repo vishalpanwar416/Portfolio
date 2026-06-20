@@ -46,7 +46,7 @@ export const sectionContent = {
 
   portfolio: {
     title: "Featured Projects",
-    subtitle: "Production systems across backend, cloud, and AI automation",
+    subtitle: "Full-stack products, mobile apps, and UI/UX-led frontend work across real estate, e-commerce, and AI",
     viewProject: "View Project",
     viewCode: "View Code",
     viewDemo: "Live Demo"
