@@ -32,12 +32,21 @@ export const projects = [
   },
   {
     title: "CREDAI Homes — Mobile App",
-    description: "Full React Native conversion of the CREDAI Homes web product — auth, property browsing, developer dashboards, and role-based navigation with a custom design system.",
+    description: "Full React Native conversion of the CREDAI Homes web product — auth, property browsing, builder dashboards, and role-based navigation with a custom design system.",
     tech: ["React Native", "TypeScript", "React Navigation", "REST APIs"],
-    features: ["Web-to-mobile conversion", "Auth & user-type flows", "Property & project screens", "Developer/admin modules"],
+    features: ["Web-to-mobile conversion", "Auth & user-type flows", "Property & project screens", "Builder/admin portals"],
     image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg",
     github: "https://github.com/vishalpanwar416/credai-mobile",
     live: null
+  },
+  {
+    title: "A One Movers",
+    description: "Complete UI/UX design and frontend development for a Canadian moving company — conversion-focused layout, service pages, reviews gallery, contact flows, and SEO-ready Next.js site.",
+    tech: ["Next.js", "TypeScript", "Tailwind CSS", "Framer Motion", "Vercel"],
+    features: ["Custom brand design", "Responsive mobile-first UI", "Animated landing sections", "Contact & reviews integration"],
+    image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg",
+    github: "https://github.com/vishalpanwar416/AOneMovers",
+    live: "https://www.aonemovers.ca"
   },
   {
     title: "Tarzbygazala",
