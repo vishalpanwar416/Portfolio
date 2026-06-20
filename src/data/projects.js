@@ -12,14 +12,23 @@ export const projects = [
     featured: true
   },
   {
+    title: "AYS Developers",
+    description: "End-to-end UI/UX design and frontend development for a Dubai luxury real-estate developer — project showcases (Ventone, Breva, Tivanno, Q Gardens), mall kiosks, exhibitions, media, and SEO landing pages.",
+    tech: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Framer Motion", "Vercel"],
+    features: ["Luxury brand website design", "Dynamic project pages", "Interactive maps & carousels", "Exhibitions & construction updates"],
+    image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg",
+    github: null,
+    live: "https://aysdevelopers.ae",
+    featured: true
+  },
+  {
     title: "Top Selling Properties — Mobile App",
     description: "End-to-end UI/UX design and React Native development for Whassims' real-estate platform — property search, agents, projects, post-property flows, and WhatsApp lead capture.",
     tech: ["React Native", "Expo", "React Navigation", "Firebase", "JavaScript"],
     features: ["Drawer + tab navigation", "Property & project listings", "Agent marketplace", "Post property via WhatsApp"],
     image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg",
     github: "https://github.com/vishalpanwar416/Top-Selling-Properties",
-    live: null,
-    featured: true
+    live: null
   },
   {
     title: "TSP Marketing Module",
