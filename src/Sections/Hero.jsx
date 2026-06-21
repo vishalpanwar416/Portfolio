@@ -160,7 +160,7 @@ export default function Hero() {
               <img
                 src={profilePhoto}
                 alt={personalInfo.name.full}
-                className="w-full aspect-[4/5] object-cover object-[center_15%] grayscale contrast-[1.05] brightness-90 hover:grayscale-0 hover:brightness-100 transition-all duration-700"
+                className="w-full aspect-[4/5] object-cover object-[center_15%] contrast-[1.05] brightness-95 hover:brightness-100 transition-all duration-700"
                 fetchPriority="high"
               />
 
