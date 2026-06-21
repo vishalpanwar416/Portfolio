@@ -40,7 +40,7 @@ export default function BackToTop() {
         >
           <ArrowUp className="w-6 h-6" />
           <motion.div
-            className="absolute inset-0 rounded-full bg-gradient-to-r from-gray-500/20 to-gray-400/20 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-500/20 opacity-0 group-hover:opacity-100 transition-opacity"
             initial={false}
           />
         </motion.button>

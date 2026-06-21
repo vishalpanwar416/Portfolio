@@ -42,7 +42,7 @@ export default function TypingAnimation({ texts, typingSpeed = 100, deletingSpee
   return (
     <span className="inline-flex items-center text-gray-100">
       {currentText}
-      <span className="ml-1 w-0.5 h-5 sm:h-6 bg-gray-400 animate-pulse" />
+      <span className="ml-1 w-0.5 h-5 sm:h-6 bg-orange-500 animate-pulse" />
     </span>
   )
 }

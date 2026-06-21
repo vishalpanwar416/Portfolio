@@ -119,7 +119,7 @@ export default function Navbar() {
 
                 {/* Underline animation */}
                 <motion.div
-                  className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-gray-500 via-white to-gray-500 rounded-full"
+                  className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500 rounded-full"
                   initial={{ width: 0, x: "-50%" }}
                   whileHover={{ width: "80%", x: "-50%" }}
                   transition={{ duration: 0.3 }}
@@ -233,9 +233,9 @@ export default function Navbar() {
                         <span>{item.name}</span>
                         <ChevronRight size={18} className="opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
                       </div>
-                      {/* Left border indicator - Monochromatic */}
+                      {/* Left border indicator - Accent Orange */}
                       <motion.div
-                        className="absolute left-0 top-1/2 w-1 h-0 bg-gradient-to-b from-gray-800 to-black rounded-r-full"
+                        className="absolute left-0 top-1/2 w-1 h-0 bg-gradient-to-b from-orange-500 to-amber-500 rounded-r-full"
                         initial={{ height: 0, y: "-50%" }}
                         whileHover={{ height: "80%", y: "-50%" }}
                         transition={{ duration: 0.3 }}
