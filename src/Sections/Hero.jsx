@@ -47,7 +47,7 @@ export default function Hero() {
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
             <span className="block text-white">{personalInfo.name.first}</span>
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-orange-400 to-amber-500 mt-1">
+            <span className="block text-orange-500 mt-1">
               {personalInfo.name.last}
             </span>
           </motion.h1>

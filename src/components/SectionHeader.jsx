@@ -14,7 +14,7 @@ export default function SectionHeader({ label, title, subtitle, className = '' }
     >
       {label && (
         <div className="flex items-center gap-3 mb-4">
-          <span className="h-px w-10 bg-gradient-to-r from-orange-500 to-transparent" />
+          <span className="h-px w-10 bg-orange-500/50" />
           <p className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-[0.32em]">
             {label.includes('/') ? (
               <>
@@ -34,7 +34,7 @@ export default function SectionHeader({ label, title, subtitle, className = '' }
       >
         {otherWords ? `${otherWords} ` : ''}
         {lastWord && (
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500">
+          <span className="text-orange-500">
             {lastWord}
           </span>
         )}

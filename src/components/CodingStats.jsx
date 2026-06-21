@@ -64,11 +64,11 @@ export default function CodingStats({
       <div className="text-center mb-12">
         <h3 className="text-3xl md:text-4xl font-bold mb-3 tracking-tight">
           <span className="text-white">Coding </span>
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500">
+          <span className="text-orange-500">
             Activity
           </span>
         </h3>
-        <div className="w-20 h-1 bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500 mx-auto rounded-full"></div>
+        <div className="w-20 h-1 bg-orange-500 mx-auto rounded-full"></div>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-8">

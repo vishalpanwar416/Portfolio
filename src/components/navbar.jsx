@@ -119,7 +119,7 @@ export default function Navbar() {
 
                 {/* Underline animation */}
                 <motion.div
-                  className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500 rounded-full"
+                  className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-orange-500 rounded-full"
                   initial={{ width: 0, x: "-50%" }}
                   whileHover={{ width: "80%", x: "-50%" }}
                   transition={{ duration: 0.3 }}
@@ -235,7 +235,7 @@ export default function Navbar() {
                       </div>
                       {/* Left border indicator - Accent Orange */}
                       <motion.div
-                        className="absolute left-0 top-1/2 w-1 h-0 bg-gradient-to-b from-orange-500 to-amber-500 rounded-r-full"
+                        className="absolute left-0 top-1/2 w-1 h-0 bg-orange-500 rounded-r-full"
                         initial={{ height: 0, y: "-50%" }}
                         whileHover={{ height: "80%", y: "-50%" }}
                         transition={{ duration: 0.3 }}
