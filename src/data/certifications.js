@@ -66,7 +66,7 @@ export const detailedCertifications = [
 
 export const achievements = [
   {
-    title: "250+ LeetCode Problems Solved",
+    title: "300+ LeetCode Problems Solved",
     description: "Consistent DSA practice across Easy, Medium, and Hard",
     icon: Trophy
   },

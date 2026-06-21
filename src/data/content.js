@@ -19,7 +19,7 @@ export const sectionContent = {
     content: [
       "I'm a Software Development Engineer with 2+ years of experience building scalable backend systems, cloud infrastructure, and AI-powered products. Currently at Bluecopa, shipping Go and Next.js features to production.",
       "I've designed Go REST APIs with 40% p95 latency reduction, deployed microservices on GCP/Kubernetes with 99.9% uptime, and built LLM-powered automation pipelines that process tens of thousands of events daily.",
-      "Open to Backend, Full Stack, SRE/DevOps, and Go roles — remote (India), US, or Gulf region. 250+ LeetCode problems solved; promoted at Cognizant within 6 months."
+      "Open to Backend, Full Stack, SRE/DevOps, and Go roles — remote (India), US, or Gulf region. 300+ LeetCode problems solved; promoted at Cognizant within 6 months."
     ]
   },
 

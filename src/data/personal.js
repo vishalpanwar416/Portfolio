@@ -32,7 +32,7 @@ export const personalInfo = {
     unavailableDays: ["Saturday", "Sunday"]
   },
   heroStats: {
-    stack: ["Backend · Cloud · AI", "Go / Node.js / GCP", "250+ LeetCode"]
+    stack: ["Backend · Cloud · AI", "Go / Node.js / GCP", "300+ LeetCode"]
   },
   username: {
     github: "vishalpanwar416",
