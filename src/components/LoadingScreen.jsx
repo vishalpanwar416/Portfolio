@@ -69,17 +69,14 @@ export default function LoadingScreen({ onComplete }) {
         </motion.p>
 
         <motion.h1
-          className="text-5xl sm:text-6xl md:text-7xl font-bold leading-tight"
+          className="text-4xl sm:text-6xl md:text-7xl font-bold leading-tight whitespace-nowrap"
           style={{ fontFamily: "'Playfair Display', serif" }}
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.1 }}
         >
-          <span className="block bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
-            {personalInfo.name.first}
-          </span>
-          <span className="block bg-gradient-to-r from-gray-300 via-gray-100 to-white bg-clip-text text-transparent mt-1">
-            {personalInfo.name.last}
+          <span className="bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
+            {personalInfo.name.first} {personalInfo.name.last}
           </span>
         </motion.h1>
 

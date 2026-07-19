@@ -180,7 +180,7 @@ export default function Hero() {
 
             <motion.div
               {...reveal(0.75)}
-              className="absolute -bottom-3 left-1/2 -translate-x-1/2 lg:translate-x-0 lg:left-auto lg:-right-4 lg:bottom-12 z-20 inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md bg-black/70 border border-white/10 text-xs text-gray-300 whitespace-nowrap"
+              className="absolute -bottom-3 left-1/2 -translate-x-1/2 lg:translate-x-0 lg:left-auto lg:-right-4 lg:bottom-24 z-20 inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md bg-black/70 border border-white/10 text-xs text-gray-300 whitespace-nowrap"
             >
               <MapPin className="w-3.5 h-3.5 text-gray-400" />
               {personalInfo.location.display}
