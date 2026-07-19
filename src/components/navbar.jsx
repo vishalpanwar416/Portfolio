@@ -93,7 +93,7 @@ export default function Navbar() {
           >
             <img 
               src={logo} 
-              alt="Vishal Panwar — Full-Stack Web Developer" 
+              alt="Vishal Panwar — Software Development Engineer" 
               className="h-20 w-auto mix-blend-normal filter brightness-100 drop-shadow-lg"
             />
           </motion.div>

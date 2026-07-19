@@ -20,7 +20,7 @@ function ProjectCard({ project, className = '', index = 0 }) {
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="h-14 w-14 rounded-xl bg-black/50 border border-white/10 flex items-center justify-center p-2">
           {project.image && (
-            <img src={project.image} alt="" className="max-h-full max-w-full object-contain" />
+            <img src={project.image} alt={`${project.title} logo`} className="max-h-full max-w-full object-contain" />
           )}
         </div>
         {project.private && (

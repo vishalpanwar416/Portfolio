@@ -4,8 +4,8 @@ export const personalInfo = {
     last: "Panwar",
     full: "Vishal Panwar"
   },
-  title: "Software Development Engineer | Backend · Cloud · AI",
-  shortBio: "Building cloud-native microservices, observability-first platforms, and AI automation systems with Go, Node.js, and GCP.",
+  title: "Software Development Engineer | Gen AI Products · Backend",
+  shortBio: "Shipping Gen AI products and AI applications with Go, Next.js, and GCP.",
   experienceYears: "2+",
   contact: {
     email: "vishalpanwar416@gmail.com",
@@ -32,7 +32,7 @@ export const personalInfo = {
     unavailableDays: ["Saturday", "Sunday"]
   },
   heroStats: {
-    stack: ["Backend · Cloud · AI", "Go / Node.js / GCP", "300+ LeetCode"]
+    stack: ["Gen AI · Backend", "Go / Next.js / GCP", "300+ LeetCode"]
   },
   username: {
     github: "vishalpanwar416",

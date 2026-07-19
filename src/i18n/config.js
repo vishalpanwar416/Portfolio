@@ -15,8 +15,8 @@ export const translations = {
   en: {
     hero: {
       greeting: "Hey, I'm",
-      title: "Software Development Engineer | Backend · Cloud · AI",
-      description: "Building cloud-native microservices, observability-first platforms, and AI automation with Go, Node.js, and GCP.",
+      title: "Software Development Engineer | Gen AI Products · Backend",
+      description: "Shipping Gen AI products and AI applications with Go, Next.js, and GCP.",
       viewWork: "View My Work",
       getInTouch: "Get In Touch",
       downloadResume: "Download Resume"

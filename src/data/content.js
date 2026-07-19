@@ -95,11 +95,13 @@ export const sectionContent = {
   },
 
   meta: {
+    siteUrl: "https://vishalpanwar.in",
     title: "Vishal Panwar | Software Development Engineer | Gen AI Products · Backend",
-    description: "Vishal Panwar — Software Development Engineer specializing in building and shipping Gen AI products and AI applications. 2+ years experience at Bluecopa, Discovr.ai, Implere Tech, and Cognizant.",
-    keywords: "Vishal Panwar, Gen AI, AI Applications, Software Development Engineer, Backend Engineer, Go Developer, Golang, Full Stack Engineer, SRE, DevOps, Cloud Engineer, GCP, Kubernetes, Node.js, React, Next.js, AI Engineer, LLM, Portfolio, Hyderabad, Remote",
+    description: "Vishal Panwar — Software Development Engineer shipping Gen AI products and AI applications with Go, Next.js, and GCP. 2+ years at Bluecopa, Discovr.ai, Implere Tech, and Cognizant.",
+    keywords: "Vishal Panwar, Gen AI, AI Applications, Software Development Engineer, Backend Engineer, Go Developer, Golang, Next.js, GCP, Kubernetes, LLM, AI Engineer, Portfolio, Hyderabad, Remote",
     ogTitle: "Vishal Panwar | Gen AI · Backend · Cloud Engineer",
-    ogDescription: "Building and shipping Gen AI products and AI applications with Go, Node.js, and GCP. 2+ years shipping production backend and full-stack products.",
+    ogDescription: "Building and shipping Gen AI products and AI applications with Go, Next.js, and GCP. 2+ years shipping production systems.",
+    ogImage: "https://vishalpanwar.in/og-image.png",
     twitterCard: "summary_large_image"
   },
 

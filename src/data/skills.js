@@ -26,10 +26,10 @@ export const skillCategories = [
 ]
 
 export const typingAnimationTexts = [
-  'Cloud-Native Microservices',
+  'Gen AI Products',
+  'AI Applications',
   'Go Backend Systems',
-  'AI Automation Pipelines',
-  'Observability Platforms',
+  'Cloud-Native Microservices',
   'Full-Stack Products',
   'Distributed Systems'
 ]

@@ -1,13 +1,13 @@
 {
   "short_name": "Vishal Panwar",
-  "name": "Vishal Panwar | Full-Stack Developer | AI & Cloud Engineer",
-  "description": "Portfolio of Vishal Panwar - Full-Stack Developer, AI & Cloud Engineer, and Flutter Enthusiast",
+  "name": "Vishal Panwar | Software Development Engineer",
+  "description": "Portfolio of Vishal Panwar — Software Development Engineer shipping Gen AI products and AI applications.",
   "icons": [
     {
       "src": "logo.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "logo.png",
@@ -22,7 +22,8 @@
   "orientation": "portrait-primary",
   "theme_color": "#0a0a0a",
   "background_color": "#0a0a0a",
-  "categories": ["portfolio", "developer", "technology"],
-  "lang": "en-US",
-  "dir": "ltr"
+  "categories": ["portfolio", "business", "productivity"],
+  "lang": "en-IN",
+  "dir": "ltr",
+  "id": "/"
 }
