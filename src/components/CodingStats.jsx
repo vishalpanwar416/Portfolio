@@ -138,7 +138,7 @@ export default function CodingStats({
         </div>
         <div className="flex justify-center bg-gray-900/50 rounded-xl p-3 border border-gray-800/50 overflow-x-auto">
           <img
-            src={`https://ghchart.rshah.org/f97316/${githubUsername}`}
+            src={`https://ghchart.rshah.org/${githubUsername}`}
             alt="GitHub Contribution Chart"
             className="w-full min-w-[600px] max-h-32 object-contain"
             loading="lazy"
