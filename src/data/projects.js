@@ -17,7 +17,7 @@ export const projects = [
     tech: ["Node.js", "React", "Ollama", "Express", "Vite", "Cloudflare Tunnel"],
     features: ["OpenAI-compatible /v1 API", "Custom table-tap-AI models", "Chat UI + job harness", "Tunnel for remote Table Tap apps"],
     image: tableTapLogo,
-    github: "https://github.com/vishalpanwar416/table-tap-ai",
+    github: null,
     live: "https://table-tap.in",
     featured: true
   },
