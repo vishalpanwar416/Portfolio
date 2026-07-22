@@ -12,6 +12,16 @@ export const projects = [
     featured: true
   },
   {
+    title: "Table-Tap AI",
+    description: "Local OpenAI-compatible AI stack for Table Tap — Ollama models, chat UI, queue harness, and Cloudflare Tunnel so restaurant apps can call a private /v1 API like OpenAI.",
+    tech: ["Node.js", "React", "Ollama", "Express", "Vite", "Cloudflare Tunnel"],
+    features: ["OpenAI-compatible /v1 API", "Custom table-tap-AI models", "Chat UI + job harness", "Tunnel for remote Table Tap apps"],
+    image: tableTapLogo,
+    github: "https://github.com/vishalpanwar416/table-tap-ai",
+    live: "https://table-tap.in",
+    featured: true
+  },
+  {
     title: "AYS Developers",
     description: "End-to-end UI/UX design and frontend development for a Dubai luxury real-estate developer — project showcases (Ventone, Breva, Tivanno, Q Gardens), mall kiosks, exhibitions, media, and SEO landing pages.",
     tech: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Framer Motion", "Vercel"],
