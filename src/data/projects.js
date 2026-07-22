@@ -1,4 +1,4 @@
-import tableTapLogo from '../assets/table-tap-icon.png'
+import tableTapLogo from '../assets/Tabletap.png'
 
 export const projects = [
   {
@@ -7,6 +7,7 @@ export const projects = [
     tech: ["React", "Node.js", "MongoDB", "OpenAI", "GCP", "Twilio"],
     features: ["Contactless QR ordering", "GPT-4 RAG analytics", "Event-driven notifications", "Cloud Run deployment"],
     image: tableTapLogo,
+    wideImage: true,
     github: "https://github.com/vishalpanwar416/table-tap",
     live: "https://table-tap-qr.vercel.app",
     featured: true
@@ -17,6 +18,7 @@ export const projects = [
     tech: ["Node.js", "React", "Ollama", "Express", "Vite", "Cloudflare Tunnel"],
     features: ["OpenAI-compatible /v1 API", "Custom table-tap-AI models", "Chat UI + job harness", "Tunnel for remote Table Tap apps"],
     image: tableTapLogo,
+    wideImage: true,
     github: null,
     live: "https://table-tap.in",
     featured: true

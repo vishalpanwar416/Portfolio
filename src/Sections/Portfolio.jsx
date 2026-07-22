@@ -18,9 +18,9 @@ function ProjectCard({ project, className = '', index = 0 }) {
       whileHover={{ y: -4 }}
     >
       <div className="flex items-start justify-between gap-3 mb-4">
-        <div className="h-14 w-14 rounded-xl bg-black/50 border border-white/10 flex items-center justify-center p-1.5 overflow-hidden">
+        <div className={`${project.wideImage ? 'h-14 w-28' : 'h-14 w-14'} rounded-xl bg-black border border-white/10 flex items-center justify-center p-1 overflow-hidden`}>
           {project.image && (
-            <img src={project.image} alt={`${project.title} logo`} className="max-h-full max-w-full object-contain rounded-lg" />
+            <img src={project.image} alt={`${project.title} logo`} className="max-h-full max-w-full object-contain" />
           )}
         </div>
         {project.private && (
