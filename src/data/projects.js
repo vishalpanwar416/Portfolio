@@ -1,4 +1,4 @@
-import tableTapLogo from '../assets/Tabletap.png'
+import tableTapLogo from '../assets/table-tap-icon.png'
 
 export const projects = [
   {
