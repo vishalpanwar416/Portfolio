@@ -28,11 +28,25 @@ window.addEventListener('unhandledrejection', (event) => {
   return true;
 });
 
+// admin.vishalpanwar.in serves the private dashboard from this same build
+// (localhost/?admin for development). It's a separate lazy chunk, so the
+// portfolio never downloads it.
+const isAdminHost =
+  window.location.hostname.startsWith('admin.') ||
+  (window.location.hostname === 'localhost' && new URLSearchParams(window.location.search).has('admin'));
+const AdminApp = React.lazy(() => import('./admin/AdminApp'));
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <ErrorBoundary>
-      <App />
+      {isAdminHost ? (
+        <React.Suspense fallback={null}>
+          <AdminApp />
+        </React.Suspense>
+      ) : (
+        <App />
+      )}
     </ErrorBoundary>
   </React.StrictMode>
 );
