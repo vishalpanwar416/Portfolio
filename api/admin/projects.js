@@ -31,7 +31,10 @@ module.exports = async (req, res) => {
       const r = await fetch(`${API}/v10/projects?teamId=${teamId}&limit=100${until ? `&until=${until}` : ''}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!r.ok) throw new Error(`Vercel API ${r.status}`);
+      if (!r.ok) {
+        const err = (await r.json().catch(() => ({}))).error || {};
+        throw new Error(`Vercel API ${r.status}${err.code ? ` (${err.code}: ${err.message})` : ''}`);
+      }
       const body = await r.json();
       projects.push(...body.projects);
       until = body.pagination?.next || '';

@@ -20,7 +20,10 @@ module.exports = async (req, res) => {
       const r = await fetch(`${API}/v6/deployments?teamId=${teamId}&projectId=${id}&limit=${PER_PROJECT}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!r.ok) throw new Error(`Vercel API ${r.status}`);
+      if (!r.ok) {
+        const err = (await r.json().catch(() => ({}))).error || {};
+        throw new Error(`Vercel API ${r.status}${err.code ? ` (${err.code}: ${err.message})` : ''}`);
+      }
       return (await r.json()).deployments || [];
     }));
     // Only whitelisted fields go back to the browser.
