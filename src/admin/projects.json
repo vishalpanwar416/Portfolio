@@ -4,7 +4,7 @@
     "name": "Bluecopa",
     "category": "Employment",
     "status": "live",
-    "summary": "Finance operations platform — infrastructure, data plane, DR and UI.",
+    "summary": "Finance operations platform \u2014 infrastructure, data plane, DR and UI.",
     "stack": [
       "GCP",
       "Terraform",
@@ -25,7 +25,7 @@
     "name": "Aarambh",
     "category": "Client",
     "status": "live",
-    "summary": "Fitness app — Flutter app, Node backend, admin panel and landing page.",
+    "summary": "Fitness app \u2014 Flutter app, Node backend, admin panel and landing page.",
     "stack": [
       "Flutter",
       "Node.js",
@@ -53,7 +53,7 @@
     "name": "Edition TV",
     "category": "Client",
     "status": "live",
-    "summary": "TSP news platform — backend, CMS, Flutter app, reel audio service and GCP infra.",
+    "summary": "TSP news platform \u2014 backend, CMS, Flutter app, reel audio service and GCP infra.",
     "stack": [
       "Node.js",
       "Flutter",
@@ -104,7 +104,7 @@
     "name": "SplinkPro",
     "category": "Client",
     "status": "live",
-    "summary": "Sports platform — athletes, students, AI service, API, web and mobile.",
+    "summary": "Sports platform \u2014 athletes, students, AI service, API, web and mobile.",
     "stack": [
       "Next.js",
       "Flutter",
@@ -150,7 +150,7 @@
     "name": "Sanero Media",
     "category": "Product",
     "status": "live",
-    "summary": "Creator and social media agency — site, admin and outreach.",
+    "summary": "Creator and social media agency \u2014 site, admin and outreach.",
     "stack": [
       "Next.js",
       "Firebase"
@@ -171,7 +171,7 @@
     "name": "Table Tap",
     "category": "Product",
     "status": "live",
-    "summary": "QR ordering for restaurants — customer app, restaurant and admin panels, AI ops.",
+    "summary": "QR ordering for restaurants \u2014 customer app, restaurant and admin panels, AI ops.",
     "stack": [
       "React",
       "Supabase",
@@ -217,7 +217,7 @@
     "name": "Penspace",
     "category": "Product",
     "status": "paused",
-    "summary": "Flutter reading app — feed, discover, notes.",
+    "summary": "Flutter reading app \u2014 feed, discover, notes.",
     "stack": [
       "Flutter"
     ],
@@ -229,13 +229,16 @@
     "slug": "panwar-travels",
     "name": "Panwar Travels",
     "category": "Product",
-    "status": "paused",
-    "summary": "Travel agency site with SEO landing pages.",
+    "status": "live",
+    "summary": "Travel agency site with SEO landing pages. panwartravels.in registered (GoDaddy), DNS not pointed yet.",
     "domains": [
-      "panwartravels.in"
+      "panwar-travels.vercel.app"
     ],
     "repos": [
       "vishalpanwar416/panwar-travels"
+    ],
+    "vercel": [
+      "panwar-travels"
     ]
   },
   {
@@ -290,7 +293,7 @@
     "name": "Hermes",
     "category": "Utility",
     "status": "live",
-    "summary": "Personal agent — gateway, dashboard and cron jobs (social, job hunt).",
+    "summary": "Personal agent \u2014 gateway, dashboard and cron jobs (social, job hunt).",
     "stack": [
       "Python",
       "Node.js",
@@ -306,7 +309,7 @@
     "name": "Bezelrig",
     "category": "Utility",
     "status": "live",
-    "summary": "GNOME desktop rig — chats, wake word, clipboard drop, token usage.",
+    "summary": "GNOME desktop rig \u2014 chats, wake word, clipboard drop, token usage.",
     "repos": [
       "vishalpanwar416/bezelrig"
     ]
