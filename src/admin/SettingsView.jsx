@@ -75,9 +75,9 @@ export default function SettingsView({ data, install }) {
                 <li>Send your bot any message, then open <code>https://api.telegram.org/bot&lt;TOKEN&gt;/getUpdates</code> and copy <code>chat.id</code>.</li>
                 <li>Save both as repo secrets (run in Claude Code with <code>!</code>, or a terminal):</li>
               </ol>
-              <Cmd>{`gh secret set TELEGRAM_BOT_TOKEN -R ${REPO} --body "PASTE_BOT_TOKEN" && gh secret set TELEGRAM_CHAT_ID -R ${REPO} --body "PASTE_CHAT_ID" && gh workflow run monitor.yml -R ${REPO}`}</Cmd>
+              <Cmd>{`export GH_TOKEN=$(gh auth token -u vishalpanwar416) && gh secret set TELEGRAM_BOT_TOKEN -R ${REPO} --body "PASTE_BOT_TOKEN" && gh secret set TELEGRAM_CHAT_ID -R ${REPO} --body "PASTE_CHAT_ID" && gh workflow run monitor.yml -R ${REPO}`}</Cmd>
               Optional — also watch every Vercel custom domain, not just the ones listed on projects:
-              <Cmd>{`gh secret set VERCEL_TOKEN -R ${REPO} --body "PASTE_VERCEL_TOKEN" && gh secret set VERCEL_TEAM_ID -R ${REPO} --body "team_fzknfdYzx339Ps3Qh3RTiiPb"`}</Cmd>
+              <Cmd>{`export GH_TOKEN=$(gh auth token -u vishalpanwar416) && gh secret set VERCEL_TOKEN -R ${REPO} --body "PASTE_VERCEL_TOKEN" && gh secret set VERCEL_TEAM_ID -R ${REPO} --body "team_fzknfdYzx339Ps3Qh3RTiiPb"`}</Cmd>
             </Integration>
 
             <Integration name="GitHub — commits, PRs, CI" ok={st.github}>
