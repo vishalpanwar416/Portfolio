@@ -142,3 +142,50 @@ export function ShareBars({ rows, format }) {
     </ul>
   )
 }
+
+/** Thin progress bar; turns bright once the goal is reached. */
+export function Progress({ value, max, className }) {
+  const pct = max > 0 ? Math.min(100, (value / max) * 100) : 0
+  return (
+    <div className={cx('h-2 overflow-hidden rounded-full bg-white/[0.06]', className)}>
+      <div className={cx('h-full rounded-full transition-all', pct >= 100 ? 'bg-emerald-400/80' : 'bg-white/60')} style={{ width: `${pct}%` }} />
+    </div>
+  )
+}
+
+/** Tiny inline trend line for a list of numbers. */
+export function Sparkline({ values, width = 120, height = 28, className }) {
+  if (!values?.length) return null
+  const max = Math.max(1, ...values)
+  const step = values.length > 1 ? width / (values.length - 1) : width
+  const pts = values.map((v, i) => `${(i * step).toFixed(1)},${(height - 2 - (v / max) * (height - 4)).toFixed(1)}`).join(' ')
+  return (
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className={className} aria-hidden>
+      <polyline points={pts} fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+/** Shown in place of a section's content when its server key isn't set. */
+export function ConnectHint({ children, go }) {
+  return (
+    <div className="rounded-xl border border-dashed border-white/10 px-4 py-4 text-sm text-zinc-500">
+      {children}
+      {go && <button onClick={() => go('/settings')} className="ml-1 text-zinc-300 underline decoration-white/20 hover:text-white">Set it up in Settings →</button>}
+    </div>
+  )
+}
+
+export const Label = ({ children }) => <span className="mb-1 block text-xs text-zinc-500">{children}</span>
+
+/** Small coloured pill for invoice / CI / renewal states. */
+export function Badge({ tone = 'zinc', children }) {
+  const tones = {
+    zinc: 'border-white/10 bg-white/[0.04] text-zinc-300',
+    green: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300',
+    amber: 'border-amber-400/20 bg-amber-400/10 text-amber-300',
+    red: 'border-red-400/20 bg-red-500/10 text-red-300',
+    sky: 'border-sky-400/20 bg-sky-400/10 text-sky-300',
+  }
+  return <span className={cx('inline-flex items-center rounded-full border px-2 py-0.5 text-[11px]', tones[tone])}>{children}</span>
+}

@@ -1,0 +1,345 @@
+[
+  {
+    "slug": "bluecopa",
+    "name": "Bluecopa",
+    "category": "Employment",
+    "status": "live",
+    "summary": "Finance operations platform — infrastructure, data plane, DR and UI.",
+    "stack": [
+      "GCP",
+      "Terraform",
+      "Kubernetes",
+      "Java",
+      "Svelte"
+    ],
+    "repos": [
+      "bluecopa/blui",
+      "bluecopa/data-plane-api",
+      "bluecopa/fx-runtime",
+      "bluecopa/infrastructure",
+      "bluecopa/samyx"
+    ]
+  },
+  {
+    "slug": "aarambh",
+    "name": "Aarambh",
+    "category": "Client",
+    "status": "live",
+    "summary": "Fitness app — Flutter app, Node backend, admin panel and landing page.",
+    "stack": [
+      "Flutter",
+      "Node.js",
+      "Postgres",
+      "Firebase",
+      "Next.js"
+    ],
+    "domains": [
+      "aarambh.app",
+      "api.aarambh.app"
+    ],
+    "repos": [
+      "Aarambhadmin/Aarambh-2.0",
+      "Aarambhadmin/aarambhapp_android_30.6.2026",
+      "developer7696/admin-web",
+      "developer7696/aarambh-web",
+      "developer7696/aarambh-ai"
+    ],
+    "firebase": [
+      "aarambh-20a47"
+    ]
+  },
+  {
+    "slug": "edition-tv",
+    "name": "Edition TV",
+    "category": "Client",
+    "status": "live",
+    "summary": "TSP news platform — backend, CMS, Flutter app, reel audio service and GCP infra.",
+    "stack": [
+      "Node.js",
+      "Flutter",
+      "GCP",
+      "Terraform",
+      "Cloud SQL"
+    ],
+    "domains": [
+      "edition.tv",
+      "cms.edition.tv",
+      "api1.editiontv.com"
+    ],
+    "repos": [
+      "MOHAMMEDSAVOOD/Edition-Tv",
+      "MOHAMMEDSAVOOD/Edition-Tv-Frontend",
+      "MOHAMMEDSAVOOD/editiontv-audioservice",
+      "vishalpanwar416/Edition-TV-App-Flutter",
+      "vishalpanwar416/Edition-terraform",
+      "vishalpanwar416/social-media-module"
+    ]
+  },
+  {
+    "slug": "tsp-certification",
+    "name": "TSP Certification",
+    "category": "Client",
+    "status": "maintenance",
+    "summary": "Certificate generation and delivery module for TSP.",
+    "stack": [
+      "React",
+      "Firebase"
+    ],
+    "domains": [
+      "tspc.vishalpanwar.in"
+    ],
+    "repos": [
+      "vishalpanwar416/TSP-Certification-module"
+    ],
+    "vercel": [
+      "tsp-certification-module",
+      "tspc-api"
+    ],
+    "firebase": [
+      "certificate-automation-fb39e"
+    ]
+  },
+  {
+    "slug": "splinkpro",
+    "name": "SplinkPro",
+    "category": "Client",
+    "status": "live",
+    "summary": "Sports platform — athletes, students, AI service, API, web and mobile.",
+    "stack": [
+      "Next.js",
+      "Flutter",
+      "AWS",
+      "Terraform",
+      "Python"
+    ],
+    "domains": [
+      "splinkpro.ai",
+      "app.splinkpro.ai"
+    ],
+    "repos": [
+      "Splink-pro/splink-platform",
+      "Splink-pro/splinkpro-api",
+      "Splink-pro/splinkpro-ai",
+      "Splink-pro/splinkpro-web",
+      "Splink-pro/splinkpro-mobile",
+      "Splink-pro/splinkpro-student",
+      "Splink-pro/splinkpro-site"
+    ]
+  },
+  {
+    "slug": "sarai",
+    "name": "Sarai",
+    "category": "Freelance",
+    "status": "maintenance",
+    "summary": "Freelance site with AI search.",
+    "domains": [
+      "sarai.vishalpanwar.in"
+    ],
+    "repos": [
+      "vishalpanwar416/sarai"
+    ],
+    "vercel": [
+      "sarai"
+    ],
+    "firebase": [
+      "sarai-crm"
+    ]
+  },
+  {
+    "slug": "sanero",
+    "name": "Sanero Media",
+    "category": "Product",
+    "status": "live",
+    "summary": "Creator and social media agency — site, admin and outreach.",
+    "stack": [
+      "Next.js",
+      "Firebase"
+    ],
+    "domains": [
+      "sanero.in",
+      "admin.sanero.in"
+    ],
+    "repos": [
+      "vishalpanwar416/sanero-website"
+    ],
+    "firebase": [
+      "sanero-media"
+    ]
+  },
+  {
+    "slug": "table-tap",
+    "name": "Table Tap",
+    "category": "Product",
+    "status": "live",
+    "summary": "QR ordering for restaurants — customer app, restaurant and admin panels, AI ops.",
+    "stack": [
+      "React",
+      "Supabase",
+      "Terraform"
+    ],
+    "domains": [
+      "table-tap.in",
+      "app.table-tap.in",
+      "restaurant.table-tap.in",
+      "admin.table-tap.in"
+    ],
+    "repos": [
+      "vishalpanwar416/Table-Tap-QR",
+      "vishalpanwar416/table-tap-AI"
+    ],
+    "vercel": [
+      "table-tap-qr"
+    ]
+  },
+  {
+    "slug": "stacky",
+    "name": "Stacky",
+    "category": "Product",
+    "status": "live",
+    "summary": "Task tracker with an MCP server for Claude.",
+    "stack": [
+      "React",
+      "Firebase",
+      "MCP"
+    ],
+    "domains": [
+      "stacky-f7f42.web.app"
+    ],
+    "repos": [
+      "vishalpanwar416/Stacky"
+    ],
+    "firebase": [
+      "stacky-f7f42"
+    ]
+  },
+  {
+    "slug": "penspace",
+    "name": "Penspace",
+    "category": "Product",
+    "status": "paused",
+    "summary": "Flutter reading app — feed, discover, notes.",
+    "stack": [
+      "Flutter"
+    ],
+    "repos": [
+      "Jahanvikumawat14/penspace_clone"
+    ]
+  },
+  {
+    "slug": "panwar-travels",
+    "name": "Panwar Travels",
+    "category": "Product",
+    "status": "paused",
+    "summary": "Travel agency site with SEO landing pages.",
+    "domains": [
+      "panwartravels.in"
+    ],
+    "repos": [
+      "vishalpanwar416/panwar-travels"
+    ]
+  },
+  {
+    "slug": "multiqr",
+    "name": "MultiQR",
+    "category": "Product",
+    "status": "paused",
+    "summary": "Multi-link QR code generator.",
+    "repos": [
+      "vishalpanwar416/multiqr"
+    ]
+  },
+  {
+    "slug": "portfolio",
+    "name": "Portfolio",
+    "category": "Personal",
+    "status": "live",
+    "summary": "vishalpanwar.in and this dashboard.",
+    "stack": [
+      "React",
+      "Tailwind",
+      "Vercel"
+    ],
+    "domains": [
+      "vishalpanwar.in",
+      "admin.vishalpanwar.in"
+    ],
+    "repos": [
+      "vishalpanwar416/Portfolio"
+    ],
+    "vercel": [
+      "portfolio",
+      "vishal-s-portfolio"
+    ]
+  },
+  {
+    "slug": "leo",
+    "name": "Leo",
+    "category": "Personal",
+    "status": "paused",
+    "summary": "Voice AI companion with memory.",
+    "stack": [
+      "Python",
+      "React"
+    ],
+    "repos": [
+      "vishalpanwar416/leo"
+    ]
+  },
+  {
+    "slug": "hermes",
+    "name": "Hermes",
+    "category": "Utility",
+    "status": "live",
+    "summary": "Personal agent — gateway, dashboard and cron jobs (social, job hunt).",
+    "stack": [
+      "Python",
+      "Node.js",
+      "systemd"
+    ],
+    "repos": [
+      "vishalpanwar416/hermes-jobs",
+      "NousResearch/hermes-agent"
+    ]
+  },
+  {
+    "slug": "bezelrig",
+    "name": "Bezelrig",
+    "category": "Utility",
+    "status": "live",
+    "summary": "GNOME desktop rig — chats, wake word, clipboard drop, token usage.",
+    "repos": [
+      "vishalpanwar416/bezelrig"
+    ]
+  },
+  {
+    "slug": "jarvis",
+    "name": "Jarvis",
+    "category": "Utility",
+    "status": "live",
+    "summary": "Local assistant for this machine.",
+    "repos": [
+      "vishalpanwar416/jarvis"
+    ]
+  },
+  {
+    "slug": "job-automation",
+    "name": "Job automation",
+    "category": "Automation",
+    "status": "live",
+    "summary": "Naukri / Indeed scrapers, tailored resumes and auto-apply.",
+    "repos": [
+      "vishalpanwar416/job-automation"
+    ]
+  },
+  {
+    "slug": "media-man",
+    "name": "Media-man",
+    "category": "Automation",
+    "status": "live",
+    "summary": "Scheduled Instagram posts and outreach for Sanero and Table Tap.",
+    "stack": [
+      "Node.js",
+      "systemd"
+    ]
+  }
+]

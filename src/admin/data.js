@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { collection, deleteDoc, doc, onSnapshot, setDoc } from 'firebase/firestore'
 import { auth, db, SITES_COLLECTION } from './firebase'
+import defaultProjects from './projects.json'
 
 export const VERCEL_TEAM_SLUG = 'vishal-panwars-projects'
 export const CHECK_EVERY_MS = 5 * 60e3
@@ -32,133 +33,15 @@ export const GROUPS = [
   { title: 'Utilities & automation', categories: ['Utility', 'Automation'] },
 ]
 
-// Starting point, taken from ~/Development on 2026-11-08. Status is a best
-// guess from recent activity; revenue and clients start empty on purpose.
-export const DEFAULT_PROJECTS = [
-  {
-    slug: 'bluecopa', name: 'Bluecopa', category: 'Employment', status: 'live',
-    summary: 'Finance operations platform — infrastructure, data plane, DR and UI.',
-    stack: ['GCP', 'Terraform', 'Kubernetes', 'Java', 'Svelte'],
-    repos: ['bluecopa/blui', 'bluecopa/data-plane-api', 'bluecopa/fx-runtime', 'bluecopa/infrastructure', 'bluecopa/samyx'],
-  },
-  {
-    slug: 'aarambh', name: 'Aarambh', category: 'Client', status: 'live',
-    summary: 'Fitness app — Flutter app, Node backend, admin panel and landing page.',
-    stack: ['Flutter', 'Node.js', 'Postgres', 'Firebase', 'Next.js'],
-    domains: ['aarambh.app', 'api.aarambh.app'],
-    repos: ['Aarambhadmin/Aarambh-2.0', 'Aarambhadmin/aarambhapp_android_30.6.2026', 'developer7696/admin-web', 'developer7696/aarambh-web', 'developer7696/aarambh-ai'],
-  },
-  {
-    slug: 'edition-tv', name: 'Edition TV', category: 'Client', status: 'live',
-    summary: 'TSP news platform — backend, CMS, Flutter app, reel audio service and GCP infra.',
-    stack: ['Node.js', 'Flutter', 'GCP', 'Terraform', 'Cloud SQL'],
-    domains: ['edition.tv', 'cms.edition.tv', 'api1.editiontv.com'],
-    repos: ['MOHAMMEDSAVOOD/Edition-Tv', 'MOHAMMEDSAVOOD/Edition-Tv-Frontend', 'MOHAMMEDSAVOOD/editiontv-audioservice', 'vishalpanwar416/Edition-TV-App-Flutter', 'vishalpanwar416/Edition-terraform', 'vishalpanwar416/social-media-module'],
-  },
-  {
-    slug: 'tsp-certification', name: 'TSP Certification', category: 'Client', status: 'maintenance',
-    summary: 'Certificate generation and delivery module for TSP.',
-    stack: ['React', 'Firebase'],
-    domains: ['tspc.vishalpanwar.in'],
-    repos: ['vishalpanwar416/TSP-Certification-module'],
-    vercel: ['tsp-certification-module', 'tspc-api'],
-  },
-  {
-    slug: 'splinkpro', name: 'SplinkPro', category: 'Client', status: 'live',
-    summary: 'Sports platform — athletes, students, AI service, API, web and mobile.',
-    stack: ['Next.js', 'Flutter', 'AWS', 'Terraform', 'Python'],
-    domains: ['splinkpro.ai', 'app.splinkpro.ai'],
-    repos: ['Splink-pro/splink-platform', 'Splink-pro/splinkpro-api', 'Splink-pro/splinkpro-ai', 'Splink-pro/splinkpro-web', 'Splink-pro/splinkpro-mobile', 'Splink-pro/splinkpro-student', 'Splink-pro/splinkpro-site'],
-  },
-  {
-    slug: 'sarai', name: 'Sarai', category: 'Freelance', status: 'maintenance',
-    summary: 'Freelance site with AI search.',
-    domains: ['sarai.vishalpanwar.in'],
-    repos: ['vishalpanwar416/sarai'],
-    vercel: ['sarai'],
-  },
-  {
-    slug: 'sanero', name: 'Sanero Media', category: 'Product', status: 'live',
-    summary: 'Creator and social media agency — site, admin and outreach.',
-    stack: ['Next.js', 'Firebase'],
-    domains: ['sanero.in', 'admin.sanero.in'],
-    repos: ['vishalpanwar416/sanero-website'],
-  },
-  {
-    slug: 'table-tap', name: 'Table Tap', category: 'Product', status: 'live',
-    summary: 'QR ordering for restaurants — customer app, restaurant and admin panels, AI ops.',
-    stack: ['React', 'Supabase', 'Terraform'],
-    domains: ['table-tap.in', 'app.table-tap.in', 'restaurant.table-tap.in', 'admin.table-tap.in'],
-    repos: ['vishalpanwar416/Table-Tap-QR', 'vishalpanwar416/table-tap-AI'],
-    vercel: ['table-tap-qr'],
-  },
-  {
-    slug: 'stacky', name: 'Stacky', category: 'Product', status: 'live',
-    summary: 'Task tracker with an MCP server for Claude.',
-    stack: ['React', 'Firebase', 'MCP'],
-    domains: ['stacky-f7f42.web.app'],
-    repos: ['vishalpanwar416/Stacky'],
-  },
-  {
-    slug: 'penspace', name: 'Penspace', category: 'Product', status: 'paused',
-    summary: 'Flutter reading app — feed, discover, notes.',
-    stack: ['Flutter'],
-    repos: ['Jahanvikumawat14/penspace_clone'],
-  },
-  {
-    slug: 'panwar-travels', name: 'Panwar Travels', category: 'Product', status: 'paused',
-    summary: 'Travel agency site with SEO landing pages.',
-    domains: ['panwartravels.in'],
-    repos: ['vishalpanwar416/panwar-travels'],
-  },
-  {
-    slug: 'multiqr', name: 'MultiQR', category: 'Product', status: 'paused',
-    summary: 'Multi-link QR code generator.',
-    repos: ['vishalpanwar416/multiqr'],
-  },
-  {
-    slug: 'portfolio', name: 'Portfolio', category: 'Personal', status: 'live',
-    summary: 'vishalpanwar.in and this dashboard.',
-    stack: ['React', 'Tailwind', 'Vercel'],
-    domains: ['vishalpanwar.in', 'admin.vishalpanwar.in'],
-    repos: ['vishalpanwar416/Portfolio'],
-    vercel: ['portfolio', 'vishal-s-portfolio'],
-  },
-  {
-    slug: 'leo', name: 'Leo', category: 'Personal', status: 'paused',
-    summary: 'Voice AI companion with memory.',
-    stack: ['Python', 'React'],
-    repos: ['vishalpanwar416/leo'],
-  },
-  {
-    slug: 'hermes', name: 'Hermes', category: 'Utility', status: 'live',
-    summary: 'Personal agent — gateway, dashboard and cron jobs (social, job hunt).',
-    stack: ['Python', 'Node.js', 'systemd'],
-    repos: ['vishalpanwar416/hermes-jobs', 'NousResearch/hermes-agent'],
-  },
-  {
-    slug: 'bezelrig', name: 'Bezelrig', category: 'Utility', status: 'live',
-    summary: 'GNOME desktop rig — chats, wake word, clipboard drop, token usage.',
-    repos: ['vishalpanwar416/bezelrig'],
-  },
-  {
-    slug: 'jarvis', name: 'Jarvis', category: 'Utility', status: 'live',
-    summary: 'Local assistant for this machine.',
-    repos: ['vishalpanwar416/jarvis'],
-  },
-  {
-    slug: 'job-automation', name: 'Job automation', category: 'Automation', status: 'live',
-    summary: 'Naukri / Indeed scrapers, tailored resumes and auto-apply.',
-    repos: ['vishalpanwar416/job-automation'],
-  },
-  {
-    slug: 'media-man', name: 'Media-man', category: 'Automation', status: 'live',
-    summary: 'Scheduled Instagram posts and outreach for Sanero and Table Tap.',
-    stack: ['Node.js', 'systemd'],
-  },
-]
+// Starting point, taken from ~/Development on 2026-11-08 (projects.json is
+// shared with scripts/monitor.mjs). Status is a best guess from recent
+// activity; revenue and clients start empty on purpose.
+export const DEFAULT_PROJECTS = defaultProjects
 
-const EMPTY = { summary: '', stack: [], domains: [], repos: [], vercel: [], revenue: [], clients: [], updates: [], links: [], notes: '' }
+const EMPTY = {
+  summary: '', stack: [], domains: [], repos: [], vercel: [], firebase: [], stacky: [],
+  revenue: [], invoices: [], expenses: [], clients: [], updates: [], links: [], notes: '',
+}
 
 export const projectDocId = (slug) => `proj-${slug}`
 export const slugify = (s) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -206,30 +89,124 @@ export const monthLabel = (key) => {
 // www.* is almost always a redirect to the apex, so it isn't checked separately.
 export const checkable = (hosts) => (hosts || []).filter((h) => !h.startsWith('www.'))
 
+// ── money ──────────────────────────────────────────────
+//
+// Revenue for a month = hand-logged revenue entries + invoices marked paid
+// (counted in the month they were paid). Costs come from expenses: monthly
+// ones every month in range, yearly ones spread over 12 months, one-offs in
+// their month.
+
+// Local date, not UTC — in India UTC is still yesterday until 5:30am.
+export const today = () => new Date(Date.now() - new Date().getTimezoneOffset() * 60e3).toISOString().slice(0, 10)
+export const newId = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+
+export const INVOICE_STATUSES = ['draft', 'sent', 'paid']
+export const invoiceState = (inv) =>
+  inv.status === 'sent' && inv.due && inv.due < today() ? 'overdue' : inv.status || 'draft'
+const paidMonth = (inv) => (inv.paidOn || '').slice(0, 7) || inv.month
+
+export function revenueIn(p, month) {
+  const logged = (p.revenue || []).filter((r) => r.month === month).reduce((t, r) => t + (Number(r.amount) || 0), 0)
+  const paid = (p.invoices || []).filter((i) => i.status === 'paid' && paidMonth(i) === month).reduce((t, i) => t + (Number(i.amount) || 0), 0)
+  return logged + paid
+}
+
+export function costIn(p, month) {
+  let total = 0
+  for (const e of p.expenses || []) {
+    const amount = Number(e.amount) || 0
+    const start = e.start || '0000-00'
+    if (e.cycle === 'once') { if (start === month) total += amount; continue }
+    if (month < start || (e.end && month > e.end)) continue
+    total += e.cycle === 'yearly' ? amount / 12 : amount
+  }
+  return Math.round(total)
+}
+
+export const monthlyCost = (p) => costIn(p, monthKey())
+
+export function outstanding(p) {
+  const open = (p.invoices || []).filter((i) => i.status === 'sent')
+  const overdue = open.filter((i) => invoiceState(i) === 'overdue')
+  const sum = (l) => l.reduce((t, i) => t + (Number(i.amount) || 0), 0)
+  return { amount: sum(open), count: open.length, overdueAmount: sum(overdue), overdueCount: overdue.length }
+}
+
 // ── per-project numbers ────────────────────────────────
 
 export function projectStats(p, checks = {}) {
   const thisMonth = monthKey()
-  const revenue = p.revenue || []
   const clients = p.clients || []
   const active = clients.filter((c) => c.status !== 'past')
   const hostChecks = checkable(p.domains).map((h) => checks[h]).filter(Boolean)
+  const months = new Set([
+    ...(p.revenue || []).map((r) => r.month),
+    ...(p.invoices || []).filter((i) => i.status === 'paid').map(paidMonth),
+  ])
+  const monthRevenue = revenueIn(p, thisMonth)
+  const monthCost = costIn(p, thisMonth)
   return {
-    monthRevenue: revenue.filter((r) => r.month === thisMonth).reduce((s, r) => s + (Number(r.amount) || 0), 0),
-    totalRevenue: revenue.reduce((s, r) => s + (Number(r.amount) || 0), 0),
+    monthRevenue,
+    monthCost,
+    monthProfit: monthRevenue - monthCost,
+    totalRevenue: [...months].reduce((t, m) => t + revenueIn(p, m), 0),
     mrr: active.reduce((s, c) => s + (Number(c.monthly) || 0), 0),
     activeClients: active.length,
     totalClients: clients.length,
     hostsUp: hostChecks.filter((c) => c.up).length,
     hostsChecked: hostChecks.length,
     down: hostChecks.filter((c) => !c.up).length,
+    owed: outstanding(p),
   }
 }
 
 export function revenueByMonth(projects, months) {
-  const totals = Object.fromEntries(months.map((m) => [m, 0]))
-  for (const p of projects) for (const r of p.revenue || []) if (r.month in totals) totals[r.month] += Number(r.amount) || 0
-  return months.map((m) => ({ month: m, amount: totals[m] }))
+  return months.map((m) => {
+    const amount = projects.reduce((t, p) => t + revenueIn(p, m), 0)
+    const cost = projects.reduce((t, p) => t + costIn(p, m), 0)
+    return { month: m, amount, cost, profit: amount - cost }
+  })
+}
+
+// ── renewals: client contracts, domains, SSL ───────────
+
+export const RENEWAL_WARN_DAYS = 30
+
+export function clientRenewals(projects, withinDays = RENEWAL_WARN_DAYS) {
+  return projects.flatMap((p) => (p.clients || [])
+    .filter((c) => c.status !== 'past' && c.contractEnd)
+    .map((c) => ({ project: p, client: c, days: daysUntil(c.contractEnd) }))
+    .filter((r) => r.days !== null && r.days <= withinDays))
+    .sort((a, b) => a.days - b.days)
+}
+
+// Registrable domain for a host: sanero.in for admin.sanero.in. Hosting
+// platform subdomains (x.vercel.app, x.web.app) have nothing to renew.
+const TWO_PART_SUFFIXES = ['co.in', 'net.in', 'org.in', 'firm.in', 'gen.in', 'ind.in', 'co.uk', 'org.uk', 'com.au', 'co.nz', 'com.br']
+const PLATFORM_SUFFIXES = ['vercel.app', 'web.app', 'firebaseapp.com', 'netlify.app', 'github.io', 'pages.dev', 'onrender.com', 'herokuapp.com', 'run.app']
+export function apexDomain(host) {
+  const h = String(host || '').toLowerCase()
+  if (PLATFORM_SUFFIXES.some((s) => h === s || h.endsWith(`.${s}`))) return null
+  const parts = h.split('.')
+  if (parts.length < 2) return null
+  const lastTwo = parts.slice(-2).join('.')
+  return TWO_PART_SUFFIXES.includes(lastTwo) ? parts.slice(-3).join('.') : lastTwo
+}
+
+// ── CSV export ─────────────────────────────────────────
+
+export function downloadCsv(filename, rows) {
+  if (!rows.length) return
+  const cols = Object.keys(rows[0])
+  const esc = (v) => {
+    const s = v === null || v === undefined ? '' : String(v)
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+  }
+  const csv = [cols.join(','), ...rows.map((r) => cols.map((c) => esc(r[c])).join(','))].join('\n')
+  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }))
+  const a = Object.assign(document.createElement('a'), { href: url, download: filename })
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 // ── API ────────────────────────────────────────────────
@@ -241,13 +218,34 @@ export async function api(path, options = {}) {
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', ...options.headers },
   })
   const body = await res.json().catch(() => ({}))
-  if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`)
+  if (!res.ok) throw Object.assign(new Error(body.error || `HTTP ${res.status}`), { status: res.status })
   return body
 }
 
 export const saveDoc = (id, patch) =>
   setDoc(doc(db, SITES_COLLECTION, id), { ...patch, updatedAt: Date.now() }, { merge: true })
 export const removeDoc = (id) => deleteDoc(doc(db, SITES_COLLECTION, id))
+
+/**
+ * GET an admin API path; `path` null skips the call. A 503 means the
+ * integration isn't configured yet, which pages show as a "connect" hint
+ * rather than an error.
+ */
+export function useApi(path) {
+  const [state, setState] = useState({ data: null, error: null, loading: !!path, notConfigured: false })
+  const [tick, setTick] = useState(0)
+  useEffect(() => {
+    if (!path) { setState({ data: null, error: null, loading: false, notConfigured: false }); return }
+    let live = true
+    setState((s) => ({ ...s, loading: true }))
+    api(path)
+      .then((data) => live && setState({ data, error: null, loading: false, notConfigured: false }))
+      .catch((e) => live && setState({ data: null, error: e.message, loading: false, notConfigured: e.status === 503 }))
+    return () => { live = false }
+  }, [path, tick])
+  const reload = useCallback(() => setTick((t) => t + 1), [])
+  return { ...state, reload }
+}
 
 // ── the one hook the shell uses ────────────────────────
 
@@ -298,6 +296,20 @@ export function useAdminData() {
       .filter((p) => !p.deleted)
   }, [docs, vercel])
 
+  const settings = docs.settings || {}
+
+  // Registrable domains behind every project and Vercel domain, for renewals.
+  const apexKey = useMemo(() => {
+    const set = new Set()
+    projects.forEach((p) => (p.domains || []).forEach((h) => { const a = apexDomain(h); if (a) set.add(a) }))
+    vercel.forEach((v) => (v.domains || []).forEach((h) => { const a = apexDomain(h); if (a) set.add(a) }))
+    return [...set].sort().join(',')
+  }, [projects, vercel])
+  const domains = useApi(apexKey ? `/api/admin/domains?domains=${encodeURIComponent(apexKey)}` : null)
+  const integrations = useApi('/api/admin/status')
+  const traffic = useApi('/api/admin/traffic')
+  const stacky = useApi('/api/admin/stacky')
+
   // Everything worth pinging: project domains plus Vercel custom domains and
   // hand-added sites from the Sites view.
   const hostKey = useMemo(() => {
@@ -333,7 +345,15 @@ export function useAdminData() {
     return () => clearInterval(t)
   }, [runChecks])
 
-  const refresh = useCallback(() => { loadVercel(); runChecks() }, [loadVercel, runChecks])
+  const { reload: reloadDomains } = domains
+  const { reload: reloadTraffic } = traffic
+  const { reload: reloadStacky } = stacky
+  const refresh = useCallback(() => {
+    loadVercel(); runChecks(); reloadDomains(); reloadTraffic(); reloadStacky()
+  }, [loadVercel, runChecks, reloadDomains, reloadTraffic, reloadStacky])
 
-  return { projects, vercel, vercelError, docs, docsReady, checks, checking, lastChecked, refresh }
+  return {
+    projects, vercel, vercelError, docs, docsReady, checks, checking, lastChecked, refresh,
+    settings, domains, integrations, traffic, stacky,
+  }
 }

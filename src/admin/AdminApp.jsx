@@ -1,14 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
-import { Globe, LayoutDashboard, LogOut, Menu, Plus, RefreshCw, ShieldAlert, X } from 'lucide-react'
+import { CalendarClock, Globe, IndianRupee, LayoutDashboard, LogOut, Menu, Plus, RefreshCw, Search, Settings, ShieldAlert, X } from 'lucide-react'
 import { auth } from './firebase'
-import { GROUPS, projectDocId, saveDoc, slugify, timeAgo, useAdminData } from './data'
+import { GROUPS, projectDocId, projectStats, saveDoc, slugify, timeAgo, useAdminData } from './data'
 import { Button, Glass, Input, StatusDot, cx } from './ui'
 import OverviewView from './OverviewView'
 import ProjectView from './ProjectView'
 import SitesView from './SitesView'
+import MoneyView from './MoneyView'
+import RenewalsView, { renewalAlerts } from './RenewalsView'
+import SettingsView from './SettingsView'
+import CommandPalette, { useHotkey } from './CommandPalette'
 
-// ── routing: #/, #/sites, #/p/<slug> ───────────────────
+// ── routing: #/, #/money, #/renewals, #/sites, #/settings, #/p/<slug> ──
 
 function useHashRoute() {
   const read = () => window.location.hash.replace(/^#/, '') || '/'
@@ -33,7 +37,7 @@ const Backdrop = () => (
 
 // ── sidebar ────────────────────────────────────────────
 
-function NavItem({ active, onClick, children, dim }) {
+function NavItem({ active, onClick, children, dim, badge }) {
   return (
     <button
       onClick={onClick}
@@ -44,11 +48,20 @@ function NavItem({ active, onClick, children, dim }) {
       )}
     >
       {children}
+      {badge > 0 && <span className="ml-auto rounded-full bg-amber-400/15 px-1.5 text-[10px] tabular-nums text-amber-300">{badge}</span>}
     </button>
   )
 }
 
-function Sidebar({ projects, route, go, onNavigate }) {
+export const PAGES = [
+  { to: '/', label: 'Overview', icon: LayoutDashboard },
+  { to: '/money', label: 'Money', icon: IndianRupee },
+  { to: '/renewals', label: 'Renewals', icon: CalendarClock },
+  { to: '/sites', label: 'Sites & uptime', icon: Globe },
+  { to: '/settings', label: 'Settings', icon: Settings },
+]
+
+function Sidebar({ projects, route, go, onNavigate, badges = {} }) {
   const [adding, setAdding] = useState(false)
   const [name, setName] = useState('')
   const nav = (to) => { go(to); onNavigate?.() }
@@ -75,8 +88,9 @@ function Sidebar({ projects, route, go, onNavigate }) {
       </div>
 
       <div className="space-y-0.5 px-1.5">
-        <NavItem active={route === '/'} onClick={() => nav('/')}><LayoutDashboard size={15} /> Overview</NavItem>
-        <NavItem active={route === '/sites'} onClick={() => nav('/sites')}><Globe size={15} /> Sites & uptime</NavItem>
+        {PAGES.map(({ to, label, icon: Icon }) => (
+          <NavItem key={to} active={route === to} onClick={() => nav(to)} badge={badges[to]}><Icon size={15} /> {label}</NavItem>
+        ))}
       </div>
 
       <div className="mt-5 flex-1 space-y-4 overflow-y-auto px-1.5 pb-4">
@@ -130,6 +144,15 @@ function Shell({ user }) {
   const data = useAdminData()
   const [route, go] = useHashRoute()
   const [drawer, setDrawer] = useState(false)
+  const [palette, setPalette] = useState(false)
+  const openPalette = useCallback(() => setPalette(true), [])
+  useHotkey(openPalette)
+  const install = useInstallPrompt()
+
+  const alerts = renewalAlerts(data)
+  const overdue = data.projects.reduce((t, p) => t + projectStats(p).owed.overdueCount, 0)
+  const down = Object.values(data.checks).filter((c) => !c.up).length
+  const badges = { '/renewals': alerts.count, '/money': overdue, '/sites': down }
 
   const slug = route.startsWith('/p/') ? route.slice(3) : null
   const project = slug ? data.projects.find((p) => p.slug === slug) : null
@@ -139,6 +162,15 @@ function Shell({ user }) {
   if (route === '/sites') {
     title = 'Sites & uptime'
     view = <SitesView data={data} />
+  } else if (route === '/money') {
+    title = 'Money'
+    view = <MoneyView data={data} go={go} />
+  } else if (route === '/renewals') {
+    title = 'Renewals'
+    view = <RenewalsView data={data} go={go} />
+  } else if (route === '/settings') {
+    title = 'Settings'
+    view = <SettingsView data={data} install={install} />
   } else if (slug) {
     title = project?.name || 'Project'
     view = project
@@ -153,7 +185,7 @@ function Shell({ user }) {
       <Backdrop />
 
       <aside className="fixed inset-y-3 left-3 hidden w-60 lg:block">
-        <Glass className="h-full p-3"><Sidebar projects={data.projects} route={route} go={go} /></Glass>
+        <Glass className="h-full p-3"><Sidebar projects={data.projects} route={route} go={go} badges={badges} /></Glass>
       </aside>
 
       {drawer && (
@@ -162,7 +194,7 @@ function Shell({ user }) {
           <div className="absolute inset-y-3 left-3 w-64 rounded-2xl bg-zinc-950/80">
             <Glass className="h-full p-3">
               <button onClick={() => setDrawer(false)} className="absolute right-3 top-3 text-zinc-500 hover:text-white" aria-label="Close menu"><X size={18} /></button>
-              <Sidebar projects={data.projects} route={route} go={go} onNavigate={() => setDrawer(false)} />
+              <Sidebar projects={data.projects} route={route} go={go} badges={badges} onNavigate={() => setDrawer(false)} />
             </Glass>
           </div>
         </div>
@@ -178,6 +210,10 @@ function Shell({ user }) {
                 {data.lastChecked ? `Uptime checked ${timeAgo(data.lastChecked)} · every 5 min` : 'Checking sites…'}
               </div>
             </div>
+            <button onClick={openPalette} className="hidden items-center gap-2 rounded-lg border border-white/10 bg-black/30 px-2.5 py-1.5 text-xs text-zinc-500 hover:text-zinc-200 md:flex">
+              <Search size={13} /> Search <kbd className="rounded border border-white/10 px-1 text-[10px]">Ctrl K</kbd>
+            </button>
+            <Button variant="glass" onClick={openPalette} className="md:hidden" aria-label="Search"><Search size={14} /></Button>
             <Button variant="glass" onClick={data.refresh} disabled={data.checking}>
               <RefreshCw size={14} className={data.checking ? 'animate-spin' : ''} /> <span className="hidden sm:inline">Refresh</span>
             </Button>
@@ -194,8 +230,53 @@ function Shell({ user }) {
           {view}
         </main>
       </div>
+
+      <CommandPalette
+        open={palette}
+        onClose={() => setPalette(false)}
+        pages={PAGES}
+        projects={data.projects}
+        go={go}
+        actions={[{ label: 'Refresh everything', icon: RefreshCw, run: data.refresh }, { label: 'Sign out', icon: LogOut, run: () => signOut(auth) }]}
+      />
     </div>
   )
+}
+
+// ── installable app ────────────────────────────────────
+
+// Point the page at the admin manifest (the build ships the portfolio's), so
+// "Install" gives a VP Control app that opens on the dashboard.
+function useAdminManifest() {
+  useEffect(() => {
+    let link = document.querySelector('link[rel="manifest"]')
+    if (!link) {
+      link = Object.assign(document.createElement('link'), { rel: 'manifest' })
+      document.head.appendChild(link)
+    }
+    link.href = '/admin.webmanifest'
+    const meta = (name, content) => {
+      let m = document.querySelector(`meta[name="${name}"]`)
+      if (!m) { m = Object.assign(document.createElement('meta'), { name }); document.head.appendChild(m) }
+      m.content = content
+    }
+    meta('theme-color', '#000000')
+    meta('apple-mobile-web-app-capable', 'yes')
+    meta('apple-mobile-web-app-status-bar-style', 'black-translucent')
+    meta('apple-mobile-web-app-title', 'VP Control')
+  }, [])
+}
+
+function useInstallPrompt() {
+  const [evt, setEvt] = useState(null)
+  useEffect(() => {
+    const on = (e) => { e.preventDefault(); setEvt(e) }
+    const done = () => setEvt(null)
+    window.addEventListener('beforeinstallprompt', on)
+    window.addEventListener('appinstalled', done)
+    return () => { window.removeEventListener('beforeinstallprompt', on); window.removeEventListener('appinstalled', done) }
+  }, [])
+  return evt ? async () => { evt.prompt(); await evt.userChoice; setEvt(null) } : null
 }
 
 // ── auth gate ──────────────────────────────────────────
@@ -210,6 +291,7 @@ function Centered({ children }) {
 }
 
 export default function AdminApp() {
+  useAdminManifest()
   // undefined = still resolving, null = signed out
   const [user, setUser] = useState(undefined)
   const [allowed, setAllowed] = useState(false)
