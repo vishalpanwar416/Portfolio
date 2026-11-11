@@ -42,7 +42,7 @@ export default function ProjectsView({ data, go }) {
         return (
           <section key={g.title}>
             <h2 className="mb-2.5 text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-500">{g.title} · {items.length}</h2>
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
               {items.map((p) => <ProjectTile key={p.slug} p={p} checks={data.checks} go={go} traffic={data.traffic} />)}
             </div>
           </section>

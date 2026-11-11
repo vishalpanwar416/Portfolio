@@ -7,7 +7,7 @@ import {
   monthLabel, newId, projectStats, removeDoc, revenueByMonth, saveDoc, SSL_WARN_DAYS, timeAgo, today,
 } from './data'
 import {
-  BarChart, Button, Empty, Input, Section, Select, Stat, StatusPill, Tag, Textarea, UpDot, cx,
+  BarChart, Button, Empty, FIELD_MAIN, Input, Section, Select, Stat, StatusPill, Tag, Textarea, UpDot, cx, formRow,
 } from './ui'
 import { Clients, Expenses, Invoices } from './MoneySections'
 import { CloudCosts, GitHubActivity, StackyTasks, Usage } from './IntegrationSections'
@@ -35,11 +35,11 @@ function Revenue({ p, save }) {
   return (
     <Section title="Revenue" action={<span className="text-[11px] text-zinc-600">paid invoices add here automatically</span>}>
       {(entries.length > 0 || hasPaid) && <div className="mb-5"><BarChart data={chart} format={money} height={110} /></div>}
-      <div className="flex flex-wrap gap-2">
-        <Input type="month" value={row.month} onChange={(e) => setRow({ ...row, month: e.target.value })} className="w-40" />
-        <Input value={row.amount} onChange={(e) => setRow({ ...row, amount: e.target.value })} placeholder="Amount ₹" inputMode="numeric" className="w-32" />
-        <Input value={row.note} onChange={(e) => setRow({ ...row, note: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && add()} placeholder="Note (invoice, client…)" className="min-w-0 flex-1" />
-        <Button variant="glass" onClick={add}><Plus size={14} /> Add</Button>
+      <div className={formRow}>
+        <Input type="month" value={row.month} onChange={(e) => setRow({ ...row, month: e.target.value })} className="min-w-0 sm:w-40" />
+        <Input value={row.amount} onChange={(e) => setRow({ ...row, amount: e.target.value })} placeholder="Amount ₹" inputMode="numeric" className="min-w-0 sm:w-32" />
+        <Input value={row.note} onChange={(e) => setRow({ ...row, note: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && add()} placeholder="Note (invoice, client…)" className={FIELD_MAIN} />
+        <Button variant="glass" onClick={add} className="col-span-2"><Plus size={14} /> Add</Button>
       </div>
       {entries.length === 0 ? (
         <div className="mt-4"><Empty>No income logged for {p.name} yet.</Empty></div>
@@ -50,7 +50,7 @@ function Revenue({ p, save }) {
               <span className="w-20 shrink-0 text-zinc-500">{monthLabel(r.month)} {r.month.slice(0, 4)}</span>
               <span className="w-28 shrink-0 tabular-nums text-zinc-100">{money(r.amount)}</span>
               <span className="min-w-0 flex-1 truncate text-zinc-400">{r.note}</span>
-              <button onClick={() => save({ revenue: p.revenue.filter((x) => x.id !== r.id) })} className="text-zinc-600 opacity-0 hover:text-red-400 group-hover:opacity-100" aria-label="Remove entry">
+              <button onClick={() => save({ revenue: p.revenue.filter((x) => x.id !== r.id) })} className="text-zinc-600 opacity-0 hover:text-red-400 group-hover:opacity-100 [@media(hover:none)]:opacity-100" aria-label="Remove entry">
                 <Trash2 size={13} />
               </button>
             </li>
@@ -91,10 +91,10 @@ function Updates({ p, save }) {
 
   return (
     <Section title="Updates">
-      <div className="flex flex-wrap gap-2">
-        <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-40" />
-        <Input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && add()} placeholder="What happened? Shipped, signed, paused…" className="min-w-0 flex-1" />
-        <Button variant="glass" onClick={add}><Plus size={14} /> Log</Button>
+      <div className={formRow}>
+        <Input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && add()} placeholder="What happened? Shipped, signed, paused…" className={cx(FIELD_MAIN, 'sm:order-2')} />
+        <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="min-w-0 sm:order-1 sm:w-40" />
+        <Button variant="glass" onClick={add} className="sm:order-3"><Plus size={14} /> Log</Button>
       </div>
       {items.length === 0 ? (
         <div className="mt-4"><Empty>No updates yet{p.vercelProjects.length ? '' : ' — link a Vercel project to see deploys here'}.</Empty></div>
@@ -110,7 +110,7 @@ function Updates({ p, save }) {
                   {it.text}
                 </span>
                 {it.update && (
-                  <button onClick={() => save({ updates: p.updates.filter((u) => u.id !== it.update.id) })} className="text-zinc-600 opacity-0 hover:text-red-400 group-hover:opacity-100" aria-label="Remove update">
+                  <button onClick={() => save({ updates: p.updates.filter((u) => u.id !== it.update.id) })} className="text-zinc-600 opacity-0 hover:text-red-400 group-hover:opacity-100 [@media(hover:none)]:opacity-100" aria-label="Remove update">
                     <Trash2 size={13} />
                   </button>
                 )}
@@ -228,7 +228,7 @@ function EditDetails({ p, save, onClose, go }) {
   const label = 'mb-1 block text-xs text-zinc-500'
   return (
     <Section title="Edit details" action={<Button onClick={onClose}>Cancel</Button>}>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <label><span className={label}>Name</span><Input value={f.name} onChange={set('name')} className="w-full" /></label>
         <label><span className={label}>Category</span>
           <Select value={f.category} onChange={set('category')} className="w-full">
@@ -308,12 +308,12 @@ export default function ProjectView({ project: p, data, go }) {
         <Stat label="Sites up" value={s.hostsChecked ? `${s.hostsUp}/${s.hostsChecked}` : '—'} tone={s.down ? 'text-red-400' : 'text-zinc-50'} icon={Globe} />
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <Revenue p={p} save={save} />
         <Clients p={p} save={save} />
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <Invoices p={p} save={save} />
         <Expenses p={p} save={save} />
       </div>
@@ -325,18 +325,18 @@ export default function ProjectView({ project: p, data, go }) {
       <ProjectApps p={p} apps={data.apps} />
 
       {((p.supabase || []).length > 0 || (p.services || []).length > 0) && (
-        <div className={cx('grid gap-5', (p.supabase || []).length > 0 && (p.services || []).length > 0 && 'xl:grid-cols-2')}>
+        <div className={cx('grid grid-cols-1 gap-5', (p.supabase || []).length > 0 && (p.services || []).length > 0 && 'xl:grid-cols-2')}>
           <ProjectDatabases p={p} supabase={data.supabase} go={go} />
           <ProjectServices p={p} docs={data.docs} />
         </div>
       )}
 
-      <div className="grid gap-5 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <StackyTasks p={p} stacky={data.stacky} go={go} />
         <Usage p={p} traffic={data.traffic} go={go} />
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-5">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-5">
         <div className="space-y-5 xl:col-span-3">
           <Updates p={p} save={save} />
           <GitHubActivity p={p} />

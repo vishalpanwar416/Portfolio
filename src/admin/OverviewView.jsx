@@ -91,7 +91,7 @@ export default function OverviewView({ data, go }) {
         <Stat label="Sites down" value={sum('down')} tone={sum('down') ? 'text-red-400' : 'text-emerald-300'} sub={data.lastChecked ? `checked ${timeAgo(data.lastChecked)}` : 'checking…'} icon={Activity} />
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <GoalCard settings={data.settings} thisMonth={cur.amount} />
         <Section
           title={`Needs attention${alerts.length ? ` · ${alerts.length}` : ''}`}
@@ -114,7 +114,7 @@ export default function OverviewView({ data, go }) {
         </Section>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <Section title="Revenue · last 12 months" className="lg:col-span-2">
           {yearTotal === 0 ? <Empty>No revenue yet. Log income on a project, mark invoices paid, or connect Razorpay.</Empty>
             : <BarChart data={monthly.map((m) => ({ label: monthLabel(m.month), value: m.amount }))} format={money} />}
@@ -124,7 +124,7 @@ export default function OverviewView({ data, go }) {
         </Section>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
         <Section title={`Live projects · ${live.length}`} className="lg:col-span-3" action={<button onClick={() => go('/projects')} className="inline-flex items-center gap-1 text-xs text-zinc-500 hover:text-white">All projects <ArrowRight size={12} /></button>}>
           <ul className="divide-y divide-white/[0.05]">
             {live.map(({ p, s }) => (

@@ -75,7 +75,7 @@ function NavItem({ active, onClick, children, badge, badgeTone = 'amber' }) {
     <button
       onClick={onClick}
       className={cx(
-        'relative flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left text-sm transition',
+        'relative flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-left text-sm transition lg:py-1.5',
         active ? 'bg-white/[0.09] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]' : 'text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-100'
       )}
     >
@@ -177,25 +177,26 @@ function Sidebar({ projects, route, go, onNavigate, badges, pinned }) {
           <NavItem onClick={() => setAdding(true)}><Plus size={15} /> New project</NavItem>
         )}
         <NavItem active={route === SETTINGS.to} onClick={() => nav(SETTINGS.to)}><Settings size={15} /> {SETTINGS.label}</NavItem>
+        {onNavigate && <NavItem onClick={() => signOut(auth)}><LogOut size={15} /> Sign out</NavItem>}
       </div>
     </div>
   )
 }
 
-// Phone: the five main places as a bottom bar; the rest in the menu.
+// Phone: the main places as a bottom bar; Apps, projects and settings in More.
 function BottomBar({ route, go, onMenu, badges }) {
-  const items = [PAGES[0], PAGES[1], PAGES[2], PAGES[3]]
+  const items = [PAGES[0], PAGES[1], PAGES[2], PAGES[3], { ...PAGES[5], label: 'Infra' }]
   return (
     <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-white/[0.08] bg-black/70 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden">
-      <div className="grid grid-cols-5">
+      <div className="grid grid-cols-6">
         {items.map((pg) => (
-          <button key={pg.to} onClick={() => go(pg.to)} className={cx('relative flex flex-col items-center gap-0.5 py-2 text-[10px]', isActive(route, pg) ? 'text-white' : 'text-zinc-500')}>
+          <button key={pg.to} onClick={() => go(pg.to)} className={cx('relative flex flex-col items-center gap-0.5 pb-1.5 pt-2 text-[10px]', isActive(route, pg) ? 'text-white' : 'text-zinc-500')}>
             <pg.icon size={19} />
             {pg.label}
-            {badges[pg.to] > 0 && <span className={cx('absolute right-[26%] top-1 h-2 w-2 rounded-full', pg.to === '/alerts' && badges.critical ? 'bg-red-500' : 'bg-amber-400')} />}
+            {badges[pg.to] > 0 && <span className={cx('absolute right-[24%] top-1.5 h-2 w-2 rounded-full', pg.to === '/alerts' && badges.critical ? 'bg-red-500' : 'bg-amber-400')} />}
           </button>
         ))}
-        <button onClick={onMenu} className="flex flex-col items-center gap-0.5 py-2 text-[10px] text-zinc-500"><Menu size={19} /> More</button>
+        <button onClick={onMenu} className="flex flex-col items-center gap-0.5 pb-1.5 pt-2 text-[10px] text-zinc-500"><Menu size={19} /> More</button>
       </div>
     </nav>
   )
@@ -207,6 +208,8 @@ function Shell({ user }) {
   const data = useAdminData()
   const [route, go] = useHashRoute()
   const [drawer, setDrawer] = useState(false)
+  // Any navigation (a link, the phone's back gesture) closes the menu.
+  useEffect(() => setDrawer(false), [route])
   const [palette, setPalette] = useState(false)
   const openPalette = useCallback(() => setPalette(true), [])
   useHotkey(openPalette)
@@ -256,7 +259,7 @@ function Shell({ user }) {
       {drawer && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDrawer(false)} />
-          <div className="absolute inset-y-3 left-3 w-72 max-w-[85vw] rounded-2xl bg-zinc-950/85">
+          <div className="absolute bottom-3 left-3 top-[max(0.75rem,env(safe-area-inset-top))] w-72 max-w-[85vw] rounded-2xl bg-zinc-950/85">
             <Glass className="h-full p-3">
               <button onClick={() => setDrawer(false)} className="absolute right-3 top-3 z-10 text-zinc-500 hover:text-white" aria-label="Close menu"><X size={18} /></button>
               <Sidebar projects={data.projects} route={route} go={go} badges={badges} pinned={pinned} onNavigate={() => setDrawer(false)} />
@@ -265,8 +268,8 @@ function Shell({ user }) {
         </div>
       )}
 
-      <div className="pb-20 lg:pb-0 lg:pl-[16.5rem]">
-        <div className="sticky top-0 z-30 px-3 pt-3 lg:px-4">
+      <div className="pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-0 lg:pl-[16.5rem]">
+        <div className="sticky top-0 z-30 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] lg:px-4">
           <Glass className="flex items-center gap-3 px-4 py-2.5">
             <div className="min-w-0 flex-1">
               <div className="flex items-baseline gap-2">
@@ -330,6 +333,7 @@ function useAdminManifest() {
       if (!m) { m = Object.assign(document.createElement('meta'), { name }); document.head.appendChild(m) }
       m.content = content
     }
+    meta('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover')
     meta('theme-color', '#000000')
     meta('apple-mobile-web-app-capable', 'yes')
     meta('apple-mobile-web-app-status-bar-style', 'black-translucent')

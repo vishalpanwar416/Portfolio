@@ -5,7 +5,7 @@ import { ChevronDown, Mail, Phone, Plus, Receipt, Trash2 } from 'lucide-react'
 import {
   RENEWAL_WARN_DAYS, costIn, daysUntil, invoiceState, money, moneyShort, monthKey, monthLabel, newId, today,
 } from './data'
-import { Badge, Button, Empty, Input, Label, Section, Select, Textarea, cx } from './ui'
+import { Badge, Button, Empty, FIELD_MAIN, Input, Label, Section, Select, Textarea, cx, formRow } from './ui'
 
 const num = (v) => Number(String(v).replace(/[^\d.-]/g, '')) || 0
 const addDays = (n) => {
@@ -36,7 +36,7 @@ function ClientDetails({ c, update }) {
     if (Object.keys(next).some((k) => String(next[k] ?? '') !== String(c[k] ?? ''))) update(next)
   }
   return (
-    <div className="grid gap-3 pb-3 pt-1 sm:grid-cols-2" onBlur={commit}>
+    <div className="grid grid-cols-1 gap-3 pb-3 pt-1 sm:grid-cols-2" onBlur={commit}>
       <label><Label>Company</Label><Input value={f.company} onChange={set('company')} className="w-full" /></label>
       <label><Label>₹ / month</Label><Input value={f.monthly} onChange={set('monthly')} inputMode="numeric" className="w-full" /></label>
       <label><Label>Email</Label><Input type="email" value={f.email} onChange={set('email')} className="w-full" /></label>
@@ -63,11 +63,11 @@ export function Clients({ p, save }) {
 
   return (
     <Section title="Clients">
-      <div className="flex flex-wrap gap-2">
-        <Input value={row.name} onChange={(e) => setRow({ ...row, name: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && add()} placeholder="Client name" className="min-w-0 flex-1" />
-        <Input value={row.monthly} onChange={(e) => setRow({ ...row, monthly: e.target.value })} placeholder="₹ / month" inputMode="numeric" className="w-28" />
-        <Input type="month" value={row.since} onChange={(e) => setRow({ ...row, since: e.target.value })} className="w-40" />
-        <Button variant="glass" onClick={add}><Plus size={14} /> Add</Button>
+      <div className={formRow}>
+        <Input value={row.name} onChange={(e) => setRow({ ...row, name: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && add()} placeholder="Client name" className={FIELD_MAIN} />
+        <Input value={row.monthly} onChange={(e) => setRow({ ...row, monthly: e.target.value })} placeholder="₹ / month" inputMode="numeric" className="min-w-0 sm:w-28" />
+        <Input type="month" value={row.since} onChange={(e) => setRow({ ...row, since: e.target.value })} className="min-w-0 sm:w-40" title="Client since" />
+        <Button variant="glass" onClick={add} className="col-span-2"><Plus size={14} /> Add</Button>
       </div>
       {clients.length === 0 ? (
         <div className="mt-4"><Empty>No clients yet.</Empty></div>
@@ -77,20 +77,20 @@ export function Clients({ p, save }) {
             <li key={c.id} className={cx('group', c.status === 'past' && 'opacity-50')}>
               <div className="flex items-center gap-3 py-2 text-sm">
                 <span className={cx('h-1.5 w-1.5 shrink-0 rounded-full', c.status === 'past' ? 'bg-zinc-600' : 'bg-emerald-400')} />
-                <button onClick={() => setOpen(open === c.id ? null : c.id)} className="flex min-w-0 flex-1 items-center gap-2 text-left">
-                  <span className="truncate text-zinc-100">{c.name}</span>
+                <button onClick={() => setOpen(open === c.id ? null : c.id)} className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-0.5 text-left">
+                  <span className="max-w-full truncate text-zinc-100">{c.name}</span>
                   {c.company && <span className="hidden truncate text-xs text-zinc-500 sm:inline">{c.company}</span>}
                   {c.status !== 'past' && renewalBadge(c.contractEnd)}
                   <ChevronDown size={13} className={cx('shrink-0 text-zinc-600 transition', open === c.id && 'rotate-180')} />
                 </button>
-                {c.email && <a href={`mailto:${c.email}`} className="text-zinc-500 hover:text-white" title={c.email}><Mail size={13} /></a>}
-                {c.phone && <a href={`tel:${c.phone}`} className="text-zinc-500 hover:text-white" title={c.phone}><Phone size={13} /></a>}
+                {c.email && <a href={`mailto:${c.email}`} className="-m-1 p-1 text-zinc-500 hover:text-white" title={c.email}><Mail size={13} /></a>}
+                {c.phone && <a href={`tel:${c.phone}`} className="-m-1 p-1 text-zinc-500 hover:text-white" title={c.phone}><Phone size={13} /></a>}
                 <span className="shrink-0 tabular-nums text-zinc-300">{c.monthly ? `${moneyShort(c.monthly)}/mo` : '—'}</span>
                 <span className="hidden w-20 shrink-0 text-right text-xs text-zinc-500 sm:block">since {c.since ? `${monthLabel(c.since)} ${c.since.slice(2, 4)}` : '—'}</span>
-                <button onClick={() => update(c.id, { status: c.status === 'past' ? 'active' : 'past' })} className="w-14 shrink-0 text-right text-xs text-zinc-500 hover:text-zinc-200">
+                <button onClick={() => update(c.id, { status: c.status === 'past' ? 'active' : 'past' })} className="shrink-0 text-right text-xs text-zinc-500 hover:text-zinc-200 sm:w-14">
                   {c.status === 'past' ? 'Restore' : 'End'}
                 </button>
-                <button onClick={() => save({ clients: p.clients.filter((x) => x.id !== c.id) })} className="text-zinc-600 opacity-0 hover:text-red-400 group-hover:opacity-100" aria-label="Remove client">
+                <button onClick={() => save({ clients: p.clients.filter((x) => x.id !== c.id) })} className="text-zinc-600 opacity-0 hover:text-red-400 group-hover:opacity-100 [@media(hover:none)]:opacity-100" aria-label="Remove client">
                   <Trash2 size={13} />
                 </button>
               </div>
@@ -156,12 +156,12 @@ export function Invoices({ p, save }) {
         <Button variant="glass" onClick={billMonth}><Receipt size={14} /> Bill {monthLabel(monthKey())} ({billable.length})</Button>
       )}
     >
-      <div className="flex flex-wrap gap-2">
-        <Input list={`clients-${p.slug}`} value={row.client} onChange={(e) => pickClient(e.target.value)} placeholder="Client" className="min-w-0 flex-1" />
+      <div className={formRow}>
+        <Input list={`clients-${p.slug}`} value={row.client} onChange={(e) => pickClient(e.target.value)} placeholder="Client" className={FIELD_MAIN} />
         <datalist id={`clients-${p.slug}`}>{activeClients.map((c) => <option key={c.id} value={c.name} />)}</datalist>
-        <Input type="month" value={row.month} onChange={(e) => setRow({ ...row, month: e.target.value })} className="w-36" title="Billing month" />
-        <Input value={row.amount} onChange={(e) => setRow({ ...row, amount: e.target.value })} placeholder="₹" inputMode="numeric" className="w-24" />
-        <Input type="date" value={row.due} onChange={(e) => setRow({ ...row, due: e.target.value })} className="w-36" title="Due date" />
+        <Input type="month" value={row.month} onChange={(e) => setRow({ ...row, month: e.target.value })} className="min-w-0 sm:w-36" title="Billing month" />
+        <Input value={row.amount} onChange={(e) => setRow({ ...row, amount: e.target.value })} placeholder="₹" inputMode="numeric" className="min-w-0 sm:w-24" />
+        <Input type="date" value={row.due} onChange={(e) => setRow({ ...row, due: e.target.value })} className="min-w-0 sm:w-36" title="Due date" />
         <Button variant="glass" onClick={add}><Plus size={14} /> Add</Button>
       </div>
       {sorted.length === 0 ? (
@@ -172,15 +172,18 @@ export function Invoices({ p, save }) {
             const st = invoiceState(i)
             return (
               <li key={i.id} className="group flex flex-wrap items-center gap-x-3 gap-y-1 py-2 text-sm">
-                <span className="w-28 shrink-0 font-mono text-xs text-zinc-500">{i.number}</span>
-                <span className="min-w-0 flex-1 truncate text-zinc-200">{i.client || '—'} <span className="text-xs text-zinc-500">· {monthText(i.month)}</span></span>
+                <span className="hidden w-28 shrink-0 font-mono text-xs text-zinc-500 sm:block">{i.number}</span>
+                <span className="min-w-[55%] flex-1 sm:min-w-[35%]">
+                  <span className="block truncate text-zinc-200">{i.client || '—'} <span className="hidden text-xs text-zinc-500 sm:inline">· {monthText(i.month)}</span></span>
+                  <span className="block truncate text-xs text-zinc-500 sm:hidden"><span className="font-mono">{i.number}</span> · {monthText(i.month)}</span>
+                </span>
                 <span className="w-24 shrink-0 text-right tabular-nums text-zinc-100">{money(i.amount)}</span>
                 <Badge tone={STATE_TONE[st]}>{st}{st === 'paid' && i.paidOn ? ` ${i.paidOn.slice(5)}` : ''}{(st === 'sent' || st === 'overdue') && i.due ? ` · due ${i.due.slice(5)}` : ''}</Badge>
                 <span className="flex shrink-0 gap-1">
                   {i.status === 'draft' && <Button className="px-2 py-0.5 text-xs" onClick={() => update(i.id, { status: 'sent', issued: today() })}>Mark sent</Button>}
                   {i.status === 'sent' && <Button className="px-2 py-0.5 text-xs" onClick={() => update(i.id, { status: 'paid', paidOn: today() })}>Mark paid</Button>}
-                  {i.status === 'paid' && <Button className="px-2 py-0.5 text-xs opacity-0 group-hover:opacity-100" onClick={() => update(i.id, { status: 'sent', paidOn: null })}>Undo</Button>}
-                  <button onClick={() => save({ invoices: invoices.filter((x) => x.id !== i.id) })} className="px-1 text-zinc-600 opacity-0 hover:text-red-400 group-hover:opacity-100" aria-label="Delete invoice">
+                  {i.status === 'paid' && <Button className="px-2 py-0.5 text-xs opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100" onClick={() => update(i.id, { status: 'sent', paidOn: null })}>Undo</Button>}
+                  <button onClick={() => save({ invoices: invoices.filter((x) => x.id !== i.id) })} className="px-1 text-zinc-600 opacity-0 hover:text-red-400 group-hover:opacity-100 [@media(hover:none)]:opacity-100" aria-label="Delete invoice">
                     <Trash2 size={13} />
                   </button>
                 </span>
@@ -212,15 +215,15 @@ export function Expenses({ p, save }) {
 
   return (
     <Section title="Expenses" action={<span className="text-xs tabular-nums text-zinc-400">{money(costIn(p, monthKey()))} this month</span>}>
-      <div className="flex flex-wrap gap-2">
-        <Input value={row.label} onChange={(e) => setRow({ ...row, label: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && add()} placeholder="Hosting, domain, API…" className="min-w-0 flex-1" />
-        <Input value={row.amount} onChange={(e) => setRow({ ...row, amount: e.target.value })} placeholder="₹" inputMode="numeric" className="w-24" />
-        <Select value={row.cycle} onChange={(e) => setRow({ ...row, cycle: e.target.value })}>
+      <div className={formRow}>
+        <Input value={row.label} onChange={(e) => setRow({ ...row, label: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && add()} placeholder="Hosting, domain, API…" className={FIELD_MAIN} />
+        <Input value={row.amount} onChange={(e) => setRow({ ...row, amount: e.target.value })} placeholder="₹" inputMode="numeric" className="min-w-0 sm:w-24" />
+        <Select value={row.cycle} onChange={(e) => setRow({ ...row, cycle: e.target.value })} className="min-w-0">
           <option value="monthly">Monthly</option>
           <option value="yearly">Yearly</option>
           <option value="once">One-off</option>
         </Select>
-        <Input type="month" value={row.start} onChange={(e) => setRow({ ...row, start: e.target.value })} className="w-36" title="Starts / paid in" />
+        <Input type="month" value={row.start} onChange={(e) => setRow({ ...row, start: e.target.value })} className="min-w-0 sm:w-36" title="Starts / paid in" />
         <Button variant="glass" onClick={add}><Plus size={14} /> Add</Button>
       </div>
       {expenses.length === 0 ? (
@@ -240,7 +243,7 @@ export function Expenses({ p, save }) {
                   {e.end ? 'Resume' : 'Stop'}
                 </button>
               )}
-              <button onClick={() => save({ expenses: expenses.filter((x) => x.id !== e.id) })} className="text-zinc-600 opacity-0 hover:text-red-400 group-hover:opacity-100" aria-label="Remove expense">
+              <button onClick={() => save({ expenses: expenses.filter((x) => x.id !== e.id) })} className="text-zinc-600 opacity-0 hover:text-red-400 group-hover:opacity-100 [@media(hover:none)]:opacity-100" aria-label="Remove expense">
                 <Trash2 size={13} />
               </button>
             </li>

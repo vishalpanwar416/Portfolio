@@ -83,7 +83,13 @@ export function Button({ variant = 'ghost', className, ...rest }) {
   )
 }
 
-const field = 'rounded-lg border border-white/10 bg-black/40 px-2.5 py-1.5 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-white/25 focus:outline-none'
+// Add-a-row forms: two columns on a phone (the main field gets its own row),
+// one line from sm up. Fields use FIELD_MAIN / a width like 'sm:w-28'.
+export const formRow = 'grid grid-cols-2 gap-2 sm:flex sm:flex-wrap'
+export const FIELD_MAIN = 'col-span-2 min-w-0 sm:flex-[1_1_12rem]'
+
+// 16px text on phones: iOS zooms the page into any smaller input on focus.
+const field = 'rounded-lg border border-white/10 bg-black/40 px-2.5 py-1.5 text-base sm:text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-white/25 focus:outline-none'
 
 export const Input = ({ className, ...rest }) => <input className={cx(field, className)} {...rest} />
 export const Textarea = ({ className, ...rest }) => <textarea className={cx(field, 'w-full', className)} {...rest} />

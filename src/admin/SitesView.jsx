@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ExternalLink, GitBranch, Github, Plus, Trash2 } from 'lucide-react'
 import { SSL_WARN_DAYS, VERCEL_TEAM_SLUG, daysUntil, removeDoc, saveDoc, timeAgo } from './data'
-import { Button, Glass, Input, Tag, Textarea, UpDot, cx } from './ui'
+import { Button, Glass, Input, Tag, Textarea, UpDot } from './ui'
 
 function SiteCard({ site, checks, onSave, onDelete }) {
   const [open, setOpen] = useState(false)
@@ -30,8 +30,8 @@ function SiteCard({ site, checks, onSave, onDelete }) {
         <div className="min-w-0">
           <div className="truncate font-medium text-zinc-100">{site.name}</div>
           {site.project?.repo && (
-            <a href={`https://github.com/${site.project.repo}`} target="_blank" rel="noreferrer" className="mt-0.5 inline-flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-200">
-              <Github size={12} /> {site.project.repo}
+            <a href={`https://github.com/${site.project.repo}`} target="_blank" rel="noreferrer" className="mt-0.5 flex min-w-0 items-center gap-1 text-xs text-zinc-500 hover:text-zinc-200">
+              <Github size={12} className="shrink-0" /> <span className="truncate">{site.project.repo}</span>
             </a>
           )}
         </div>
@@ -187,7 +187,7 @@ export default function SitesView({ data }) {
           <Button variant="glass" onClick={addSite} aria-label="Add site"><Plus size={14} /></Button>
         </div>
       </div>
-      <div className={cx('grid gap-3 sm:grid-cols-2 xl:grid-cols-3')}>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {visible.map((s) => (
           <SiteCard key={s.id} site={s} checks={checks} onSave={(patch) => saveDoc(s.id, patch)} onDelete={() => removeDoc(s.id)} />
         ))}

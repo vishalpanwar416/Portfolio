@@ -263,7 +263,7 @@ export function CloudCosts({ sources, go }) {
   return (
     <Section title="Cloud bill">
       {res.error ? <Empty>{res.error}</Empty> : !res.data ? <div className="text-sm text-zinc-500">Loading costs…</div> : (
-        <div className={cx('grid gap-4', res.data.sources.length > 1 && 'lg:grid-cols-2')}>
+        <div className={cx('grid grid-cols-1 gap-4', res.data.sources.length > 1 && 'lg:grid-cols-2')}>
           {res.data.sources.map((s) => <CloudCard key={s.source} s={s} go={go} />)}
         </div>
       )}

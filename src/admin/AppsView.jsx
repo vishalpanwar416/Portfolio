@@ -73,7 +73,7 @@ export function ProjectApps({ p, apps }) {
   return (
     <Section title="Mobile apps">
       {apps.error ? <Empty>{apps.error}</Empty> : !apps.data ? <div className="text-sm text-zinc-500">Loading store listings…</div> : (
-        <div className="grid gap-3 sm:grid-cols-2">{mine.map((a) => <AppCard key={a.spec} a={a} />)}</div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">{mine.map((a) => <AppCard key={a.spec} a={a} />)}</div>
       )}
     </Section>
   )
@@ -94,12 +94,12 @@ export default function AppsView({ data, go }) {
         <>
           <Section title={`Live in stores · ${live.length}`}>
             {live.length === 0 ? <Empty>Nothing published yet.</Empty> : (
-              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{live.map((a) => <AppCard key={a.spec} a={a} project={owner[a.spec]} go={go} />)}</div>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">{live.map((a) => <AppCard key={a.spec} a={a} project={owner[a.spec]} go={go} />)}</div>
             )}
           </Section>
           {draft.length > 0 && (
             <Section title={`Not published · ${draft.length}`}>
-              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">{draft.map((a) => <AppCard key={a.spec} a={a} project={owner[a.spec]} go={go} />)}</div>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">{draft.map((a) => <AppCard key={a.spec} a={a} project={owner[a.spec]} go={go} />)}</div>
             </Section>
           )}
           <p className="text-xs text-zinc-600">Ratings and downloads come from the public store pages (refreshed hourly). Crash and ANR rates need the dashboard’s service account added in Play Console — see Settings.</p>

@@ -70,7 +70,7 @@ export default function RenewalsView({ data, go }) {
         )}
       </Section>
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <Section title="SSL certificates">
           {certs.length === 0 ? <Empty>Waiting for the first uptime check…</Empty> : (
             <ul className="divide-y divide-white/[0.05]">

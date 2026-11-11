@@ -134,7 +134,7 @@ export default function MoneyView({ data, go }) {
         <Stat label="Monthly recurring" value={moneyShort(mrr)} sub="active retainers" icon={Repeat} />
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <GoalCard settings={settings} thisMonth={cur.amount} />
         <Section title="Revenue · last 12 months" className="lg:col-span-2">
           {monthly.every((m) => !m.amount && !m.cost) ? <Empty>Nothing logged yet.</Empty> : (
@@ -162,7 +162,7 @@ export default function MoneyView({ data, go }) {
 
       <CloudBills projects={projects} go={go} />
 
-      <div className="grid gap-5 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <Section title={`Unpaid invoices${unpaid.length ? ` · ${unpaid.length}` : ''}`} className="lg:col-span-2">
           {unpaid.length === 0 ? <Empty>All paid up.</Empty> : (
             <ul className="divide-y divide-white/[0.05]">

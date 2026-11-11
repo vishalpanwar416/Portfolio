@@ -36,7 +36,7 @@ export default function AlertsView({ data, go }) {
   const mon = st.monitor
 
   return (
-    <div className="grid gap-5 xl:grid-cols-5">
+    <div className="grid grid-cols-1 gap-5 xl:grid-cols-5">
       <div className="space-y-5 xl:col-span-3">
         <div className="grid grid-cols-3 gap-3">
           {Object.entries(SEVERITY).map(([k, s]) => (

@@ -99,7 +99,7 @@ export function ProjectDatabases({ p, supabase, go }) {
     <Section title="Supabase">
       {supabase.error ? <Empty>{supabase.error}</Empty> : !supabase.data ? <div className="text-sm text-zinc-500">Loading…</div>
         : missing ? <ConnectHint go={go}>Connect Supabase to see database health and size.</ConnectHint> : (
-          <div className="grid gap-3 sm:grid-cols-2">{mine.map((s) => <SupabaseCard key={s.spec} s={s} />)}</div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">{mine.map((s) => <SupabaseCard key={s.spec} s={s} />)}</div>
         )}
     </Section>
   )
@@ -107,12 +107,15 @@ export function ProjectDatabases({ p, supabase, go }) {
 
 // ── laptop ─────────────────────────────────────────────
 
+// "media-man@sanero.service" → "media-man@sanero"; timers keep their suffix.
+export const unitName = (unit) => unit.replace(/\.service$/, '')
+
 function ServiceRow({ s }) {
   return (
     <li className="flex items-center gap-3 py-2 text-sm">
       <span className={cx('h-1.5 w-1.5 shrink-0 rounded-full', s.ok ? 'bg-emerald-400' : s.missing ? 'bg-zinc-600' : 'bg-red-500')} />
-      <span className="min-w-0 flex-1 truncate font-mono text-xs text-zinc-200" title={s.description}>{s.unit}</span>
-      <span className={cx('shrink-0 text-xs', s.ok ? 'text-zinc-500' : 'text-red-300')}>{s.missing ? 'not installed' : `${s.state}${s.sub && s.sub !== s.state ? ` · ${s.sub}` : ''}${!s.ok && s.result && s.result !== 'success' ? ` · ${s.result}` : ''}`}</span>
+      <span className="min-w-0 flex-1 truncate font-mono text-xs text-zinc-200" title={`${s.unit} — ${s.description}`}>{unitName(s.unit)}</span>
+      <span className={cx('max-w-[45%] shrink-0 truncate text-right text-xs', s.ok ? 'text-zinc-500' : 'text-red-300')}>{s.missing ? 'not installed' : `${s.state}${s.sub && s.sub !== s.state ? ` · ${s.sub}` : ''}${!s.ok && s.result && s.result !== 'success' ? ` · ${s.result}` : ''}`}</span>
     </li>
   )
 }
@@ -167,9 +170,9 @@ function ServiceRowFull({ s, uptime }) {
     <li className="py-2 text-sm">
       <div className="flex items-center gap-3">
         <span className={cx('h-1.5 w-1.5 shrink-0 rounded-full', s.ok ? 'bg-emerald-400' : s.missing ? 'bg-zinc-600' : 'bg-red-500')} />
-        <span className="min-w-0 flex-1 truncate font-mono text-xs text-zinc-200" title={s.description}>{s.unit}</span>
+        <span className="min-w-0 flex-1 truncate font-mono text-xs text-zinc-200" title={`${s.unit} — ${s.description}`}>{unitName(s.unit)}</span>
         {uptime !== null && uptime !== undefined && <span className={cx('shrink-0 text-[11px] tabular-nums', uptime < 95 ? 'text-amber-300' : 'text-zinc-500')}>{uptime}% ok</span>}
-        <span className={cx('w-28 shrink-0 truncate text-right text-xs', s.ok ? 'text-zinc-500' : 'text-red-300')}>{s.missing ? 'not installed' : `${s.state}${!s.ok && s.result && s.result !== 'success' ? ` · ${s.result}` : ''}`}</span>
+        <span className={cx('max-w-[8rem] shrink-0 truncate text-right text-xs sm:w-28 sm:max-w-none', s.ok ? 'text-zinc-500' : 'text-red-300')}>{s.missing ? 'not installed' : `${s.state}${!s.ok && s.result && s.result !== 'success' ? ` · ${s.result}` : ''}`}</span>
       </div>
       {!s.ok && (s.log || []).length > 0 && (
         <pre className="mt-1.5 overflow-x-auto whitespace-pre-wrap break-all rounded-lg bg-black/40 px-2.5 py-1.5 font-mono text-[10.5px] leading-relaxed text-zinc-400">{s.log.join('\n')}</pre>
@@ -234,7 +237,7 @@ export function LaptopPanel({ data, go }) {
         {hist.length === 0 ? <Empty>History starts building from the first report.</Empty> : (
           <div className="space-y-5">
             <OnlineStrip points={hist} from={from} to={to} hours={hours} />
-            <div className="grid gap-5 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               <LineChart label="CPU load (per core)" points={series('l')} from={from} to={to} max={Math.max(1, ...hist.map((p) => p.l || 0))} format={(v) => `${Math.round(v * 100)}%`} />
               <LineChart label="Memory used" points={series('m')} from={from} to={to} />
               <LineChart label="Disk used" points={series('d')} from={from} to={to} />
@@ -245,7 +248,7 @@ export function LaptopPanel({ data, go }) {
       </Section>
 
       <Section title={`Services · ${bad ? `${bad} failing` : 'all running'}`} action={<span className="text-[11px] text-zinc-600">% ok over {range}</span>}>
-        <div className="grid gap-x-8 gap-y-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-x-8 gap-y-4 lg:grid-cols-2">
           {Object.entries(byProject).map(([slug, list]) => (
             <div key={slug}>
               <button onClick={() => names[slug] && go(`/p/${slug}`)} className="mb-1 text-xs text-zinc-500 hover:text-white">{names[slug]?.name || 'Other failed units'}</button>
@@ -256,7 +259,7 @@ export function LaptopPanel({ data, go }) {
         {!l.online && <p className="mt-3 text-xs text-amber-300/80">The laptop hasn’t reported for {Math.round(l.ageMs / 60e3)} minutes — these states are from then.</p>}
       </Section>
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <Section title={`Docker · ${containers.filter((c) => c.running).length}/${containers.length} running`} action={<Badge tone={l.docker?.ok ? 'zinc' : 'red'}>{l.docker?.state}</Badge>}>
           {containers.length === 0 ? <Empty>No containers.</Empty> : (
             <ul className="divide-y divide-white/[0.05]">

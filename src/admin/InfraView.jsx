@@ -1,5 +1,6 @@
 // Infrastructure, one page with tabs: uptime, renewals, cloud bills,
 // databases, the laptop.
+import { useEffect, useRef } from 'react'
 import { CloudCosts, FirestoreUsage } from './IntegrationSections'
 import { LaptopPanel, SupabaseCard } from './InfraSections'
 import RenewalsView from './RenewalsView'
@@ -25,7 +26,7 @@ function Databases({ data, go }) {
         {!Object.keys(owner).length ? <Empty>No Supabase projects linked.</Empty>
           : sb.error ? <Empty>{sb.error}</Empty> : !sb.data ? <div className="text-sm text-zinc-500">Loading…</div>
             : sb.data.projects.some((s) => s.notConfigured) ? <ConnectHint go={go}>Add a Supabase access token to see health, size and pauses.</ConnectHint> : (
-              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{sb.data.projects.map((s) => <SupabaseCard key={s.spec} s={s} project={owner[s.spec]} />)}</div>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">{sb.data.projects.map((s) => <SupabaseCard key={s.spec} s={s} project={owner[s.spec]} />)}</div>
             )}
       </Section>
       <Section title="Firestore · reads and writes per day">
@@ -38,12 +39,16 @@ function Databases({ data, go }) {
 export default function InfraView({ data, go, tab }) {
   const current = INFRA_TABS.some((t) => t.key === tab) ? tab : 'uptime'
   const cloudSources = [...new Set(data.projects.flatMap((p) => p.cloud || []))]
+  // On a phone the tab strip scrolls sideways; keep the open tab in view.
+  const active = useRef(null)
+  useEffect(() => { active.current?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' }) }, [current])
   return (
     <div className="space-y-5">
-      <div className="flex gap-1 overflow-x-auto rounded-xl border border-white/[0.08] bg-white/[0.03] p-1 backdrop-blur-xl">
+      <div className="flex gap-1 overflow-x-auto rounded-xl border border-white/[0.08] bg-white/[0.03] p-1 backdrop-blur-xl [scrollbar-width:none]">
         {INFRA_TABS.map((t) => (
           <button
             key={t.key}
+            ref={current === t.key ? active : null}
             onClick={() => go(`/infra/${t.key}`)}
             className={cx('shrink-0 rounded-lg px-3.5 py-1.5 text-sm transition', current === t.key ? 'bg-white/[0.1] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]' : 'text-zinc-400 hover:text-zinc-100')}
           >
