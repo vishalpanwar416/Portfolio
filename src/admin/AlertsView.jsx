@@ -88,8 +88,8 @@ export default function AlertsView({ data, go }) {
               <b className="text-zinc-200">Set up once (2 minutes):</b>
               <ol className="mt-1 list-decimal space-y-1 pl-4">
                 <li>Run in a terminal (or in Claude Code with <code>!</code>):
-                  <pre className="mt-1 overflow-x-auto rounded-lg bg-black/50 px-2 py-1.5 font-mono text-[11px] text-zinc-300">bash ~/Development/Projects/Portfolio/scripts/setup-alerts.sh</pre>
-                  It creates the shared secret and a private ntfy topic, saves them to Vercel and GitHub, and starts the laptop agent.</li>
+                  <pre className="mt-1 overflow-x-auto rounded-lg bg-black/50 px-2 py-1.5 font-mono text-[11px] text-zinc-300">bash ~/Development/Projects/Portfolio/scripts/setup.sh</pre>
+                  It sets up the backend’s service account, the shared secret and a private ntfy topic, and starts the laptop agent (reports every 2 minutes while the laptop is on).</li>
                 <li>Install <b>ntfy</b> on your phone (Play Store / App Store), tap +, and subscribe to the topic the script printed.</li>
                 <li>Come back here and press <b>Send test</b>.</li>
               </ol>

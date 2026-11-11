@@ -189,3 +189,45 @@ export function Badge({ tone = 'zinc', children }) {
   }
   return <span className={cx('inline-flex items-center rounded-full border px-2 py-0.5 text-[11px]', tones[tone])}>{children}</span>
 }
+
+/**
+ * Time-series line with a soft area fill. points: [{t (ms), v}], gaps longer
+ * than `gapMs` break the line (laptop asleep).
+ */
+export function LineChart({ points, from, to, max = 100, height = 90, gapMs = 15 * 60e3, format = (v) => `${Math.round(v)}%`, label }) {
+  const W = 600
+  const x = (t) => ((t - from) / Math.max(1, to - from)) * W
+  const y = (v) => height - 4 - (Math.min(v, max) / max) * (height - 8)
+  const segments = []
+  let cur = []
+  for (const p of points) {
+    if (p.v === null || p.v === undefined) continue
+    if (cur.length && p.t - cur[cur.length - 1].t > gapMs) { segments.push(cur); cur = [] }
+    cur.push(p)
+  }
+  if (cur.length) segments.push(cur)
+  const last = points.filter((p) => p.v !== null && p.v !== undefined).at(-1)
+  const vals = points.map((p) => p.v).filter((v) => v !== null && v !== undefined)
+  const avg = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null
+  return (
+    <div>
+      <div className="mb-1 flex items-baseline justify-between text-xs">
+        <span className="text-zinc-500">{label}</span>
+        <span className="tabular-nums text-zinc-300">{last ? format(last.v) : '—'}{avg !== null && <span className="text-zinc-600"> · avg {format(avg)}</span>}</span>
+      </div>
+      <svg viewBox={`0 0 ${W} ${height}`} preserveAspectRatio="none" className="h-[90px] w-full rounded-lg bg-white/[0.02]">
+        {[0.25, 0.5, 0.75].map((f) => <line key={f} x1="0" x2={W} y1={height * f} y2={height * f} stroke="rgba(255,255,255,0.04)" />)}
+        {segments.map((seg, i) => {
+          const line = seg.map((p) => `${x(p.t).toFixed(1)},${y(p.v).toFixed(1)}`).join(' ')
+          const area = `${x(seg[0].t).toFixed(1)},${height} ${line} ${x(seg.at(-1).t).toFixed(1)},${height}`
+          return (
+            <g key={i}>
+              <polygon points={area} fill="rgba(255,255,255,0.06)" />
+              <polyline points={line} fill="none" stroke="rgba(255,255,255,0.65)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+            </g>
+          )
+        })}
+      </svg>
+    </div>
+  )
+}

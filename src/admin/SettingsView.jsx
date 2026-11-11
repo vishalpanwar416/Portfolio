@@ -84,8 +84,8 @@ export default function SettingsView({ data, install }) {
             </Integration>
 
             <Integration name="Alerts & phone notifications" ok={st.monitorSecret && st.ntfy && monitorOk} detail={mon && <span className="text-xs text-zinc-500">monitor ran {timeAgo(mon.at)}</span>}>
-              One script sets up the scheduled monitor’s secret, a private ntfy topic for your phone, and the laptop agent:
-              <Cmd>{`bash ~/Development/Projects/Portfolio/scripts/setup-alerts.sh`}</Cmd>
+              One script sets up the Google service account (backend storage), the monitor secret, a private ntfy topic for your phone, and the laptop agent:
+              <Cmd>{`bash ~/Development/Projects/Portfolio/scripts/setup.sh`}</Cmd>
               Then install <b>ntfy</b> on your phone and subscribe to the topic it prints. Test it from the <a className="underline" href="#/alerts">Alerts</a> page. Telegram is optional:
               <Cmd>{`export GH_TOKEN=$(gh auth token -u vishalpanwar416) && gh secret set TELEGRAM_BOT_TOKEN -R ${REPO} --body "PASTE_BOT_TOKEN" && gh secret set TELEGRAM_CHAT_ID -R ${REPO} --body "PASTE_CHAT_ID"`}</Cmd>
             </Integration>

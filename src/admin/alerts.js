@@ -18,6 +18,17 @@ export function laptopStatus(docs) {
   return { ...l, ageMs, online: ageMs < LAPTOP_STALE_MS }
 }
 
+/** Laptop history points from the last `hours`, oldest first (t in ms). */
+export function laptopHistory(docs, hours) {
+  const since = Date.now() - hours * 3600e3
+  return Object.entries(docs || {})
+    .filter(([id]) => id.startsWith('laptop-h-'))
+    .flatMap(([, d]) => d.points || [])
+    .map((p) => ({ ...p, t: p.t * 1000 }))
+    .filter((p) => p.t >= since)
+    .sort((a, b) => a.t - b.t)
+}
+
 /** Every current problem, most severe first. */
 export function computeAlerts(data) {
   const out = []
