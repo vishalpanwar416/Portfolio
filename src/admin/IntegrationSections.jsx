@@ -183,7 +183,8 @@ export function GitHubActivity({ p }) {
 
 // ── cloud bills (GCP billing export, AWS Cost Explorer) ─
 
-const PROVIDER = { gcp: 'Google Cloud', aws: 'AWS' }
+const PROVIDER = { gcp: 'Google Cloud', aws: 'AWS', azure: 'Azure' }
+export const providerName = (p) => PROVIDER[p] || p
 
 export function cloudMoney(amount, currency) {
   if (amount === null || amount === undefined) return '—'

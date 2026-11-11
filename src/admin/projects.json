@@ -18,19 +18,21 @@
       "bluecopa/fx-runtime",
       "bluecopa/infrastructure",
       "bluecopa/samyx"
-    ]
+    ],
+    "hidden": true
   },
   {
     "slug": "aarambh",
     "name": "Aarambh",
     "category": "Client",
     "status": "live",
-    "summary": "Fitness app \u2014 Flutter app, Node backend, admin panel and landing page.",
+    "summary": "Fitness app \u2014 Flutter app, Node backend on Azure App Service, admin panel and landing page.",
     "stack": [
       "Flutter",
       "Node.js",
       "Postgres",
       "Firebase",
+      "Azure",
       "Next.js"
     ],
     "domains": [
@@ -46,6 +48,9 @@
     ],
     "firebase": [
       "aarambh-20a47"
+    ],
+    "cloud": [
+      "azure:aarambh"
     ]
   },
   {
@@ -131,6 +136,9 @@
     "cloud": [
       "aws:splink",
       "gcp:splink-dev-048521.billing_export"
+    ],
+    "vercel": [
+      "splinkpro-web-dev"
     ]
   },
   {
@@ -164,12 +172,16 @@
     ],
     "domains": [
       "sanero.in",
-      "admin.sanero.in"
+      "admin.sanero.in",
+      "creator.sanero.in"
     ],
     "repos": [
       "vishalpanwar416/sanero-website"
     ],
     "firebase": [
+      "sanero-media"
+    ],
+    "vercel": [
       "sanero-media"
     ]
   },
@@ -182,20 +194,33 @@
     "stack": [
       "React",
       "Supabase",
+      "Firebase",
+      "GCP",
       "Terraform"
     ],
     "domains": [
       "table-tap.in",
       "app.table-tap.in",
       "restaurant.table-tap.in",
-      "admin.table-tap.in"
+      "admin.table-tap.in",
+      "owner.table-tap.in",
+      "automation.table-tap.in"
     ],
     "repos": [
       "vishalpanwar416/Table-Tap-QR",
       "vishalpanwar416/table-tap-AI"
     ],
     "vercel": [
+      "table-tap-app",
+      "table-tap-landing",
+      "tabletapautomation",
       "table-tap-qr"
+    ],
+    "firebase": [
+      "table-tap-e7267"
+    ],
+    "cloud": [
+      "gcp:table-tap-qr.billing_export"
     ]
   },
   {
@@ -210,13 +235,17 @@
       "MCP"
     ],
     "domains": [
-      "stacky-f7f42.web.app"
+      "stacky-f7f42.web.app",
+      "stackyy.vercel.app"
     ],
     "repos": [
       "vishalpanwar416/Stacky"
     ],
     "firebase": [
       "stacky-f7f42"
+    ],
+    "vercel": [
+      "stacky"
     ]
   },
   {
@@ -332,6 +361,17 @@
     ]
   },
   {
+    "slug": "remote-emulator",
+    "name": "Remote emulator",
+    "category": "Utility",
+    "status": "live",
+    "summary": "Streams and controls the local Android emulator over HTTP (adb).",
+    "stack": [
+      "Node.js",
+      "adb"
+    ]
+  },
+  {
     "slug": "job-automation",
     "name": "Job automation",
     "category": "Automation",
@@ -339,6 +379,9 @@
     "summary": "Naukri / Indeed scrapers, tailored resumes and auto-apply.",
     "repos": [
       "vishalpanwar416/job-automation"
+    ],
+    "vercel": [
+      "freddy"
     ]
   },
   {

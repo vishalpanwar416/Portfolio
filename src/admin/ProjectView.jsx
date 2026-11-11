@@ -237,11 +237,14 @@ function EditDetails({ p, save, onClose, go }) {
         <label><span className={label}>GitHub repos (owner/name)</span><Textarea rows={4} value={f.repos} onChange={set('repos')} /></label>
         <label><span className={label}>Vercel project names</span><Textarea rows={4} value={f.vercel} onChange={set('vercel')} /></label>
         <label><span className={label}>Firebase project IDs</span><Textarea rows={4} value={f.firebase} onChange={set('firebase')} /></label>
-        <label className="sm:col-span-2"><span className={label}>Cloud bills — one per line: gcp:&lt;project&gt;.&lt;dataset&gt; or aws:&lt;label&gt;</span><Textarea rows={2} value={f.cloud} onChange={set('cloud')} placeholder="gcp:my-project.billing_export" /></label>
+        <label className="sm:col-span-2"><span className={label}>Cloud bills — one per line: gcp:&lt;project&gt;.&lt;dataset&gt;, aws:&lt;label&gt; or azure:&lt;label&gt;</span><Textarea rows={2} value={f.cloud} onChange={set('cloud')} placeholder="gcp:my-project.billing_export" /></label>
         <label className="sm:col-span-2"><span className={label}>Stacky project names (blank = match “{p.name}”)</span><Input value={f.stacky} onChange={set('stacky')} className="w-full" placeholder={p.name} /></label>
       </div>
       <div className="mt-5 flex items-center justify-between">
-        <Button variant="danger" onClick={remove}><Trash2 size={14} /> Remove project</Button>
+        <div className="flex gap-2">
+          <Button variant="danger" onClick={remove}><Trash2 size={14} /> Remove project</Button>
+          <Button onClick={async () => { await save({ hidden: true }); go('/') }}>Hide for now</Button>
+        </div>
         <Button variant="primary" onClick={submit}>Save</Button>
       </div>
     </Section>

@@ -7,7 +7,7 @@ import {
   revenueByMonth, revenueIn, saveDoc, today,
 } from './data'
 import { Badge, BarChart, Button, Empty, Input, Progress, Section, Stat, StatusDot, cx } from './ui'
-import { cloudMoney, useCloud } from './IntegrationSections'
+import { cloudMoney, providerName, useCloud } from './IntegrationSections'
 
 export function GoalCard({ settings, thisMonth, compact }) {
   const [editing, setEditing] = useState(false)
@@ -67,7 +67,7 @@ function CloudBills({ projects, go }) {
           {res.data.sources.map((s) => (
             <li key={s.source} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2 text-sm">
               <button onClick={() => go(`/p/${owner[s.source].slug}`)} className="w-28 shrink-0 truncate text-left text-zinc-300 hover:text-white">{owner[s.source].name}</button>
-              <span className="w-40 shrink-0 truncate text-xs text-zinc-500">{s.provider === 'gcp' ? 'Google Cloud' : 'AWS'} · {s.account}</span>
+              <span className="w-40 shrink-0 truncate text-xs text-zinc-500">{providerName(s.provider)} · {s.account}</span>
               {s.error ? <span className="min-w-0 flex-1 truncate text-xs text-zinc-500">{s.error}</span> : (
                 <>
                   <span className="flex-1 tabular-nums text-zinc-100">{cloudMoney(s.monthToDate, s.currency)} <span className="text-xs text-zinc-500">so far</span></span>

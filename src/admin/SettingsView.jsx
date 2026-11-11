@@ -2,7 +2,7 @@
 // server key is set — and the setup steps to add the missing ones.
 import { useState } from 'react'
 import { Check, Copy, Download, ExternalLink, X } from 'lucide-react'
-import { monthKey, revenueIn, timeAgo } from './data'
+import { monthKey, revenueIn, saveDoc, timeAgo } from './data'
 import { GoalCard } from './MoneyView'
 import { Badge, Button, Section, cx } from './ui'
 
@@ -61,6 +61,21 @@ export default function SettingsView({ data, install }) {
         </Section>
       </div>
 
+      {data.hiddenProjects.length > 0 && (
+        <Section title="Hidden projects">
+          <p className="mb-3 text-xs text-zinc-500">Left out of the sidebar, totals and alerts until you show them again.</p>
+          <ul className="divide-y divide-white/[0.05]">
+            {data.hiddenProjects.map((p) => (
+              <li key={p.slug} className="flex items-center gap-3 py-2 text-sm">
+                <span className="flex-1 text-zinc-300">{p.name}</span>
+                <span className="text-xs text-zinc-500">{p.category}</span>
+                <Button className="px-2 py-0.5 text-xs" onClick={() => saveDoc(p.id, { kind: 'project', hidden: false })}>Show again</Button>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )}
+
       <Section title="Connections">
         {data.integrations.error ? <div className="text-sm text-zinc-500">{data.integrations.error}</div> : (
           <ul className="divide-y divide-white/[0.05]">
@@ -91,21 +106,23 @@ export default function SettingsView({ data, install }) {
               Tasks show on a project when its Stacky project has the same name (or set the names under Edit on the project page).
             </Integration>
 
-            <Integration name="Cloud bills — Edition TV (Google Cloud), SplinkPro (AWS + Google Cloud)" ok={st.firebase && (st.aws || []).includes('splink')}>
+            <Integration name="Cloud bills — Edition TV, SplinkPro, Table Tap (Google Cloud), SplinkPro (AWS), Aarambh (Azure)" ok={st.firebase && (st.aws || []).includes('splink') && (st.azure || []).includes('aarambh')}>
               <b>Google Cloud.</b> Google only exposes spend through its billing export to BigQuery, so for each billing account:
               <ol className="mt-1 list-decimal space-y-1 pl-4">
                 <li>Create the dataset the export writes into:
                   <Cmd>{`gcloud config set account editionmedia.tv@gmail.com && bq --project_id=edition-tv mk --dataset --location=US edition-tv:billing_export
 gcloud config set account vishal@splinkpro.ai && bq --project_id=splink-dev-048521 mk --dataset --location=US splink-dev-048521:billing_export
+gcloud config set account admin@table-tap.in && bq --project_id=table-tap-qr mk --dataset --location=US table-tap-qr:billing_export
 gcloud config set account vishal.p@bluecopa.com`}</Cmd>
                 </li>
                 <li>Turn on <i>Standard usage cost</i> export into that dataset — this step is console-only:{' '}
                   <a className="underline" href="https://console.cloud.google.com/billing/0141EB-74B5DA-B315BE/export" target="_blank" rel="noreferrer">Edition TV billing</a>,{' '}
-                  <a className="underline" href="https://console.cloud.google.com/billing/015C7A-EE6EDE-98074B/export" target="_blank" rel="noreferrer">SplinkPro billing</a>{' '}
+                  <a className="underline" href="https://console.cloud.google.com/billing/015C7A-EE6EDE-98074B/export" target="_blank" rel="noreferrer">SplinkPro billing</a>,{' '}
+                  <a className="underline" href="https://console.cloud.google.com/billing/0170E2-41AB2B-D03612/export" target="_blank" rel="noreferrer">Table Tap billing</a>{' '}
                   → BigQuery export → Standard usage cost → Edit settings → project + <code>billing_export</code>. First data shows up within a day.</li>
                 <li>Let the dashboard’s service account read it (create the account with the Firebase step below first):
                   <Cmd>{`SA=serviceAccount:vp-control@sanero-media.iam.gserviceaccount.com
-for x in "editionmedia.tv@gmail.com edition-tv" "vishal@splinkpro.ai splink-dev-048521"; do set -- $x
+for x in "editionmedia.tv@gmail.com edition-tv" "vishal@splinkpro.ai splink-dev-048521" "admin@table-tap.in table-tap-qr"; do set -- $x
   for r in roles/bigquery.dataViewer roles/bigquery.jobUser; do gcloud projects add-iam-policy-binding $2 --account $1 --member $SA --role $r --condition=None; done
 done`}</Cmd>
                 </li>
@@ -117,6 +134,10 @@ aws iam put-user-policy --user-name vp-control-costs --policy-name cost-explorer
 read -r ID SECRET <<< "$(aws iam create-access-key --user-name vp-control-costs --profile splink --query 'AccessKey.[AccessKeyId,SecretAccessKey]' --output text)"
 ${CD}vercel env add AWS_COST_SPLINK_KEY_ID production --value "$ID" --yes --force --sensitive && vercel env add AWS_COST_SPLINK_SECRET production --value "$SECRET" --yes --force --sensitive && unset ID SECRET && vercel redeploy admin.vishalpanwar.in --target production`}</Cmd>
               Cost Explorer charges $0.01 per lookup; the dashboard caches each bill for 3 hours.
+              <b className="mt-3 block">Azure (Aarambh backend).</b> A service principal that can only read costs on the Aarambh subscription; again nothing is printed:
+              <Cmd>{`az login   # as aarambhapp.rafs@gmail.com, if not already
+read -r APP SECRET TENANT <<< "$(az ad sp create-for-rbac --name vp-control-costs --role "Cost Management Reader" --scopes /subscriptions/11381ea5-8f68-4e64-ab1b-3122845ba5db --query '[appId,password,tenant]' -o tsv)"
+${CD}for kv in "TENANT $TENANT" "CLIENT_ID $APP" "SECRET $SECRET" "SUBSCRIPTION 11381ea5-8f68-4e64-ab1b-3122845ba5db"; do set -- $kv; vercel env add AZURE_COST_AARAMBH_$1 production --value "$2" --yes --force --sensitive; done && unset APP SECRET TENANT && vercel redeploy admin.vishalpanwar.in --target production`}</Cmd>
             </Integration>
 
             <Integration name="Firebase — Firestore reads/writes" ok={st.firebase}>

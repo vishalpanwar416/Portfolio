@@ -48,7 +48,7 @@ async function vercelDomains() {
 const owner = Object.fromEntries(projects.flatMap((p) => (p.domains || []).map((d) => [d, p.name])))
 
 const hosts = [...new Set([
-  ...projects.filter((p) => p.status !== 'decommissioned').flatMap((p) => p.domains || []),
+  ...projects.filter((p) => p.status !== 'decommissioned' && !p.hidden).flatMap((p) => p.domains || []),
   ...(await vercelDomains()),
   ...String(process.env.MONITOR_EXTRA_HOSTS || '').split(','),
 ].map((h) => h.trim().toLowerCase()).filter((h) => h && !h.startsWith('www.')))].sort()

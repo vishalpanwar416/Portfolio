@@ -280,7 +280,7 @@ export function useAdminData() {
   )
 
   // Defaults overlaid with their Firestore edits, plus projects added by hand.
-  const projects = useMemo(() => {
+  const allProjects = useMemo(() => {
     const vercelByName = Object.fromEntries(vercel.map((v) => [v.name, v]))
     const known = new Set(DEFAULT_PROJECTS.map((p) => p.slug))
     const custom = Object.entries(docs)
@@ -295,6 +295,10 @@ export function useAdminData() {
       })
       .filter((p) => !p.deleted)
   }, [docs, vercel])
+  // Hidden projects stay in data (and can be shown again from Settings) but
+  // are left out of every page, total and alert.
+  const projects = useMemo(() => allProjects.filter((p) => !p.hidden), [allProjects])
+  const hiddenProjects = useMemo(() => allProjects.filter((p) => p.hidden), [allProjects])
 
   const settings = docs.settings || {}
 
@@ -354,6 +358,6 @@ export function useAdminData() {
 
   return {
     projects, vercel, vercelError, docs, docsReady, checks, checking, lastChecked, refresh,
-    settings, domains, integrations, traffic, stacky,
+    settings, domains, integrations, traffic, stacky, hiddenProjects,
   }
 }

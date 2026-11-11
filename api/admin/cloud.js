@@ -1,12 +1,14 @@
 // Cloud bills for client projects: Google Cloud (from the Cloud Billing
 // export in BigQuery) and AWS (Cost Explorer).
-// GET ?sources=gcp:edition-tv.billing_export,aws:splink
+// GET ?sources=gcp:edition-tv.billing_export,aws:splink,azure:aarambh
 //
 // GCP needs GCP_SA_KEY with BigQuery Data Viewer on the export dataset and
 // BigQuery Job User on its project. AWS needs, per account label,
 // AWS_COST_<LABEL>_KEY_ID and AWS_COST_<LABEL>_SECRET for an IAM user that
 // may call ce:GetCostAndUsage. Cost Explorer charges $0.01 a call, so
-// results are cached for a few hours.
+// results are cached for a few hours. Azure needs, per label,
+// AZURE_COST_<LABEL>_TENANT, _CLIENT_ID, _SECRET and _SUBSCRIPTION for a
+// service principal with the Cost Management Reader role.
 const crypto = require('node:crypto');
 const { requireOwner } = require('./_auth');
 const { serviceAccount, accessToken } = require('./_gcp');
@@ -15,6 +17,7 @@ const TTL_MS = 3 * 3600e3;
 const MONTHS = 6;
 const GCP_RE = /^gcp:([a-z][a-z0-9-]{4,28}[a-z0-9])\.([A-Za-z0-9_]{1,100})$/;
 const AWS_RE = /^aws:([a-z0-9_]{1,30})$/;
+const AZURE_RE = /^azure:([a-z0-9_]{1,30})$/;
 const cache = new Map();
 
 // ── shared shaping ─────────────────────────────────────
@@ -165,6 +168,67 @@ async function awsCosts(label) {
   return summarise({ monthly, services, daily, currency: currency || 'USD' });
 }
 
+// ── Azure: Cost Management query API ───────────────────
+
+async function azureCosts(label) {
+  const env = (k) => process.env[`AZURE_COST_${label.toUpperCase()}_${k}`];
+  const [tenant, clientId, secret, sub] = ['TENANT', 'CLIENT_ID', 'SECRET', 'SUBSCRIPTION'].map(env);
+  if (!tenant || !clientId || !secret || !sub) {
+    throw Object.assign(new Error(`AZURE_COST_${label.toUpperCase()}_* missing on the server`), { notConfigured: true });
+  }
+  const t = await fetch(`https://login.microsoftonline.com/${tenant}/oauth2/v2.0/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ grant_type: 'client_credentials', client_id: clientId, client_secret: secret, scope: 'https://management.azure.com/.default' }),
+  });
+  if (!t.ok) throw new Error(`Azure sign-in ${t.status}`);
+  const token = (await t.json()).access_token;
+
+  const keys = monthKeys();
+  const now = istToday();
+  const query = async (granularity, from, grouping) => {
+    const r = await fetch(`https://management.azure.com/subscriptions/${sub}/providers/Microsoft.CostManagement/query?api-version=2023-11-01`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'ActualCost',
+        timeframe: 'Custom',
+        timePeriod: { from: `${from}T00:00:00Z`, to: `${ymd(now)}T23:59:59Z` },
+        dataset: {
+          granularity,
+          aggregation: { totalCost: { name: 'Cost', function: 'Sum' } },
+          ...(grouping ? { grouping: [{ type: 'Dimension', name: grouping }] } : {}),
+        },
+      }),
+    });
+    const body = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(`Azure ${r.status}: ${body.error?.message || 'query failed'}`);
+    const cols = body.properties.columns.map((c) => c.name);
+    return body.properties.rows.map((row) => Object.fromEntries(row.map((v, i) => [cols[i], v])));
+  };
+  const [monthlyRows, dailyRows] = await Promise.all([
+    query('Monthly', `${keys[0]}-01`, 'ServiceName'),
+    query('Daily', `${keys.at(-1)}-01`, null),
+  ]);
+  const cost = (r) => Number(r.Cost ?? r.PreTaxCost ?? r.CostUSD) || 0;
+  const dateOf = (r) => {
+    const v = String(r.BillingMonth ?? r.UsageDate ?? '');
+    return /^\d{8}$/.test(v) ? `${v.slice(0, 4)}-${v.slice(4, 6)}-${v.slice(6, 8)}` : v.slice(0, 10);
+  };
+  const monthly = {};
+  const services = {};
+  for (const r of monthlyRows) {
+    const m = dateOf(r).slice(0, 7);
+    monthly[m] = (monthly[m] || 0) + cost(r);
+    if (m === keys.at(-1)) services[r.ServiceName || 'Other'] = (services[r.ServiceName || 'Other'] || 0) + cost(r);
+  }
+  return summarise({
+    monthly, services,
+    currency: monthlyRows[0]?.Currency || dailyRows[0]?.Currency || null,
+    daily: dailyRows.map((r) => ({ day: dateOf(r), amount: cost(r) })),
+  });
+}
+
 // ── handler ────────────────────────────────────────────
 
 async function load(source) {
@@ -174,8 +238,9 @@ async function load(source) {
   try {
     const g = source.match(GCP_RE);
     const a = source.match(AWS_RE);
-    const data = g ? await gcpCosts(g[1], g[2]) : await awsCosts(a[1]);
-    value = { source, provider: g ? 'gcp' : 'aws', account: g ? g[1] : a[1], ...data };
+    const z = source.match(AZURE_RE);
+    const data = g ? await gcpCosts(g[1], g[2]) : a ? await awsCosts(a[1]) : await azureCosts(z[1]);
+    value = { source, provider: g ? 'gcp' : a ? 'aws' : 'azure', account: (g || a || z)[1], ...data };
     cache.set(source, { at: Date.now(), value });
   } catch (e) {
     // Errors aren't cached, so fixing setup shows up on the next load.
@@ -188,7 +253,7 @@ module.exports = async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   if (!(await requireOwner(req, res))) return;
   const sources = [...new Set(String(req.query.sources || '').split(','))]
-    .filter((s) => GCP_RE.test(s) || AWS_RE.test(s))
+    .filter((s) => GCP_RE.test(s) || AWS_RE.test(s) || AZURE_RE.test(s))
     .slice(0, 6);
   if (req.query.fresh === '1') sources.forEach((s) => cache.delete(s));
   res.status(200).json({ sources: await Promise.all(sources.map(load)) });
