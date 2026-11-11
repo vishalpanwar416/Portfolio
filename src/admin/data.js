@@ -39,7 +39,7 @@ export const GROUPS = [
 export const DEFAULT_PROJECTS = defaultProjects
 
 const EMPTY = {
-  summary: '', stack: [], domains: [], repos: [], vercel: [], firebase: [], stacky: [],
+  summary: '', stack: [], domains: [], repos: [], vercel: [], firebase: [], stacky: [], cloud: [],
   revenue: [], invoices: [], expenses: [], clients: [], updates: [], links: [], notes: '',
 }
 

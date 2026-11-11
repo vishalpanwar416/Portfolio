@@ -4,8 +4,10 @@
 //
 // Needs GCP_SA_KEY: a service account key (raw JSON or base64 of it) whose
 // account has roles/monitoring.viewer on each project.
-const crypto = require('node:crypto');
 const { requireOwner } = require('./_auth');
+const { serviceAccount, accessToken } = require('./_gcp');
+
+const SCOPE = 'https://www.googleapis.com/auth/monitoring.read';
 
 const MAX = 8;
 const DAYS = 7;
@@ -17,37 +19,6 @@ const METRICS = {
   writes: 'firestore.googleapis.com/document/write_count',
   deletes: 'firestore.googleapis.com/document/delete_count',
 };
-
-function serviceAccount() {
-  const raw = process.env.GCP_SA_KEY;
-  if (!raw) return null;
-  const json = raw.trim().startsWith('{') ? raw : Buffer.from(raw, 'base64').toString('utf8');
-  return JSON.parse(json);
-}
-
-let tokenCache = { token: null, exp: 0 };
-async function accessToken(sa) {
-  if (tokenCache.token && Date.now() < tokenCache.exp - 60e3) return tokenCache.token;
-  const now = Math.floor(Date.now() / 1000);
-  const enc = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
-  const unsigned = `${enc({ alg: 'RS256', typ: 'JWT' })}.${enc({
-    iss: sa.client_email,
-    scope: 'https://www.googleapis.com/auth/monitoring.read',
-    aud: 'https://oauth2.googleapis.com/token',
-    iat: now,
-    exp: now + 3600,
-  })}`;
-  const sig = crypto.createSign('RSA-SHA256').update(unsigned).sign(sa.private_key).toString('base64url');
-  const r = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion: `${unsigned}.${sig}` }),
-  });
-  if (!r.ok) throw new Error(`Google auth ${r.status}`);
-  const body = await r.json();
-  tokenCache = { token: body.access_token, exp: Date.now() + body.expires_in * 1000 };
-  return tokenCache.token;
-}
 
 async function series(token, project, metric) {
   const end = new Date();
@@ -92,7 +63,7 @@ module.exports = async (req, res) => {
   if (!sa) return res.status(503).json({ error: 'GCP_SA_KEY missing on the server.' });
   const projects = [...new Set(String(req.query.projects || '').split(','))].filter((p) => ID_RE.test(p)).slice(0, MAX);
   try {
-    const token = await accessToken(sa);
+    const token = await accessToken(sa, SCOPE);
     res.status(200).json({ projects: await Promise.all(projects.map((p) => usage(token, p))), account: sa.client_email });
   } catch (e) {
     res.status(502).json({ error: String(e.message || e) });

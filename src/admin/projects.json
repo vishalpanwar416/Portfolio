@@ -73,6 +73,9 @@
       "vishalpanwar416/Edition-TV-App-Flutter",
       "vishalpanwar416/Edition-terraform",
       "vishalpanwar416/social-media-module"
+    ],
+    "cloud": [
+      "gcp:edition-tv.billing_export"
     ]
   },
   {
@@ -124,6 +127,10 @@
       "Splink-pro/splinkpro-mobile",
       "Splink-pro/splinkpro-student",
       "Splink-pro/splinkpro-site"
+    ],
+    "cloud": [
+      "aws:splink",
+      "gcp:splink-dev-048521.billing_export"
     ]
   },
   {

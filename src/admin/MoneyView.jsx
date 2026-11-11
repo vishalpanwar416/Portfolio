@@ -7,6 +7,7 @@ import {
   revenueByMonth, revenueIn, saveDoc, today,
 } from './data'
 import { Badge, BarChart, Button, Empty, Input, Progress, Section, Stat, StatusDot, cx } from './ui'
+import { cloudMoney, useCloud } from './IntegrationSections'
 
 export function GoalCard({ settings, thisMonth, compact }) {
   const [editing, setEditing] = useState(false)
@@ -49,6 +50,34 @@ export function GoalCard({ settings, thisMonth, compact }) {
             </span>
           </div>
         </div>
+      )}
+    </Section>
+  )
+}
+
+function CloudBills({ projects, go }) {
+  const owners = projects.flatMap((p) => (p.cloud || []).map((src) => [src, p]))
+  const res = useCloud(owners.map(([src]) => src))
+  if (!owners.length) return null
+  const owner = Object.fromEntries(owners)
+  return (
+    <Section title="Cloud bills">
+      {res.error ? <Empty>{res.error}</Empty> : !res.data ? <div className="text-sm text-zinc-500">Loading…</div> : (
+        <ul className="divide-y divide-white/[0.05]">
+          {res.data.sources.map((s) => (
+            <li key={s.source} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2 text-sm">
+              <button onClick={() => go(`/p/${owner[s.source].slug}`)} className="w-28 shrink-0 truncate text-left text-zinc-300 hover:text-white">{owner[s.source].name}</button>
+              <span className="w-40 shrink-0 truncate text-xs text-zinc-500">{s.provider === 'gcp' ? 'Google Cloud' : 'AWS'} · {s.account}</span>
+              {s.error ? <span className="min-w-0 flex-1 truncate text-xs text-zinc-500">{s.error}</span> : (
+                <>
+                  <span className="flex-1 tabular-nums text-zinc-100">{cloudMoney(s.monthToDate, s.currency)} <span className="text-xs text-zinc-500">so far</span></span>
+                  <span className="tabular-nums text-zinc-400">{cloudMoney(s.forecast, s.currency)} <span className="text-xs text-zinc-600">forecast</span></span>
+                  <span className="tabular-nums text-zinc-500">{cloudMoney(s.lastMonth, s.currency)} <span className="text-xs text-zinc-600">last month</span></span>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
       )}
     </Section>
   )
@@ -130,6 +159,8 @@ export default function MoneyView({ data, go }) {
           )}
         </Section>
       </div>
+
+      <CloudBills projects={projects} go={go} />
 
       <div className="grid gap-5 lg:grid-cols-3">
         <Section title={`Unpaid invoices${unpaid.length ? ` · ${unpaid.length}` : ''}`} className="lg:col-span-2">

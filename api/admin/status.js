@@ -27,6 +27,7 @@ module.exports = async (req, res) => {
     github: has('GITHUB_TOKEN'),
     stacky: has('STACKY_MCP_TOKEN'),
     firebase: has('GCP_SA_KEY'),
+    aws: Object.keys(process.env).filter((k) => /^AWS_COST_[A-Z0-9_]+_KEY_ID$/.test(k)).map((k) => k.slice(9, -7).toLowerCase()),
     monitor: await monitorRun(),
     monitorWorkflow: `https://github.com/${REPO}/actions/workflows/${WORKFLOW}`,
   });

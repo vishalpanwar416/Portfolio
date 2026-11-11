@@ -91,6 +91,34 @@ export default function SettingsView({ data, install }) {
               Tasks show on a project when its Stacky project has the same name (or set the names under Edit on the project page).
             </Integration>
 
+            <Integration name="Cloud bills — Edition TV (Google Cloud), SplinkPro (AWS + Google Cloud)" ok={st.firebase && (st.aws || []).includes('splink')}>
+              <b>Google Cloud.</b> Google only exposes spend through its billing export to BigQuery, so for each billing account:
+              <ol className="mt-1 list-decimal space-y-1 pl-4">
+                <li>Create the dataset the export writes into:
+                  <Cmd>{`gcloud config set account editionmedia.tv@gmail.com && bq --project_id=edition-tv mk --dataset --location=US edition-tv:billing_export
+gcloud config set account vishal@splinkpro.ai && bq --project_id=splink-dev-048521 mk --dataset --location=US splink-dev-048521:billing_export
+gcloud config set account vishal.p@bluecopa.com`}</Cmd>
+                </li>
+                <li>Turn on <i>Standard usage cost</i> export into that dataset — this step is console-only:{' '}
+                  <a className="underline" href="https://console.cloud.google.com/billing/0141EB-74B5DA-B315BE/export" target="_blank" rel="noreferrer">Edition TV billing</a>,{' '}
+                  <a className="underline" href="https://console.cloud.google.com/billing/015C7A-EE6EDE-98074B/export" target="_blank" rel="noreferrer">SplinkPro billing</a>{' '}
+                  → BigQuery export → Standard usage cost → Edit settings → project + <code>billing_export</code>. First data shows up within a day.</li>
+                <li>Let the dashboard’s service account read it (create the account with the Firebase step below first):
+                  <Cmd>{`SA=serviceAccount:vp-control@sanero-media.iam.gserviceaccount.com
+for x in "editionmedia.tv@gmail.com edition-tv" "vishal@splinkpro.ai splink-dev-048521"; do set -- $x
+  for r in roles/bigquery.dataViewer roles/bigquery.jobUser; do gcloud projects add-iam-policy-binding $2 --account $1 --member $SA --role $r --condition=None; done
+done`}</Cmd>
+                </li>
+              </ol>
+              <b className="mt-3 block">AWS (SplinkPro).</b> A read-only IAM user that can only call Cost Explorer; the keys go straight into Vercel without being printed:
+              <Cmd>{`aws login --profile splink
+aws iam create-user --user-name vp-control-costs --profile splink
+aws iam put-user-policy --user-name vp-control-costs --policy-name cost-explorer-read --profile splink --policy-document '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["ce:GetCostAndUsage"],"Resource":"*"}]}'
+read -r ID SECRET <<< "$(aws iam create-access-key --user-name vp-control-costs --profile splink --query 'AccessKey.[AccessKeyId,SecretAccessKey]' --output text)"
+${CD}vercel env add AWS_COST_SPLINK_KEY_ID production --value "$ID" --yes --force --sensitive && vercel env add AWS_COST_SPLINK_SECRET production --value "$SECRET" --yes --force --sensitive && unset ID SECRET && vercel redeploy admin.vishalpanwar.in --target production`}</Cmd>
+              Cost Explorer charges $0.01 per lookup; the dashboard caches each bill for 3 hours.
+            </Integration>
+
             <Integration name="Firebase — Firestore reads/writes" ok={st.firebase}>
               Needs a Google service account that can read Cloud Monitoring on each Firebase project:
               <Cmd>{`gcloud iam service-accounts create vp-control --project sanero-media --display-name "VP Control dashboard"

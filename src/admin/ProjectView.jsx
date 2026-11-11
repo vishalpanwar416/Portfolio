@@ -10,7 +10,7 @@ import {
   BarChart, Button, Empty, Input, Section, Select, Stat, StatusPill, Tag, Textarea, UpDot, cx,
 } from './ui'
 import { Clients, Expenses, Invoices } from './MoneySections'
-import { GitHubActivity, StackyTasks, Usage } from './IntegrationSections'
+import { CloudCosts, GitHubActivity, StackyTasks, Usage } from './IntegrationSections'
 
 const list = (s) => s.split(/[\n,]/).map((x) => x.trim()).filter(Boolean)
 
@@ -201,7 +201,7 @@ function EditDetails({ p, save, onClose, go }) {
   const [f, setF] = useState({
     name: p.name, category: p.category, summary: p.summary || '', stack: (p.stack || []).join(', '),
     domains: (p.domains || []).join('\n'), repos: (p.repos || []).join('\n'), vercel: (p.vercel || []).join('\n'),
-    firebase: (p.firebase || []).join('\n'), stacky: (p.stacky || []).join('\n'),
+    firebase: (p.firebase || []).join('\n'), stacky: (p.stacky || []).join('\n'), cloud: (p.cloud || []).join('\n'),
   })
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
 
@@ -210,7 +210,7 @@ function EditDetails({ p, save, onClose, go }) {
       name: f.name.trim() || p.name, category: f.category, summary: f.summary.trim(), stack: list(f.stack),
       domains: list(f.domains).map((d) => d.toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '')),
       repos: list(f.repos).map((r) => r.replace(/^https?:\/\/github\.com\//, '').replace(/\.git$/, '')),
-      vercel: list(f.vercel), firebase: list(f.firebase), stacky: list(f.stacky),
+      vercel: list(f.vercel), firebase: list(f.firebase), stacky: list(f.stacky), cloud: list(f.cloud),
     })
     onClose()
   }
@@ -237,6 +237,7 @@ function EditDetails({ p, save, onClose, go }) {
         <label><span className={label}>GitHub repos (owner/name)</span><Textarea rows={4} value={f.repos} onChange={set('repos')} /></label>
         <label><span className={label}>Vercel project names</span><Textarea rows={4} value={f.vercel} onChange={set('vercel')} /></label>
         <label><span className={label}>Firebase project IDs</span><Textarea rows={4} value={f.firebase} onChange={set('firebase')} /></label>
+        <label className="sm:col-span-2"><span className={label}>Cloud bills — one per line: gcp:&lt;project&gt;.&lt;dataset&gt; or aws:&lt;label&gt;</span><Textarea rows={2} value={f.cloud} onChange={set('cloud')} placeholder="gcp:my-project.billing_export" /></label>
         <label className="sm:col-span-2"><span className={label}>Stacky project names (blank = match “{p.name}”)</span><Input value={f.stacky} onChange={set('stacky')} className="w-full" placeholder={p.name} /></label>
       </div>
       <div className="mt-5 flex items-center justify-between">
@@ -299,6 +300,8 @@ export default function ProjectView({ project: p, data, go }) {
         <Invoices p={p} save={save} />
         <Expenses p={p} save={save} />
       </div>
+
+      {(p.cloud || []).length > 0 && <CloudCosts sources={p.cloud} go={go} />}
 
       <div className="grid gap-5 xl:grid-cols-2">
         <StackyTasks p={p} stacky={data.stacky} go={go} />

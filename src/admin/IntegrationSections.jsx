@@ -180,3 +180,92 @@ export function GitHubActivity({ p }) {
     </Section>
   )
 }
+
+// ── cloud bills (GCP billing export, AWS Cost Explorer) ─
+
+const PROVIDER = { gcp: 'Google Cloud', aws: 'AWS' }
+
+export function cloudMoney(amount, currency) {
+  if (amount === null || amount === undefined) return '—'
+  try {
+    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: currency || 'USD', maximumFractionDigits: Math.abs(amount) < 100 ? 2 : 0 }).format(amount)
+  } catch {
+    return `${amount} ${currency || ''}`
+  }
+}
+
+function CloudCard({ s, go }) {
+  const fmt = (n) => cloudMoney(n, s.currency)
+  const title = `${PROVIDER[s.provider] || s.provider} · ${s.account}`
+  if (s.error) {
+    return (
+      <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+        <div className="text-xs text-zinc-500">{title}</div>
+        <div className="mt-2 text-sm text-zinc-400">{s.error}</div>
+        {go && <button onClick={() => go('/settings')} className="mt-2 text-xs text-zinc-300 underline decoration-white/20 hover:text-white">Setup steps in Settings →</button>}
+      </div>
+    )
+  }
+  const up = s.lastMonth > 0 && s.forecast !== null ? Math.round(((s.forecast - s.lastMonth) / s.lastMonth) * 100) : null
+  const maxSvc = Math.max(1e-9, ...s.services.map((x) => x.amount))
+  return (
+    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+      <div className="flex items-center justify-between text-xs text-zinc-500">
+        <span>{title}</span>
+        <span>{s.cachedAt ? `as of ${timeAgo(s.cachedAt)}` : ''}</span>
+      </div>
+      <div className="mt-2 grid grid-cols-3 gap-3">
+        <div>
+          <div className="text-xl font-semibold tabular-nums text-zinc-50">{fmt(s.monthToDate)}</div>
+          <div className="text-[11px] text-zinc-500">this month so far</div>
+        </div>
+        <div>
+          <div className={cx('text-xl font-semibold tabular-nums', up !== null && up > 20 ? 'text-amber-300' : 'text-zinc-200')}>{fmt(s.forecast)}</div>
+          <div className="text-[11px] text-zinc-500">forecast{up !== null ? ` · ${up >= 0 ? '+' : ''}${up}% vs last` : ''}</div>
+        </div>
+        <div>
+          <div className="text-xl font-semibold tabular-nums text-zinc-400">{fmt(s.lastMonth)}</div>
+          <div className="text-[11px] text-zinc-500">last month</div>
+        </div>
+      </div>
+      <div className="mt-4 flex items-end gap-1.5" style={{ height: 56 }}>
+        {s.months.map((m, i) => {
+          const max = Math.max(1e-9, ...s.months.map((x) => x.amount))
+          return (
+            <div key={m.month} className="group relative flex h-full flex-1 flex-col justify-end" title={`${m.month}: ${fmt(m.amount)}`}>
+              <div className={cx('w-full rounded-t', i === s.months.length - 1 ? 'bg-white/60' : 'bg-white/[0.14]')} style={{ height: `${Math.max(3, (m.amount / max) * 100)}%` }} />
+              <div className="mt-1 text-center text-[9px] text-zinc-600">{new Date(`${m.month}-01`).toLocaleString('en-IN', { month: 'short' })}</div>
+            </div>
+          )
+        })}
+      </div>
+      {s.services.length > 0 && (
+        <ul className="mt-4 space-y-1.5">
+          {s.services.map((x) => (
+            <li key={x.name} className="text-xs">
+              <div className="flex justify-between gap-2"><span className="truncate text-zinc-400">{x.name}</span><span className="tabular-nums text-zinc-300">{fmt(x.amount)}</span></div>
+              <div className="mt-0.5 h-1 rounded-full bg-white/[0.05]"><div className="h-1 rounded-full bg-white/40" style={{ width: `${Math.max(0, (x.amount / maxSvc) * 100)}%` }} /></div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+export function useCloud(sources) {
+  return useApi(sources.length ? `/api/admin/cloud?sources=${encodeURIComponent(sources.join(','))}` : null)
+}
+
+export function CloudCosts({ sources, go }) {
+  const res = useCloud(sources)
+  return (
+    <Section title="Cloud bill">
+      {res.error ? <Empty>{res.error}</Empty> : !res.data ? <div className="text-sm text-zinc-500">Loading costs…</div> : (
+        <div className={cx('grid gap-4', res.data.sources.length > 1 && 'lg:grid-cols-2')}>
+          {res.data.sources.map((s) => <CloudCard key={s.source} s={s} go={go} />)}
+        </div>
+      )}
+    </Section>
+  )
+}
