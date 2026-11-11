@@ -4,8 +4,8 @@
 //
 // Needs GCP_SA_KEY: a service account key (raw JSON or base64 of it) whose
 // account has roles/monitoring.viewer on each project.
-const { requireOwner } = require('./_auth');
-const { serviceAccount, accessToken } = require('./_gcp');
+const { requireOwner } = require('../_auth');
+const { serviceAccount, accessToken } = require('../_gcp');
 
 const SCOPE = 'https://www.googleapis.com/auth/monitoring.read';
 

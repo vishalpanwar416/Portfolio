@@ -40,6 +40,7 @@ export const DEFAULT_PROJECTS = defaultProjects
 
 const EMPTY = {
   summary: '', stack: [], domains: [], repos: [], vercel: [], firebase: [], stacky: [], cloud: [],
+  apps: [], payments: [], supabase: [], services: [],
   revenue: [], invoices: [], expenses: [], clients: [], updates: [], links: [], notes: '',
 }
 
@@ -106,7 +107,10 @@ export const invoiceState = (inv) =>
 const paidMonth = (inv) => (inv.paidOn || '').slice(0, 7) || inv.month
 
 export function revenueIn(p, month) {
-  const logged = (p.revenue || []).filter((r) => r.month === month).reduce((t, r) => t + (Number(r.amount) || 0), 0)
+  // Razorpay takings land here automatically when the project's payments are
+  // your income (your own products), not a client's money.
+  const auto = p.paymentsIncome ? Number(p.autoRevenue?.[month]) || 0 : 0
+  const logged = auto + (p.revenue || []).filter((r) => r.month === month).reduce((t, r) => t + (Number(r.amount) || 0), 0)
   const paid = (p.invoices || []).filter((i) => i.status === 'paid' && paidMonth(i) === month).reduce((t, i) => t + (Number(i.amount) || 0), 0)
   return logged + paid
 }
@@ -140,6 +144,7 @@ export function projectStats(p, checks = {}) {
   const active = clients.filter((c) => c.status !== 'past')
   const hostChecks = checkable(p.domains).map((h) => checks[h]).filter(Boolean)
   const months = new Set([
+    ...Object.keys(p.paymentsIncome ? p.autoRevenue || {} : {}),
     ...(p.revenue || []).map((r) => r.month),
     ...(p.invoices || []).filter((i) => i.status === 'paid').map(paidMonth),
   ])
@@ -297,8 +302,27 @@ export function useAdminData() {
   }, [docs, vercel])
   // Hidden projects stay in data (and can be shown again from Settings) but
   // are left out of every page, total and alert.
-  const projects = useMemo(() => allProjects.filter((p) => !p.hidden), [allProjects])
+  const visible = useMemo(() => allProjects.filter((p) => !p.hidden), [allProjects])
   const hiddenProjects = useMemo(() => allProjects.filter((p) => p.hidden), [allProjects])
+
+  // One request each for every project's payments, apps and databases.
+  const joined = (k) => [...new Set(visible.flatMap((p) => p[k] || []))].sort().join(',')
+  const paymentKey = joined('payments')
+  const appKey = joined('apps')
+  const supabaseKey = joined('supabase')
+  const payments = useApi(paymentKey ? `/api/admin/payments?sources=${encodeURIComponent(paymentKey)}` : null)
+  const apps = useApi(appKey ? `/api/admin/apps?apps=${encodeURIComponent(appKey)}` : null)
+  const supabase = useApi(supabaseKey ? `/api/admin/supabase?refs=${encodeURIComponent(supabaseKey)}` : null)
+
+  const projects = useMemo(() => {
+    const bySource = Object.fromEntries((payments.data?.sources || []).map((s) => [s.source, s]))
+    return visible.map((p) => {
+      if (!(p.payments || []).length) return p
+      const autoRevenue = {}
+      for (const src of p.payments) for (const m of bySource[src]?.months || []) autoRevenue[m.month] = (autoRevenue[m.month] || 0) + m.net
+      return { ...p, autoRevenue }
+    })
+  }, [visible, payments.data])
 
   const settings = docs.settings || {}
 
@@ -352,12 +376,15 @@ export function useAdminData() {
   const { reload: reloadDomains } = domains
   const { reload: reloadTraffic } = traffic
   const { reload: reloadStacky } = stacky
+  const { reload: reloadPayments } = payments
+  const { reload: reloadApps } = apps
+  const { reload: reloadSupabase } = supabase
   const refresh = useCallback(() => {
-    loadVercel(); runChecks(); reloadDomains(); reloadTraffic(); reloadStacky()
-  }, [loadVercel, runChecks, reloadDomains, reloadTraffic, reloadStacky])
+    loadVercel(); runChecks(); reloadDomains(); reloadTraffic(); reloadStacky(); reloadPayments(); reloadApps(); reloadSupabase()
+  }, [loadVercel, runChecks, reloadDomains, reloadTraffic, reloadStacky, reloadPayments, reloadApps, reloadSupabase])
 
   return {
     projects, vercel, vercelError, docs, docsReady, checks, checking, lastChecked, refresh,
-    settings, domains, integrations, traffic, stacky, hiddenProjects,
+    settings, domains, integrations, traffic, stacky, hiddenProjects, payments, apps, supabase,
   }
 }

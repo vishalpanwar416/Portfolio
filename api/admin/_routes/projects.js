@@ -2,7 +2,7 @@
 // Needs VERCEL_TOKEN (a read-capable token for the team) and VERCEL_TEAM_ID.
 // Only whitelisted fields go back to the browser — the raw project objects
 // also carry env vars and protection-bypass secrets.
-const { requireOwner } = require('./_auth');
+const { requireOwner } = require('../_auth');
 
 const API = 'https://api.vercel.com';
 

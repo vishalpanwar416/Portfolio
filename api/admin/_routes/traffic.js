@@ -1,7 +1,7 @@
 // Page views per Vercel project per day, from Vercel Web Analytics via the
 // observability query API. GET ?days=30. Projects without Web Analytics
 // enabled simply don't appear.
-const { requireOwner } = require('./_auth');
+const { requireOwner } = require('../_auth');
 
 const API = 'https://api.vercel.com';
 

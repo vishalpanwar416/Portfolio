@@ -1,7 +1,7 @@
 // Open Stacky tasks, via Stacky's hosted MCP server (the same one Claude
 // uses). Needs STACKY_MCP_TOKEN — mint one in Stacky → Settings → MCP.
 // STACKY_MCP_URL defaults to the production deployment.
-const { requireOwner } = require('./_auth');
+const { requireOwner } = require('../_auth');
 
 const DEFAULT_URL = 'https://stackyy.vercel.app/api/mcp';
 const OPEN_STATUSES = ['in_progress', 'blocked', 'planned', 'backlog'];

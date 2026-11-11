@@ -74,7 +74,7 @@ export function trafficFor(p, traffic) {
   return { total: daily.reduce((a, b) => a + b, 0), daily, tracked: p.vercelProjects.some((v) => byId[v.id]) }
 }
 
-function FirestoreUsage({ ids }) {
+export function FirestoreUsage({ ids }) {
   const res = useApi(ids.length ? `/api/admin/firebase?projects=${encodeURIComponent(ids.join(','))}` : null)
   if (!ids.length) return null
   if (res.notConfigured) return <div className="text-xs text-zinc-500">Firestore usage needs GCP_SA_KEY — see Settings.</div>

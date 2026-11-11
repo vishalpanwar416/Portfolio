@@ -1,7 +1,7 @@
 // Live uptime check for a list of hostnames: HTTP status, response time and
 // days until the TLS certificate expires. POST { hosts: ["sanero.in", ...] }.
 const tls = require('node:tls');
-const { requireOwner } = require('./_auth');
+const { requireOwner } = require('../_auth');
 
 const MAX_HOSTS = 40;
 const TIMEOUT_MS = 8000;

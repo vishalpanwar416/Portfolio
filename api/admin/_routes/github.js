@@ -1,7 +1,7 @@
 // Latest commit, open PRs and the last CI run for a few repos.
 // GET ?repos=owner/name,owner/name. Uses GITHUB_TOKEN when set (needed for
 // private repos and for a sane rate limit); public repos work without it.
-const { requireOwner } = require('./_auth');
+const { requireOwner } = require('../_auth');
 
 const MAX_REPOS = 10;
 const REPO_RE = /^[A-Za-z0-9-]{1,39}\/[A-Za-z0-9._-]{1,100}$/;

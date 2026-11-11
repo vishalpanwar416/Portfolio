@@ -10,8 +10,8 @@
 // AZURE_COST_<LABEL>_TENANT, _CLIENT_ID, _SECRET and _SUBSCRIPTION for a
 // service principal with the Cost Management Reader role.
 const crypto = require('node:crypto');
-const { requireOwner } = require('./_auth');
-const { serviceAccount, accessToken } = require('./_gcp');
+const { requireOwner } = require('../_auth');
+const { serviceAccount, accessToken } = require('../_gcp');
 
 const TTL_MS = 3 * 3600e3;
 const MONTHS = 6;

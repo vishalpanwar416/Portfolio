@@ -83,16 +83,27 @@ export default function SettingsView({ data, install }) {
               Uses <code>VERCEL_TOKEN</code> and <code>VERCEL_TEAM_ID</code>. Traffic needs Web Analytics switched on per project in Vercel (Project → Analytics → Enable).
             </Integration>
 
-            <Integration name="Uptime & renewal alerts (Telegram)" ok={monitorOk} detail={mon && <span className="text-xs text-zinc-500">last run {timeAgo(mon.at)}</span>}>
-              A GitHub Actions job in <a className="underline" href={st.monitorWorkflow} target="_blank" rel="noreferrer">{REPO}</a> checks every site every 10 minutes and messages you when one goes down or comes back, plus a 9am note when a domain or certificate is about to expire.
-              <ol className="mt-2 list-decimal space-y-1 pl-4">
-                <li>In Telegram, message <b>@BotFather</b> → <code>/newbot</code>, copy the bot token. (Or reuse the Hermes bot.)</li>
-                <li>Send your bot any message, then open <code>https://api.telegram.org/bot&lt;TOKEN&gt;/getUpdates</code> and copy <code>chat.id</code>.</li>
-                <li>Save both as repo secrets (run in Claude Code with <code>!</code>, or a terminal):</li>
-              </ol>
-              <Cmd>{`export GH_TOKEN=$(gh auth token -u vishalpanwar416) && gh secret set TELEGRAM_BOT_TOKEN -R ${REPO} --body "PASTE_BOT_TOKEN" && gh secret set TELEGRAM_CHAT_ID -R ${REPO} --body "PASTE_CHAT_ID" && gh workflow run monitor.yml -R ${REPO}`}</Cmd>
-              Optional — also watch every Vercel custom domain, not just the ones listed on projects:
-              <Cmd>{`export GH_TOKEN=$(gh auth token -u vishalpanwar416) && gh secret set VERCEL_TOKEN -R ${REPO} --body "PASTE_VERCEL_TOKEN" && gh secret set VERCEL_TEAM_ID -R ${REPO} --body "team_fzknfdYzx339Ps3Qh3RTiiPb"`}</Cmd>
+            <Integration name="Alerts & phone notifications" ok={st.monitorSecret && st.ntfy && monitorOk} detail={mon && <span className="text-xs text-zinc-500">monitor ran {timeAgo(mon.at)}</span>}>
+              One script sets up the scheduled monitor’s secret, a private ntfy topic for your phone, and the laptop agent:
+              <Cmd>{`bash ~/Development/Projects/Portfolio/scripts/setup-alerts.sh`}</Cmd>
+              Then install <b>ntfy</b> on your phone and subscribe to the topic it prints. Test it from the <a className="underline" href="#/alerts">Alerts</a> page. Telegram is optional:
+              <Cmd>{`export GH_TOKEN=$(gh auth token -u vishalpanwar416) && gh secret set TELEGRAM_BOT_TOKEN -R ${REPO} --body "PASTE_BOT_TOKEN" && gh secret set TELEGRAM_CHAT_ID -R ${REPO} --body "PASTE_CHAT_ID"`}</Cmd>
+            </Integration>
+
+            <Integration name="Razorpay — automatic revenue (Table Tap, Aarambh)" ok={['tabletap', 'aarambh'].every((l) => (st.razorpay || []).includes(l))} detail={st.razorpay?.length > 0 && <span className="text-xs text-zinc-500">{st.razorpay.join(', ')}</span>}>
+              In each Razorpay account: Account &amp; Settings → API keys → generate a <b>live</b> key. Table Tap’s takings count as your revenue; Aarambh’s are shown as the client’s (toggle on the project page).
+              <Cmd>{`${CD}for L in TABLETAP AARAMBH; do read -rp "$L key id: " ID; read -rsp "$L key secret: " SEC; echo
+  vercel env add RAZORPAY_\${L}_KEY_ID production --value "$ID" --yes --force --sensitive && vercel env add RAZORPAY_\${L}_KEY_SECRET production --value "$SEC" --yes --force --sensitive
+done; unset ID SEC; vercel redeploy admin.vishalpanwar.in --target production`}</Cmd>
+            </Integration>
+
+            <Integration name="Supabase — health, size, pauses (Table Tap, SplinkPro)" ok={['tabletap', 'splink'].every((l) => (st.supabase || []).includes(l))} detail={st.supabase?.length > 0 && <span className="text-xs text-zinc-500">{st.supabase.join(', ')}</span>}>
+              Create a personal access token at <a className="underline" href="https://supabase.com/dashboard/account/tokens" target="_blank" rel="noreferrer">supabase.com/dashboard/account/tokens</a> in each account that owns the projects (one token is enough if both live in the same account — paste it twice):
+              <Cmd>{`${CD}for L in TABLETAP SPLINK; do read -rsp "$L Supabase token: " T; echo; vercel env add SUPABASE_\${L}_TOKEN production --value "$T" --yes --force --sensitive; done; unset T; vercel redeploy admin.vishalpanwar.in --target production`}</Cmd>
+            </Integration>
+
+            <Integration name="Play Console — crash and ANR rates" ok={(data.apps.data?.apps || []).some((a) => a.vitals && !a.vitals.error)}>
+              Store ratings and downloads already work. For Android crash rates: Play Console → Users and permissions → Invite new users → <code>vp-control@sanero-media.iam.gserviceaccount.com</code> → app access to Aarambh with <i>View app information</i>. (Create the service account in the Firebase step below first.)
             </Integration>
 
             <Integration name="GitHub — commits, PRs, CI" ok={st.github}>
@@ -140,12 +151,14 @@ read -r APP SECRET TENANT <<< "$(az ad sp create-for-rbac --name vp-control-cost
 ${CD}for kv in "TENANT $TENANT" "CLIENT_ID $APP" "SECRET $SECRET" "SUBSCRIPTION 11381ea5-8f68-4e64-ab1b-3122845ba5db"; do set -- $kv; vercel env add AZURE_COST_AARAMBH_$1 production --value "$2" --yes --force --sensitive; done && unset APP SECRET TENANT && vercel redeploy admin.vishalpanwar.in --target production`}</Cmd>
             </Integration>
 
-            <Integration name="Firebase — Firestore reads/writes" ok={st.firebase}>
+            <Integration name="Google service account — Firestore usage, monitor, laptop (do this first)" ok={st.firebase}>
               Needs a Google service account that can read Cloud Monitoring on each Firebase project:
               <Cmd>{`gcloud iam service-accounts create vp-control --project sanero-media --display-name "VP Control dashboard"
 for p in sanero-media aarambh-20a47 stacky-f7f42 certificate-automation-fb39e sarai-crm; do
   gcloud projects add-iam-policy-binding $p --member serviceAccount:vp-control@sanero-media.iam.gserviceaccount.com --role roles/monitoring.viewer --condition=None
 done
+# lets the monitor read your dashboard edits and the laptop agent save its status
+gcloud projects add-iam-policy-binding sanero-media --member serviceAccount:vp-control@sanero-media.iam.gserviceaccount.com --role roles/datastore.user --condition=None
 gcloud iam service-accounts keys create /tmp/vp-control.json --iam-account vp-control@sanero-media.iam.gserviceaccount.com
 ${CD}base64 -w0 /tmp/vp-control.json | vercel env add GCP_SA_KEY production --yes --force --sensitive && rm /tmp/vp-control.json && vercel redeploy admin.vishalpanwar.in --target production`}</Cmd>
             </Integration>

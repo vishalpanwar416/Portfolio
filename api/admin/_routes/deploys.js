@@ -1,6 +1,6 @@
 // Recent deployments for a few Vercel projects, for a project's update
 // timeline. GET ?projects=<id>,<id> (project ids from /api/admin/projects).
-const { requireOwner } = require('./_auth');
+const { requireOwner } = require('../_auth');
 
 const API = 'https://api.vercel.com';
 const MAX_PROJECTS = 6;

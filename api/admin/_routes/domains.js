@@ -1,6 +1,6 @@
 // Registration expiry for a list of domains, from public RDAP (the WHOIS
 // replacement). GET ?domains=sanero.in,aarambh.app. No key needed.
-const { requireOwner } = require('./_auth');
+const { requireOwner } = require('../_auth');
 
 const MAX = 25;
 const TTL_MS = 6 * 3600e3; // registries rate-limit; expiry dates rarely move

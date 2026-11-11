@@ -51,7 +51,15 @@
     ],
     "cloud": [
       "azure:aarambh"
-    ]
+    ],
+    "apps": [
+      "play:com.reignactive.aarambh",
+      "ios:Com.Aarambh.Fitness"
+    ],
+    "payments": [
+      "razorpay:aarambh"
+    ],
+    "paymentsIncome": false
   },
   {
     "slug": "edition-tv",
@@ -81,6 +89,10 @@
     ],
     "cloud": [
       "gcp:edition-tv.billing_export"
+    ],
+    "apps": [
+      "play:com.editiontv.editiontv_app",
+      "ios:com.editiontv.editiontvApp"
     ]
   },
   {
@@ -139,6 +151,15 @@
     ],
     "vercel": [
       "splinkpro-web-dev"
+    ],
+    "apps": [
+      "play:ai.splinkpro.assessor",
+      "play:ai.splinkpro.student",
+      "ios:ai.splinkpro.assessor",
+      "ios:ai.splinkpro.splinkStudent"
+    ],
+    "supabase": [
+      "splink:altpnwfozryqufjbarti"
     ]
   },
   {
@@ -221,6 +242,20 @@
     ],
     "cloud": [
       "gcp:table-tap-qr.billing_export"
+    ],
+    "services": [
+      "table-tap-tracker.service",
+      "table-tap-harness.service",
+      "table-tap-ngrok.service",
+      "table-tap-localtunnel.service"
+    ],
+    "payments": [
+      "razorpay:tabletap"
+    ],
+    "paymentsIncome": true,
+    "supabase": [
+      "tabletap:vogixryubhpqziivspks",
+      "tabletap:jkrhtaqlwcndozcynrgk"
     ]
   },
   {
@@ -259,6 +294,9 @@
     ],
     "repos": [
       "Jahanvikumawat14/penspace_clone"
+    ],
+    "apps": [
+      "play:com.example.penspace_clone"
     ]
   },
   {
@@ -338,6 +376,10 @@
     "repos": [
       "vishalpanwar416/hermes-jobs",
       "NousResearch/hermes-agent"
+    ],
+    "services": [
+      "hermes-gateway.service",
+      "hermes-dashboard.service"
     ]
   },
   {
@@ -348,6 +390,11 @@
     "summary": "GNOME desktop rig \u2014 chats, wake word, clipboard drop, token usage.",
     "repos": [
       "vishalpanwar416/bezelrig"
+    ],
+    "services": [
+      "bezelrig-chats.service",
+      "bezelrig-clipdrop.service",
+      "bezelrig-token-usage.timer"
     ]
   },
   {
@@ -393,6 +440,12 @@
     "stack": [
       "Node.js",
       "systemd"
+    ],
+    "services": [
+      "media-man-sanero.timer",
+      "media-man-tabletap.timer",
+      "media-man@sanero.service",
+      "media-man@tabletap.service"
     ]
   }
 ]

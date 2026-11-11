@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
-  ExternalLink, GitBranch, Github, IndianRupee, Pencil, Plus, Repeat, Trash2, Users, Globe, Wallet, TrendingUp,
+  ExternalLink, GitBranch, Github, IndianRupee, Pencil, Pin, PinOff, Plus, Repeat, Trash2, Users, Globe, Wallet, TrendingUp,
 } from 'lucide-react'
 import {
   CATEGORIES, STATUSES, VERCEL_TEAM_SLUG, api, daysUntil, lastMonths, money, moneyShort, monthKey,
@@ -11,6 +11,8 @@ import {
 } from './ui'
 import { Clients, Expenses, Invoices } from './MoneySections'
 import { CloudCosts, GitHubActivity, StackyTasks, Usage } from './IntegrationSections'
+import { ProjectApps } from './AppsView'
+import { PaymentsSection, ProjectDatabases, ProjectServices } from './InfraSections'
 
 const list = (s) => s.split(/[\n,]/).map((x) => x.trim()).filter(Boolean)
 
@@ -202,6 +204,7 @@ function EditDetails({ p, save, onClose, go }) {
     name: p.name, category: p.category, summary: p.summary || '', stack: (p.stack || []).join(', '),
     domains: (p.domains || []).join('\n'), repos: (p.repos || []).join('\n'), vercel: (p.vercel || []).join('\n'),
     firebase: (p.firebase || []).join('\n'), stacky: (p.stacky || []).join('\n'), cloud: (p.cloud || []).join('\n'),
+    apps: (p.apps || []).join('\n'), payments: (p.payments || []).join('\n'), supabase: (p.supabase || []).join('\n'), services: (p.services || []).join('\n'),
   })
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
 
@@ -211,6 +214,7 @@ function EditDetails({ p, save, onClose, go }) {
       domains: list(f.domains).map((d) => d.toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '')),
       repos: list(f.repos).map((r) => r.replace(/^https?:\/\/github\.com\//, '').replace(/\.git$/, '')),
       vercel: list(f.vercel), firebase: list(f.firebase), stacky: list(f.stacky), cloud: list(f.cloud),
+      apps: list(f.apps), payments: list(f.payments), supabase: list(f.supabase), services: list(f.services),
     })
     onClose()
   }
@@ -238,6 +242,10 @@ function EditDetails({ p, save, onClose, go }) {
         <label><span className={label}>Vercel project names</span><Textarea rows={4} value={f.vercel} onChange={set('vercel')} /></label>
         <label><span className={label}>Firebase project IDs</span><Textarea rows={4} value={f.firebase} onChange={set('firebase')} /></label>
         <label className="sm:col-span-2"><span className={label}>Cloud bills — one per line: gcp:&lt;project&gt;.&lt;dataset&gt;, aws:&lt;label&gt; or azure:&lt;label&gt;</span><Textarea rows={2} value={f.cloud} onChange={set('cloud')} placeholder="gcp:my-project.billing_export" /></label>
+        <label><span className={label}>Store apps — play:&lt;package&gt; / ios:&lt;bundle id&gt;</span><Textarea rows={3} value={f.apps} onChange={set('apps')} placeholder="play:com.example.app" /></label>
+        <label><span className={label}>Payments — razorpay:&lt;label&gt;</span><Textarea rows={3} value={f.payments} onChange={set('payments')} placeholder="razorpay:myshop" /></label>
+        <label><span className={label}>Supabase — &lt;label&gt;:&lt;project ref&gt;</span><Textarea rows={3} value={f.supabase} onChange={set('supabase')} placeholder="mylabel:abcdefghijklmnopqrst" /></label>
+        <label><span className={label}>Laptop services (systemd user units)</span><Textarea rows={3} value={f.services} onChange={set('services')} placeholder="my-app.service" /></label>
         <label className="sm:col-span-2"><span className={label}>Stacky project names (blank = match “{p.name}”)</span><Input value={f.stacky} onChange={set('stacky')} className="w-full" placeholder={p.name} /></label>
       </div>
       <div className="mt-5 flex items-center justify-between">
@@ -259,6 +267,9 @@ export default function ProjectView({ project: p, data, go }) {
   useEffect(() => { setNotes(p.notes || ''); setEditing(false) }, [p.slug, p.notes])
 
   const save = (patch) => saveDoc(p.id, { kind: 'project', ...patch })
+  const pinnedList = data.settings.pinned || []
+  const pinned = pinnedList.includes(p.slug)
+  const togglePin = () => saveDoc('settings', { kind: 'settings', pinned: pinned ? pinnedList.filter((x) => x !== p.slug) : [...pinnedList, p.slug] })
   const s = projectStats(p, data.checks)
 
   return (
@@ -276,6 +287,9 @@ export default function ProjectView({ project: p, data, go }) {
           )}
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="glass" onClick={togglePin} title={pinned ? 'Unpin from sidebar' : 'Pin to sidebar'} aria-label={pinned ? 'Unpin' : 'Pin'}>
+            {pinned ? <PinOff size={14} /> : <Pin size={14} />}
+          </Button>
           <Select value={p.status} onChange={(e) => save({ status: e.target.value })} aria-label="Status">
             {Object.entries(STATUSES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
           </Select>
@@ -304,7 +318,18 @@ export default function ProjectView({ project: p, data, go }) {
         <Expenses p={p} save={save} />
       </div>
 
+      <PaymentsSection p={p} payments={data.payments} go={go} />
+
       {(p.cloud || []).length > 0 && <CloudCosts sources={p.cloud} go={go} />}
+
+      <ProjectApps p={p} apps={data.apps} />
+
+      {((p.supabase || []).length > 0 || (p.services || []).length > 0) && (
+        <div className={cx('grid gap-5', (p.supabase || []).length > 0 && (p.services || []).length > 0 && 'xl:grid-cols-2')}>
+          <ProjectDatabases p={p} supabase={data.supabase} go={go} />
+          <ProjectServices p={p} docs={data.docs} />
+        </div>
+      )}
 
       <div className="grid gap-5 xl:grid-cols-2">
         <StackyTasks p={p} stacky={data.stacky} go={go} />

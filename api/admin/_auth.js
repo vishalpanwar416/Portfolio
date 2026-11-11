@@ -54,4 +54,16 @@ async function requireOwner(req, res) {
   return owner;
 }
 
-module.exports = { requireOwner };
+/**
+ * Like requireOwner, but also lets the uptime monitor (GitHub Actions) in
+ * with the shared MONITOR_SECRET. Returns 'owner' | 'monitor' | null.
+ */
+async function requireOwnerOrMonitor(req, res) {
+  const bearer = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+  const secret = process.env.MONITOR_SECRET;
+  if (secret && bearer.length === secret.length &&
+      crypto.timingSafeEqual(Buffer.from(bearer), Buffer.from(secret))) return 'monitor';
+  return (await requireOwner(req, res)) ? 'owner' : null;
+}
+
+module.exports = { requireOwner, requireOwnerOrMonitor };
