@@ -133,8 +133,7 @@
       "Python"
     ],
     "domains": [
-      "splinkpro.ai",
-      "app.splinkpro.ai"
+      "splinkpro.ai"
     ],
     "repos": [
       "Splink-pro/splink-platform",
