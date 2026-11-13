@@ -9,6 +9,7 @@ const routes = {
   domains: require('./_routes/domains'),
   firebase: require('./_routes/firebase'),
   github: require('./_routes/github'),
+  instagram: require('./_routes/instagram'),
   laptop: require('./_routes/laptop'),
   lead: require('./_routes/lead'),
   marketing: require('./_routes/marketing'),

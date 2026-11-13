@@ -18,6 +18,7 @@ import {
 
 export const MARKETING_TABS = [
   { key: 'traffic', label: 'Traffic' },
+  { key: 'instagram', label: 'Instagram' },
   { key: 'seo', label: 'SEO' },
   { key: 'campaigns', label: 'Campaigns' },
   { key: 'leads', label: 'Leads' },
@@ -133,6 +134,128 @@ function Traffic({ data, go, leads }) {
               )}
             </>
           )}
+    </div>
+  )
+}
+
+// ── Instagram ──────────────────────────────────────────
+
+const POST_TYPES = { IMAGE: 'Post', CAROUSEL_ALBUM: 'Carousel', VIDEO: 'Video', REEL: 'Reel' }
+const fmt = (v) => (v === null || v === undefined ? '—' : compact.format(v))
+const avg = (posts, k) => {
+  const vals = posts.map((p) => p[k]).filter((v) => typeof v === 'number')
+  return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null
+}
+
+function PostCard({ post }) {
+  return (
+    <a href={post.permalink} target="_blank" rel="noreferrer" className="group overflow-hidden rounded-xl border border-white/[0.07] bg-white/[0.02] transition hover:border-white/20">
+      <div className="relative aspect-square bg-white/[0.03]">
+        {post.image && <img src={post.image} alt="" loading="lazy" referrerPolicy="no-referrer" className="h-full w-full object-cover" />}
+        <span className="absolute left-2 top-2 rounded-md bg-black/60 px-1.5 py-0.5 text-[10px] text-zinc-200 backdrop-blur">{POST_TYPES[post.type] || post.type}</span>
+      </div>
+      <div className="space-y-1.5 p-2.5">
+        <div className="text-[11px] text-zinc-500">{post.at ? new Date(post.at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'}</div>
+        <p className="line-clamp-2 min-h-[2rem] text-xs text-zinc-300">{post.caption || <span className="text-zinc-600">No caption</span>}</p>
+        <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-zinc-500">
+          <span><span className="tabular-nums text-zinc-100">{fmt(post.likes)}</span> likes</span>
+          <span><span className="tabular-nums text-zinc-100">{fmt(post.comments)}</span> comments</span>
+          {post.reach != null && <span><span className="tabular-nums text-zinc-100">{fmt(post.reach)}</span> reach</span>}
+          {post.views != null && <span><span className="tabular-nums text-zinc-100">{fmt(post.views)}</span> views</span>}
+          {post.saved != null && <span><span className="tabular-nums text-zinc-100">{fmt(post.saved)}</span> saves</span>}
+        </div>
+      </div>
+    </a>
+  )
+}
+
+function InstagramAccount({ a, project, go }) {
+  const posts = a.posts || []
+  const likes = avg(posts, 'likes')
+  const comments = avg(posts, 'comments')
+  const reach = avg(posts, 'reach')
+  const engagement = a.followers && likes !== null ? ((likes + (comments || 0)) / a.followers) * 100 : null
+  const best = [...posts].sort((x, y) => (y.likes || 0) + (y.comments || 0) - ((x.likes || 0) + (x.comments || 0)))[0]
+  const expiresIn = a.tokenExpiresAt ? Math.floor((a.tokenExpiresAt - Date.now()) / 86400e3) : null
+
+  return (
+    <div className="space-y-5">
+      <Section
+        title={
+          <span className="flex items-center gap-2 normal-case tracking-normal">
+            {a.picture && <img src={a.picture} alt="" referrerPolicy="no-referrer" className="h-6 w-6 rounded-full" />}
+            <a href={`https://instagram.com/${a.username}`} target="_blank" rel="noreferrer" className="text-sm text-zinc-100 hover:text-white">@{a.username}</a>
+          </span>
+        }
+        action={project && <Button className="px-2 py-0.5 text-xs" onClick={() => go(`/p/${project.slug}`)}>{project.name}</Button>}
+      >
+        <div className="grid grid-cols-3 gap-3 text-center sm:grid-cols-6">
+          {[
+            ['Followers', fmt(a.followers)],
+            ['Following', fmt(a.follows)],
+            ['Posts', fmt(a.mediaCount)],
+            ['Reach · 28d', fmt(a.insights?.reach)],
+            ['Profile views · 28d', fmt(a.insights?.profile_views)],
+            ['Engaged · 28d', fmt(a.insights?.accounts_engaged)],
+          ].map(([label, value]) => (
+            <div key={label}>
+              <div className="text-lg font-semibold tabular-nums text-zinc-50">{value}</div>
+              <div className="text-[11px] text-zinc-500">{label}</div>
+            </div>
+          ))}
+        </div>
+        {expiresIn !== null && expiresIn < 10 && <div className="mt-3 text-xs text-amber-300">Token expires in {expiresIn} days and couldn’t be refreshed — re-issue it in the Meta dashboard.</div>}
+      </Section>
+
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <Stat label="Avg likes" value={fmt(likes)} sub={`last ${posts.length} posts`} />
+        <Stat label="Avg comments" value={fmt(comments)} />
+        <Stat label="Avg reach" value={fmt(reach)} sub="recent posts" />
+        <Stat label="Engagement rate" value={engagement === null ? '—' : `${engagement.toFixed(1)}%`} sub="likes + comments / followers" />
+      </div>
+
+      {best && (best.likes || best.comments) ? (
+        <div className="text-xs text-zinc-500">
+          Best recent post: <a href={best.permalink} target="_blank" rel="noreferrer" className="text-zinc-300 hover:text-white">{(best.caption || POST_TYPES[best.type] || 'post').slice(0, 60)}</a> · {fmt(best.likes)} likes · {fmt(best.comments)} comments
+        </div>
+      ) : null}
+
+      {posts.length === 0 ? <Empty>No posts yet.</Empty> : (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
+          {posts.map((p) => <PostCard key={p.id} post={p} />)}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function Instagram({ data, go }) {
+  const owners = data.projects.flatMap((p) => (p.instagram || []).map((acc) => [acc, p]))
+  const key = [...new Set(owners.map(([acc]) => acc))].sort().join(',')
+  const res = useApi(key ? `/api/admin/instagram?accounts=${encodeURIComponent(key)}` : null)
+  const [pick, setPick] = useState(null)
+  if (!owners.length) return <Empty>No Instagram accounts linked. Add an <code>instagram</code> key to a project.</Empty>
+  if (res.error) return <Empty>{res.error}</Empty>
+  if (!res.data) return <div className="text-sm text-zinc-500">Loading Instagram…</div>
+
+  const owner = Object.fromEntries(owners)
+  const accounts = res.data.accounts || []
+  const current = accounts.find((a) => a.account === pick) || accounts[0]
+  return (
+    <div className="space-y-5">
+      {accounts.length > 1 && (
+        <div className="flex gap-1">
+          {accounts.map((a) => (
+            <button key={a.account} onClick={() => setPick(a.account)} className={cx('rounded-lg px-3 py-1.5 text-sm', a.account === current?.account ? 'bg-white/[0.1] text-white' : 'text-zinc-400 hover:text-zinc-100')}>
+              {owner[a.account]?.name || a.account}{a.followers != null && <span className="ml-1.5 text-xs text-zinc-500">{fmt(a.followers)}</span>}
+            </button>
+          ))}
+        </div>
+      )}
+      {!current ? null
+        : current.notConfigured ? <ConnectHint>Add <code className="text-zinc-300">IG_TOKEN_{current.account.toUpperCase()}</code> (the account’s long-lived Instagram token) to the Vercel project’s environment variables.</ConnectHint>
+          : current.error ? <Empty>{owner[current.account]?.name}: {current.error}</Empty>
+            : <InstagramAccount a={current} project={owner[current.account]} go={go} />}
     </div>
   )
 }
@@ -509,6 +632,7 @@ export default function MarketingView({ data, go, tab }) {
         ))}
       </div>
       {current === 'traffic' && <Traffic data={data} go={go} leads={leads} />}
+      {current === 'instagram' && <Instagram data={data} go={go} />}
       {current === 'seo' && <Seo data={data} />}
       {current === 'campaigns' && <Campaigns data={data} go={go} leads={leads} />}
       {current === 'leads' && <Leads data={data} go={go} leads={leads} />}

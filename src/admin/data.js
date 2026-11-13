@@ -40,7 +40,7 @@ export const DEFAULT_PROJECTS = defaultProjects
 
 const EMPTY = {
   summary: '', stack: [], domains: [], repos: [], vercel: [], firebase: [], stacky: [], cloud: [],
-  apps: [], payments: [], supabase: [], services: [],
+  apps: [], payments: [], supabase: [], services: [], instagram: [],
   revenue: [], invoices: [], expenses: [], campaigns: [], clients: [], updates: [], links: [], notes: '',
 }
 

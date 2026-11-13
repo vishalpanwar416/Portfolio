@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import projectsJson from './projects.json'
 import OverviewView from './OverviewView'
 import ProjectsView from './ProjectsView'
@@ -46,7 +46,7 @@ test.each([
   ['money', <MoneyView data={data} go={go} />],
   ['settings', <SettingsView data={data} install={null} />],
   ...['uptime', 'renewals', 'cloud', 'data', 'laptop'].map((t) => [`infra ${t}`, <InfraView data={data} go={go} tab={t} />]),
-  ...['traffic', 'seo', 'campaigns', 'leads'].map((t) => [`marketing ${t}`, <MarketingView data={data} go={go} tab={t} />]),
+  ...['traffic', 'instagram', 'seo', 'campaigns', 'leads'].map((t) => [`marketing ${t}`, <MarketingView data={data} go={go} tab={t} />]),
   ...['aarambh', 'table-tap', 'media-man', 'splinkpro'].map((s) => [`project ${s}`, <ProjectView project={projects.find((p) => p.slug === s)} data={data} go={go} />]),
 ])('%s renders', (name, el) => {
   const { container } = render(el)
@@ -81,4 +81,17 @@ test('seo issues flag the basics', () => {
   const titles = seoIssues({ status: 200, robots: 'noindex', title: null, description: 'x'.repeat(200) }).map((i) => i.text)
   expect(titles).toEqual(expect.arrayContaining(['Home page is noindex', 'No <title>', 'Description is 200 chars (keep ≤ 160)', 'No sitemap.xml']))
   expect(seoIssues({ error: 'timeout' })[0].tone).toBe('red')
+})
+
+test('instagram tab shows the account and its posts', async () => {
+  const account = {
+    account: 'tabletap', username: 'tabletap.in', followers: 1200, follows: 10, mediaCount: 40, insights: { reach: 5000 },
+    posts: [{ id: '1', caption: 'Menu QR launch', type: 'REEL', permalink: 'https://instagram.com/p/1', at: '2026-11-01T10:00:00Z', likes: 50, comments: 4, reach: 900 }],
+  }
+  global.fetch = jest.fn(async () => ({ ok: true, json: async () => ({ accounts: [account, { account: 'sanero', notConfigured: true }] }) }))
+  render(<MarketingView data={data} go={go} tab="instagram" />)
+  expect(await screen.findByText('@tabletap.in')).toBeTruthy()
+  expect(screen.getAllByText('Menu QR launch').length).toBe(2)
+  expect(screen.getByText('4.5%')).toBeTruthy()
+  global.fetch = jest.fn(async () => ({ ok: true, json: async () => ({}) }))
 })

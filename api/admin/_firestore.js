@@ -80,11 +80,11 @@ async function writeSite(id, data) {
   if (!r.ok) throw new Error(r.status === 403 ? 'service account needs Cloud Datastore User on sanero-media' : `Firestore ${r.status}`);
 }
 
-async function docRequest(id, init = {}) {
+async function docRequest(id, init = {}, collection = COLLECTION) {
   const sa = serviceAccount();
   if (!sa) throw Object.assign(new Error('GCP_SA_KEY missing on the server'), { status: 503 });
   const token = await accessToken(sa, 'https://www.googleapis.com/auth/datastore');
-  return fetch(`https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/(default)/documents/${COLLECTION}/${id}`, {
+  return fetch(`https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/(default)/documents/${collection}/${id}`, {
     ...init,
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
   });
@@ -104,4 +104,21 @@ async function deleteSite(id) {
   if (!r.ok && r.status !== 404) throw new Error(`Firestore ${r.status}`);
 }
 
-module.exports = { readSites, mergedProjects, writeSite, getSite, deleteSite };
+// Server-only values (refreshed API tokens). firestore.rules has no match for
+// this collection, so browsers can't read it — unlike vp_sites.
+const SECRETS = 'vp_secrets';
+
+async function getSecret(id) {
+  const r = await docRequest(id, {}, SECRETS);
+  if (r.status === 404) return null;
+  if (!r.ok) throw new Error(`Firestore ${r.status}`);
+  const d = await r.json();
+  return Object.fromEntries(Object.entries(d.fields || {}).map(([k, v]) => [k, value(v)]));
+}
+
+async function putSecret(id, data) {
+  const r = await docRequest(id, { method: 'PATCH', body: JSON.stringify({ fields: encode(data).mapValue.fields }) }, SECRETS);
+  if (!r.ok) throw new Error(`Firestore ${r.status}`);
+}
+
+module.exports = { readSites, mergedProjects, writeSite, getSite, deleteSite, getSecret, putSecret };

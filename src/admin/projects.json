@@ -203,6 +203,9 @@
     ],
     "vercel": [
       "sanero-media"
+    ],
+    "instagram": [
+      "sanero"
     ]
   },
   {
@@ -255,6 +258,9 @@
     "supabase": [
       "tabletap:vogixryubhpqziivspks",
       "tabletap:jkrhtaqlwcndozcynrgk"
+    ],
+    "instagram": [
+      "tabletap"
     ]
   },
   {
