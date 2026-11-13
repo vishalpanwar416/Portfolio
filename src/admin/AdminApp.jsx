@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
 import {
-  Bell, ChevronRight, FolderKanban, IndianRupee, LayoutDashboard, LogOut, Menu, Plus, RefreshCw, Search, Server,
+  Bell, ChevronRight, FolderKanban, IndianRupee, LayoutDashboard, LogOut, Megaphone, Menu, Plus, RefreshCw, Search, Server,
   Settings, ShieldAlert, Smartphone, X,
 } from 'lucide-react'
 import { auth } from './firebase'
-import { GROUPS, projectDocId, projectStats, saveDoc, slugify, timeAgo, useAdminData } from './data'
+import { GROUPS, leadsFrom, projectDocId, projectStats, saveDoc, slugify, timeAgo, useAdminData } from './data'
 import { computeAlerts } from './alerts'
 import { Button, Glass, Input, StatusDot, cx } from './ui'
 import OverviewView from './OverviewView'
@@ -14,12 +14,13 @@ import ProjectsView from './ProjectsView'
 import MoneyView from './MoneyView'
 import AppsView from './AppsView'
 import InfraView, { INFRA_TABS } from './InfraView'
+import MarketingView, { MARKETING_TABS } from './MarketingView'
 import AlertsView from './AlertsView'
 import SettingsView from './SettingsView'
 import CommandPalette, { useHotkey } from './CommandPalette'
 
 // ── routing ────────────────────────────────────────────
-// #/ #/alerts #/projects #/money #/apps #/infra/<tab> #/settings #/p/<slug>
+// #/ #/alerts #/projects #/money #/marketing/<tab> #/apps #/infra/<tab> #/settings #/p/<slug>
 
 const LEGACY = { '/sites': '/infra/uptime', '/renewals': '/infra/renewals' }
 
@@ -52,6 +53,7 @@ export const PAGES = [
   { to: '/alerts', label: 'Alerts', icon: Bell },
   { to: '/projects', label: 'Projects', icon: FolderKanban },
   { to: '/money', label: 'Money', icon: IndianRupee },
+  { to: '/marketing/traffic', label: 'Marketing', icon: Megaphone, match: '/marketing' },
   { to: '/apps', label: 'Apps', icon: Smartphone },
   { to: '/infra/uptime', label: 'Infrastructure', icon: Server, match: '/infra' },
 ]
@@ -185,7 +187,7 @@ function Sidebar({ projects, route, go, onNavigate, badges, pinned }) {
 
 // Phone: the main places as a bottom bar; Apps, projects and settings in More.
 function BottomBar({ route, go, onMenu, badges }) {
-  const items = [PAGES[0], PAGES[1], PAGES[2], PAGES[3], { ...PAGES[5], label: 'Infra' }]
+  const items = [PAGES[0], PAGES[1], PAGES[2], PAGES[3], { ...PAGES[6], label: 'Infra' }]
   return (
     <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-white/[0.08] bg-black/70 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden">
       <div className="grid grid-cols-6">
@@ -219,7 +221,8 @@ function Shell({ user }) {
   const critical = alerts.filter((a) => a.severity === 'critical').length
   const overdue = data.projects.reduce((t, p) => t + projectStats(p).owed.overdueCount, 0)
   const infraIssues = alerts.filter((a) => ['site', 'ssl', 'domain', 'database', 'laptop'].includes(a.kind)).length
-  const badges = { '/alerts': alerts.filter((a) => a.severity !== 'info').length, critical, '/money': overdue, '/infra/uptime': infraIssues }
+  const newLeads = leadsFrom(data.docs).filter((l) => l.status === 'new').length
+  const badges = { '/alerts': alerts.filter((a) => a.severity !== 'info').length, critical, '/money': overdue, '/marketing/traffic': newLeads, '/infra/uptime': infraIssues }
 
   const slug = route.startsWith('/p/') ? route.slice(3) : null
   const project = slug ? data.projects.find((p) => p.slug === slug) : null
@@ -230,7 +233,12 @@ function Shell({ user }) {
   if (route === '/alerts') { title = 'Alerts'; sub = `${alerts.length} open`; view = <AlertsView data={data} go={go} /> }
   else if (route === '/projects') { title = 'Projects'; view = <ProjectsView data={data} go={go} /> }
   else if (route === '/money') { title = 'Money'; view = <MoneyView data={data} go={go} /> }
-  else if (route === '/apps') { title = 'Apps'; view = <AppsView data={data} go={go} /> }
+  else if (route.startsWith('/marketing')) {
+    const tab = route.split('/')[2] || 'traffic'
+    title = 'Marketing'
+    sub = MARKETING_TABS.find((t) => t.key === tab)?.label
+    view = <MarketingView data={data} go={go} tab={tab} />
+  } else if (route === '/apps') { title = 'Apps'; view = <AppsView data={data} go={go} /> }
   else if (route.startsWith('/infra')) {
     const tab = route.split('/')[2] || 'uptime'
     title = 'Infrastructure'
@@ -307,7 +315,7 @@ function Shell({ user }) {
       <CommandPalette
         open={palette}
         onClose={() => setPalette(false)}
-        pages={[...PAGES, ...INFRA_TABS.map((t) => ({ to: `/infra/${t.key}`, label: `Infrastructure · ${t.label}`, icon: Server })), SETTINGS]}
+        pages={[...PAGES, ...MARKETING_TABS.map((t) => ({ to: `/marketing/${t.key}`, label: `Marketing · ${t.label}`, icon: Megaphone })), ...INFRA_TABS.map((t) => ({ to: `/infra/${t.key}`, label: `Infrastructure · ${t.label}`, icon: Server })), SETTINGS]}
         projects={data.projects}
         go={go}
         actions={[{ label: 'Refresh everything', icon: RefreshCw, run: data.refresh }, { label: 'Sign out', icon: LogOut, run: () => signOut(auth) }]}

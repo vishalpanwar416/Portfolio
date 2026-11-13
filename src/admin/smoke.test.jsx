@@ -8,6 +8,8 @@ import InfraView from './InfraView'
 import MoneyView from './MoneyView'
 import ProjectView from './ProjectView'
 import SettingsView from './SettingsView'
+import MarketingView, { seoIssues } from './MarketingView'
+import { campaignMonths, costIn, leadProject, leadsFrom } from './data'
 
 jest.mock('./firebase', () => ({ auth: { currentUser: { getIdToken: async () => 't' } }, db: {}, SITES_COLLECTION: 'vp_sites' }))
 jest.mock('firebase/firestore', () => ({ collection: () => ({}), doc: () => ({}), onSnapshot: () => () => {}, setDoc: async () => {}, deleteDoc: async () => {} }))
@@ -33,6 +35,8 @@ const data = {
   supabase: ok({ projects: [{ spec: 'tabletap:vogixryubhpqziivspks', ref: 'vogixryubhpqziivspks', name: 'tt', status: 'INACTIVE', free: { dbBytes: 5e8, storageBytes: 1e9 } }, { spec: 'splink:altpnwfozryqufjbarti', ref: 'a', name: 'sp', status: 'ACTIVE_HEALTHY', health: [{ name: 'db', healthy: true }], dbBytes: 4.8e8, storageBytes: 1e7, requests24h: 1000, free: { dbBytes: 524288000, storageBytes: 1e9 } }] }),
 }
 const go = () => {}
+data.docs['lead-1'] = { kind: 'lead', status: 'new', name: 'Asha', email: 'a@x.in', site: 'sanero.in', message: 'Need a site', utm: { source: 'google', campaign: 'diwali' }, createdAt: Date.now() }
+projects.find((p) => p.slug === 'sanero').campaigns = [{ id: 'c1', name: 'Diwali', channel: 'Meta Ads', start: `${m}-01`, end: null, budget: 5000, spent: 3000, utm: 'diwali' }]
 
 test.each([
   ['overview', <OverviewView data={data} go={go} />],
@@ -42,6 +46,7 @@ test.each([
   ['money', <MoneyView data={data} go={go} />],
   ['settings', <SettingsView data={data} install={null} />],
   ...['uptime', 'renewals', 'cloud', 'data', 'laptop'].map((t) => [`infra ${t}`, <InfraView data={data} go={go} tab={t} />]),
+  ...['traffic', 'seo', 'campaigns', 'leads'].map((t) => [`marketing ${t}`, <MarketingView data={data} go={go} tab={t} />]),
   ...['aarambh', 'table-tap', 'media-man', 'splinkpro'].map((s) => [`project ${s}`, <ProjectView project={projects.find((p) => p.slug === s)} data={data} go={go} />]),
 ])('%s renders', (name, el) => {
   const { container } = render(el)
@@ -55,4 +60,25 @@ test('alerts are computed', () => {
   console.log(titles.join('\n'))
   expect(titles.some((t) => t.startsWith('critical:Supabase tt is paused'))).toBe(true)
   expect(titles.some((t) => t.includes('cms.edition.tv is down'))).toBe(true)
+})
+
+test('campaign spend counts as a cost, spread over its months', () => {
+  expect(campaignMonths({ start: '2026-10-20', end: '2026-12-05' })).toEqual(['2026-10', '2026-11', '2026-12'])
+  expect(campaignMonths({ start: '2026-10-20' })).toEqual(['2026-10'])
+  const p = { expenses: [], campaigns: [{ start: '2026-10-01', end: '2026-11-30', spent: 2000 }] }
+  expect(costIn(p, '2026-10')).toBe(1000)
+  expect(costIn(p, '2026-12')).toBe(0)
+})
+
+test('leads are matched to projects by site', () => {
+  const [lead] = leadsFrom(data.docs)
+  expect(leadProject(lead, projects)?.slug).toBe('sanero')
+  expect(leadProject({ site: 'www.sanero.in' }, projects)?.slug).toBe('sanero')
+  expect(leadProject({ site: 'unknown.example' }, projects)).toBeNull()
+})
+
+test('seo issues flag the basics', () => {
+  const titles = seoIssues({ status: 200, robots: 'noindex', title: null, description: 'x'.repeat(200) }).map((i) => i.text)
+  expect(titles).toEqual(expect.arrayContaining(['Home page is noindex', 'No <title>', 'Description is 200 chars (keep ≤ 160)', 'No sitemap.xml']))
+  expect(seoIssues({ error: 'timeout' })[0].tone).toBe('red')
 })

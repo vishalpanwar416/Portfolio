@@ -6,6 +6,24 @@ import SectionHeader from '../components/SectionHeader'
 import { contactLinks } from '../data/social'
 import { personalInfo, sectionContent, externalLinks } from '../data'
 
+// Copy of the enquiry for the admin's Leads list; WhatsApp still opens either way.
+function logLead({ name, email, message }) {
+  if (!name.trim() && !email.trim()) return
+  const params = new URLSearchParams(window.location.search)
+  fetch('/api/admin/lead', {
+    method: 'POST',
+    keepalive: true,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name, email, message,
+      site: window.location.hostname,
+      page: window.location.pathname,
+      referrer: document.referrer,
+      utm: { source: params.get('utm_source') || 'portfolio', medium: params.get('utm_medium') || 'contact-form', campaign: params.get('utm_campaign') || '' },
+    }),
+  }).catch(() => {})
+}
+
 export default function Contact() {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' })
   const [isFocused, setIsFocused] = useState({})
@@ -188,6 +206,7 @@ export default function Contact() {
                   e.preventDefault()
                   return
                 }
+                logLead(formData)
                 setWhatsappSent(true)
                 setTimeout(() => setWhatsappSent(false), 4000)
               }}

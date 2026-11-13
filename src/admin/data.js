@@ -41,7 +41,7 @@ export const DEFAULT_PROJECTS = defaultProjects
 const EMPTY = {
   summary: '', stack: [], domains: [], repos: [], vercel: [], firebase: [], stacky: [], cloud: [],
   apps: [], payments: [], supabase: [], services: [],
-  revenue: [], invoices: [], expenses: [], clients: [], updates: [], links: [], notes: '',
+  revenue: [], invoices: [], expenses: [], campaigns: [], clients: [], updates: [], links: [], notes: '',
 }
 
 export const projectDocId = (slug) => `proj-${slug}`
@@ -95,7 +95,8 @@ export const checkable = (hosts) => (hosts || []).filter((h) => !h.startsWith('w
 // Revenue for a month = hand-logged revenue entries + invoices marked paid
 // (counted in the month they were paid). Costs come from expenses: monthly
 // ones every month in range, yearly ones spread over 12 months, one-offs in
-// their month.
+// their month — plus marketing campaign spend, spread evenly over the months
+// the campaign ran.
 
 // Local date, not UTC — in India UTC is still yesterday until 5:30am.
 export const today = () => new Date(Date.now() - new Date().getTimezoneOffset() * 60e3).toISOString().slice(0, 10)
@@ -124,8 +125,52 @@ export function costIn(p, month) {
     if (month < start || (e.end && month > e.end)) continue
     total += e.cycle === 'yearly' ? amount / 12 : amount
   }
+  for (const c of p.campaigns || []) {
+    const months = campaignMonths(c)
+    if (months.includes(month)) total += (Number(c.spent) || 0) / months.length
+  }
   return Math.round(total)
 }
+
+// ── marketing ──────────────────────────────────────────
+
+export const CHANNELS = ['Google Ads', 'Meta Ads', 'Instagram', 'LinkedIn', 'YouTube', 'Email', 'WhatsApp', 'SEO / content', 'Referral', 'Offline', 'Other']
+export const LEAD_STATUSES = ['new', 'contacted', 'won', 'lost']
+
+/** Month keys a campaign ran in, start to end (just the start month if open-ended). */
+export function campaignMonths(c) {
+  const start = (c.start || '').slice(0, 7)
+  if (!start) return []
+  const end = (c.end || c.start).slice(0, 7)
+  const out = []
+  let [y, m] = start.split('-').map(Number)
+  for (let i = 0; i < 36; i++) {
+    const key = `${y}-${String(m).padStart(2, '0')}`
+    if (key > end) break
+    out.push(key)
+    if (++m > 12) { m = 1; y++ }
+  }
+  return out.length ? out : [start]
+}
+
+/** Lead docs from vp_sites, newest first. */
+export const leadsFrom = (docs) => Object.entries(docs || {})
+  .filter(([id, d]) => id.startsWith('lead-') && d.kind === 'lead')
+  .map(([id, d]) => ({ ...d, id }))
+  .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+
+/** The project a lead belongs to: picked by hand, or the one whose domain sent it. */
+export function leadProject(lead, projects) {
+  if (lead.project) return projects.find((p) => p.slug === lead.project) || null
+  const site = String(lead.site || '').replace(/^www\./, '')
+  if (!site) return null
+  return projects.find((p) => (p.domains || []).some((h) => h.replace(/^www\./, '') === site)) ||
+    projects.find((p) => (p.domains || []).some((h) => apexDomain(h) && apexDomain(h) === apexDomain(site))) || null
+}
+
+/** Leads credited to a campaign: tagged by hand, or arriving with its utm_campaign. */
+export const campaignLeads = (c, leads) => leads.filter((l) =>
+  l.campaign === c.id || (c.utm && l.utm?.campaign && l.utm.campaign.toLowerCase() === c.utm.toLowerCase()))
 
 export const monthlyCost = (p) => costIn(p, monthKey())
 
