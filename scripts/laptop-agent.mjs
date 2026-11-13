@@ -8,6 +8,7 @@
 // Snapshot: every service listed under `services` in src/admin/projects.json
 // (+ any other failed user unit, with its last log lines), Docker and its
 // containers, the busiest processes, CPU load, memory, disk, battery, network.
+// It also forwards the LinkedIn outreach trackers when they change (bottom).
 //
 // Offline? The snapshot's chart point is queued in ~/.config/vp-control/
 // queue.json and sent with the next successful run.
@@ -15,7 +16,7 @@
 // Config: ~/.config/vp-control/agent.json  { "secret": "<MONITOR_SECRET>" }
 // `--dry-run` prints the snapshot instead of sending.
 import { execFileSync } from 'node:child_process'
-import { readFileSync, writeFileSync, existsSync, statfsSync, readdirSync } from 'node:fs'
+import { readFileSync, writeFileSync, existsSync, statfsSync, statSync, readdirSync } from 'node:fs'
 import { cpus, hostname } from 'node:os'
 import { join } from 'node:path'
 
@@ -153,4 +154,36 @@ try {
   writeFileSync(QUEUE, JSON.stringify([...queue, localPoint].slice(-MAX_QUEUE)))
   console.error(`offline or server error, queued (${queue.length + 1}): ${e.message}`)
   process.exitCode = 0 // not a failure of the agent itself
+}
+
+// ── linkedin trackers ──────────────────────────────────
+// The linkedin-followup-dms scheduled task keeps its trackers in
+// ~/linkedin-outreach. Send both files to /api/admin/linkedin whenever either
+// changes, for the LinkedIn page. A failed send is retried on the next run.
+
+const LI_DIR = join(process.env.HOME, 'linkedin-outreach')
+const LI_FILES = { prospects: join(LI_DIR, 'prospects.json'), targets: join(LI_DIR, 'targets.json') }
+const LI_STATE = join(DIR, 'linkedin-sync.json')
+
+if (Object.values(LI_FILES).every(existsSync)) {
+  const sig = Object.values(LI_FILES).map((f) => statSync(f).mtimeMs).join(':')
+  if (readJson(LI_STATE, {}).sig !== sig) {
+    const body = { prospects: readJson(LI_FILES.prospects, null), targets: readJson(LI_FILES.targets, null) }
+    // A file mid-write by the task doesn't parse; try again next run.
+    if (body.prospects && body.targets) {
+      try {
+        const r = await fetch(API.replace(/\/laptop$/, '/linkedin'), {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${secret}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+          signal: AbortSignal.timeout(25000),
+        })
+        if (!r.ok) throw new Error(`HTTP ${r.status} ${(await r.text()).slice(0, 200)}`)
+        writeFileSync(LI_STATE, JSON.stringify({ sig, at: new Date().toISOString() }))
+        console.log(`linkedin: sent ${body.prospects.prospects?.length ?? 0} prospects, ${body.targets.targets?.length ?? 0} targets`)
+      } catch (e) {
+        console.error(`linkedin: not sent, retrying next run: ${e.message}`)
+      }
+    }
+  }
 }

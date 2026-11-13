@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
 import {
-  Bell, ChevronRight, FolderKanban, IndianRupee, LayoutDashboard, LogOut, Megaphone, Menu, Plus, RefreshCw, Search, Server,
+  Bell, ChevronRight, FolderKanban, IndianRupee, LayoutDashboard, Linkedin, LogOut, Megaphone, Menu, Plus, RefreshCw, Search, Server,
   Settings, ShieldAlert, Smartphone, X,
 } from 'lucide-react'
 import { auth } from './firebase'
@@ -15,12 +15,13 @@ import MoneyView from './MoneyView'
 import AppsView from './AppsView'
 import InfraView, { INFRA_TABS } from './InfraView'
 import MarketingView, { MARKETING_TABS } from './MarketingView'
+import LinkedInView, { linkedinReplies } from './LinkedInView'
 import AlertsView from './AlertsView'
 import SettingsView from './SettingsView'
 import CommandPalette, { useHotkey } from './CommandPalette'
 
 // ── routing ────────────────────────────────────────────
-// #/ #/alerts #/projects #/money #/marketing/<tab> #/apps #/infra/<tab> #/settings #/p/<slug>
+// #/ #/alerts #/projects #/money #/marketing/<tab> #/apps #/infra/<tab> #/linkedin #/settings #/p/<slug>
 
 const LEGACY = { '/sites': '/infra/uptime', '/renewals': '/infra/renewals' }
 
@@ -56,6 +57,7 @@ export const PAGES = [
   { to: '/marketing/traffic', label: 'Marketing', icon: Megaphone, match: '/marketing' },
   { to: '/apps', label: 'Apps', icon: Smartphone },
   { to: '/infra/uptime', label: 'Infrastructure', icon: Server, match: '/infra' },
+  { to: '/linkedin', label: 'LinkedIn', icon: Linkedin },
 ]
 const SETTINGS = { to: '/settings', label: 'Settings', icon: Settings }
 
@@ -222,7 +224,7 @@ function Shell({ user }) {
   const overdue = data.projects.reduce((t, p) => t + projectStats(p).owed.overdueCount, 0)
   const infraIssues = alerts.filter((a) => ['site', 'ssl', 'domain', 'database', 'laptop'].includes(a.kind)).length
   const newLeads = leadsFrom(data.docs).filter((l) => l.status === 'new').length
-  const badges = { '/alerts': alerts.filter((a) => a.severity !== 'info').length, critical, '/money': overdue, '/marketing/traffic': newLeads, '/infra/uptime': infraIssues }
+  const badges = { '/alerts': alerts.filter((a) => a.severity !== 'info').length, critical, '/money': overdue, '/marketing/traffic': newLeads, '/infra/uptime': infraIssues, '/linkedin': linkedinReplies(data.docs.linkedin).length }
 
   const slug = route.startsWith('/p/') ? route.slice(3) : null
   const project = slug ? data.projects.find((p) => p.slug === slug) : null
@@ -244,7 +246,8 @@ function Shell({ user }) {
     title = 'Infrastructure'
     sub = INFRA_TABS.find((t) => t.key === tab)?.label
     view = <InfraView data={data} go={go} tab={tab} />
-  } else if (route === '/settings') { title = 'Settings'; view = <SettingsView data={data} install={install} /> }
+  } else if (route === '/linkedin') { title = 'LinkedIn'; sub = 'Outreach'; view = <LinkedInView data={data} /> }
+  else if (route === '/settings') { title = 'Settings'; view = <SettingsView data={data} install={install} /> }
   else if (slug) {
     title = project?.name || 'Project'
     view = project

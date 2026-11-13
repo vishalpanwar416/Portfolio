@@ -9,6 +9,7 @@ import MoneyView from './MoneyView'
 import ProjectView from './ProjectView'
 import SettingsView from './SettingsView'
 import MarketingView, { seoIssues } from './MarketingView'
+import LinkedInView from './LinkedInView'
 import { campaignMonths, costIn, leadProject, leadsFrom } from './data'
 
 jest.mock('./firebase', () => ({ auth: { currentUser: { getIdToken: async () => 't' } }, db: {}, SITES_COLLECTION: 'vp_sites' }))
@@ -81,6 +82,40 @@ test('seo issues flag the basics', () => {
   const titles = seoIssues({ status: 200, robots: 'noindex', title: null, description: 'x'.repeat(200) }).map((i) => i.text)
   expect(titles).toEqual(expect.arrayContaining(['Home page is noindex', 'No <title>', 'Description is 200 chars (keep ≤ 160)', 'No sitemap.xml']))
   expect(seoIssues({ error: 'timeout' })[0].tone).toBe('red')
+})
+
+test('linkedin page shows replies, both campaigns and request caps', () => {
+  const { clean } = require('../../api/admin/_routes/linkedin')
+  const day = new Date(Date.now() + 5.5 * 3600e3).toISOString().slice(0, 10)
+  const li = clean({
+    prospects: {
+      request_log: { [day]: 4, 'not-a-day': 9 },
+      prospects: [
+        { name: 'Sana Khan', profile: 'https://www.linkedin.com/in/sana/', org: 'Solverines', role: 'Cloud Infrastructure Engineer', status: 'requested', note_sent: false, requested_on: `${day}T12:16+05:30` },
+        { name: 'Oleksandra Garshina', profile: 'javascript:alert(1)', role: 'DevOps Engineer', status: 'accepted_messaged', replied: 'Please send your CV', awaiting_vishal_reply: true },
+        { name: 'Chirag K.', role: 'System Engineer', status: 'accepted_messaged', fit_line: 'Helm and ArgoCD match.', messaged_on: `${day}T18:17+05:30` },
+      ],
+      run_notes: [{ at: `${day}T12:15+05:30`, note: 'Scheduled run.' }],
+    },
+    targets: {
+      last_checked: `${day}T12:15:06+05:30`,
+      targets: [
+        { name: 'Pankaj S.', role: 'Senior SRE', messaged: true, replied: 'visa and location??', awaiting_vishal_reply: true },
+        { name: 'Trang Duong', role: 'Senior DevOps', messaged: true, awaiting_reply: true },
+        { name: 'Meet Patel', role: 'Cloud Engineer', messaged: false },
+      ],
+    },
+  }, new Date().toISOString())
+  expect(li.prospects[1].profile).toBeNull()
+  expect(li.requestLog).toEqual([{ day, n: 4 }])
+  render(<LinkedInView data={{ ...data, docs: { ...data.docs, linkedin: li } }} />)
+  expect(screen.getByText('Needs your reply · 2')).toBeTruthy()
+  expect(screen.getByText('Please send your CV')).toBeTruthy()
+  expect(screen.getByText('visa and location??')).toBeTruthy()
+  expect(screen.getByText('4 / 15')).toBeTruthy()
+  expect(screen.getByText('Old campaign · not accepted · 1')).toBeTruthy()
+  render(<LinkedInView data={{ ...data, docs: {} }} />)
+  expect(screen.getByText(/No LinkedIn data yet/)).toBeTruthy()
 })
 
 test('instagram tab shows the account and its posts', async () => {

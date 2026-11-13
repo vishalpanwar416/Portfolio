@@ -12,6 +12,7 @@ const routes = {
   instagram: require('./_routes/instagram'),
   laptop: require('./_routes/laptop'),
   lead: require('./_routes/lead'),
+  linkedin: require('./_routes/linkedin'),
   marketing: require('./_routes/marketing'),
   monitor: require('./_routes/monitor'),
   notify: require('./_routes/notify'),
