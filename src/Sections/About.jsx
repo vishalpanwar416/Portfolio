@@ -2,10 +2,11 @@ import { motion } from 'framer-motion'
 import SectionShell from '../components/SectionShell'
 import SectionHeader from '../components/SectionHeader'
 import { detailedCertifications } from '../data/certifications'
-import { workExperience, education } from '../data/experience'
+import { usePortfolio } from '../contexts/PortfolioContext'
 import { sectionContent } from '../data'
 
 export default function About() {
+  const { workExperience, education } = usePortfolio()
   return (
     <SectionShell id="about">
       <SectionHeader

@@ -9,6 +9,8 @@ import MoneyView from './MoneyView'
 import ProjectView from './ProjectView'
 import SettingsView from './SettingsView'
 import MarketingView, { seoIssues } from './MarketingView'
+import PortfolioEditor, { builtInContent } from './PortfolioEditor'
+import { mergeContent } from '../contexts/PortfolioContext'
 import LinkedInView from './LinkedInView'
 import { campaignMonths, costIn, leadProject, leadsFrom } from './data'
 
@@ -48,6 +50,7 @@ test.each([
   ['settings', <SettingsView data={data} install={null} />],
   ...['uptime', 'renewals', 'cloud', 'data', 'laptop'].map((t) => [`infra ${t}`, <InfraView data={data} go={go} tab={t} />]),
   ...['traffic', 'instagram', 'seo', 'campaigns', 'leads'].map((t) => [`marketing ${t}`, <MarketingView data={data} go={go} tab={t} />]),
+  ...['profile', 'projects', 'skills', 'experience', 'education', 'certifications'].map((t) => [`portfolio ${t}`, <PortfolioEditor data={data} go={go} tab={t} />]),
   ...['aarambh', 'table-tap', 'media-man', 'splinkpro'].map((s) => [`project ${s}`, <ProjectView project={projects.find((p) => p.slug === s)} data={data} go={go} />]),
 ])('%s renders', (name, el) => {
   const { container } = render(el)
@@ -129,4 +132,27 @@ test('instagram tab shows the account and its posts', async () => {
   expect(screen.getAllByText('Menu QR launch').length).toBe(2)
   expect(screen.getByText('4.5%')).toBeTruthy()
   global.fetch = jest.fn(async () => ({ ok: true, json: async () => ({}) }))
+})
+
+test('portfolio content round-trips through the public endpoint into the site', () => {
+  const { clean } = require('../../api/admin/_routes/portfolio')
+  const draft = builtInContent()
+  expect(draft.projects.length).toBeGreaterThan(5)
+  expect(draft.certifications[0].icon).toBe('award')
+  draft.projects[0] = { ...draft.projects[0], title: 'New thing', live: 'javascript:alert(1)', hidden: false }
+  draft.projects[1] = { ...draft.projects[1], hidden: true }
+  draft.skills = [{ category: 'Go stack', skills: ['Go', 'gRPC'] }]
+  draft.profile.title = 'SRE | Platform'
+  const site = mergeContent(clean(draft))
+  expect(site.projects[0].title).toBe('New thing')
+  expect(site.projects[0].live).toBeNull()
+  expect(site.projects).toHaveLength(draft.projects.length - 1)
+  expect(site.skillCategories).toEqual([{ category: 'Go stack', skills: ['Go', 'gRPC'] }])
+  expect(site.personalInfo.title).toBe('SRE | Platform')
+  expect(site.personalInfo.name.full).toBe('Vishal Panwar')
+  expect(typeof site.certifications[0].icon).not.toBe('string')
+  // Nothing published: the built-in data, unchanged.
+  const fallback = mergeContent({})
+  expect(fallback.projects.length).toBe(builtInContent().projects.length)
+  expect(fallback.workExperience[0].company).toBe('Bluecopa')
 })

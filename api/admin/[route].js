@@ -17,6 +17,7 @@ const routes = {
   monitor: require('./_routes/monitor'),
   notify: require('./_routes/notify'),
   payments: require('./_routes/payments'),
+  portfolio: require('./_routes/portfolio'),
   projects: require('./_routes/projects'),
   seo: require('./_routes/seo'),
   stacky: require('./_routes/stacky'),

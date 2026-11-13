@@ -2,9 +2,11 @@ import { motion } from 'framer-motion'
 import { CheckCircle2 } from 'lucide-react'
 import SectionShell from '../components/SectionShell'
 import SectionHeader from '../components/SectionHeader'
-import { certifications, sectionContent } from '../data'
+import { sectionContent } from '../data'
+import { usePortfolio } from '../contexts/PortfolioContext'
 
 export default function Certifications() {
+  const { certifications } = usePortfolio()
   return (
     <SectionShell id="certifications">
       <SectionHeader

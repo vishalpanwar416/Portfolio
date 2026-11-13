@@ -1,8 +1,10 @@
 import { ExternalLink } from 'lucide-react'
 import logo from '../assets/logo.png'
-import { socialLinks, footerLinks, sectionContent, externalLinks, personalInfo } from '../data'
+import { socialLinks, footerLinks, sectionContent, externalLinks } from '../data'
+import { usePortfolio } from '../contexts/PortfolioContext'
 
 export default function Footer() {
+  const { personalInfo } = usePortfolio()
   return (
     <footer className="bg-black border-t border-white/[0.06] text-gray-300 py-12 relative overflow-hidden">
       <div className="absolute inset-0 noise-texture opacity-[0.01] pointer-events-none" />

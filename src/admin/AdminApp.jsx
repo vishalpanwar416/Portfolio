@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
 import {
-  Bell, ChevronRight, FolderKanban, IndianRupee, LayoutDashboard, Linkedin, LogOut, Megaphone, Menu, Plus, RefreshCw, Search, Server,
+  Bell, Briefcase, ChevronRight, FolderKanban, IndianRupee, LayoutDashboard, Linkedin, LogOut, Megaphone, Menu, Plus, RefreshCw, Search, Server,
   Settings, ShieldAlert, Smartphone, X,
 } from 'lucide-react'
 import { auth } from './firebase'
@@ -16,12 +16,13 @@ import AppsView from './AppsView'
 import InfraView, { INFRA_TABS } from './InfraView'
 import MarketingView, { MARKETING_TABS } from './MarketingView'
 import LinkedInView, { linkedinReplies } from './LinkedInView'
+import PortfolioEditor, { PORTFOLIO_TABS } from './PortfolioEditor'
 import AlertsView from './AlertsView'
 import SettingsView from './SettingsView'
 import CommandPalette, { useHotkey } from './CommandPalette'
 
 // ── routing ────────────────────────────────────────────
-// #/ #/alerts #/projects #/money #/marketing/<tab> #/apps #/infra/<tab> #/linkedin #/settings #/p/<slug>
+// #/ #/alerts #/projects #/money #/marketing/<tab> #/portfolio/<tab> #/apps #/infra/<tab> #/linkedin #/settings #/p/<slug>
 
 const LEGACY = { '/sites': '/infra/uptime', '/renewals': '/infra/renewals' }
 
@@ -55,6 +56,7 @@ export const PAGES = [
   { to: '/projects', label: 'Projects', icon: FolderKanban },
   { to: '/money', label: 'Money', icon: IndianRupee },
   { to: '/marketing/traffic', label: 'Marketing', icon: Megaphone, match: '/marketing' },
+  { to: '/portfolio/profile', label: 'Portfolio', icon: Briefcase, match: '/portfolio' },
   { to: '/apps', label: 'Apps', icon: Smartphone },
   { to: '/infra/uptime', label: 'Infrastructure', icon: Server, match: '/infra' },
   { to: '/linkedin', label: 'LinkedIn', icon: Linkedin },
@@ -189,7 +191,7 @@ function Sidebar({ projects, route, go, onNavigate, badges, pinned }) {
 
 // Phone: the main places as a bottom bar; Apps, projects and settings in More.
 function BottomBar({ route, go, onMenu, badges }) {
-  const items = [PAGES[0], PAGES[1], PAGES[2], PAGES[3], { ...PAGES[6], label: 'Infra' }]
+  const items = [PAGES[0], PAGES[1], PAGES[2], PAGES[3], { ...PAGES.find((pg) => pg.match === '/infra'), label: 'Infra' }]
   return (
     <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-white/[0.08] bg-black/70 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden">
       <div className="grid grid-cols-6">
@@ -246,6 +248,11 @@ function Shell({ user }) {
     title = 'Infrastructure'
     sub = INFRA_TABS.find((t) => t.key === tab)?.label
     view = <InfraView data={data} go={go} tab={tab} />
+  } else if (route.startsWith('/portfolio')) {
+    const tab = route.split('/')[2] || 'profile'
+    title = 'Portfolio'
+    sub = PORTFOLIO_TABS.find((t) => t.key === tab)?.label
+    view = <PortfolioEditor data={data} go={go} tab={tab} />
   } else if (route === '/linkedin') { title = 'LinkedIn'; sub = 'Outreach'; view = <LinkedInView data={data} /> }
   else if (route === '/settings') { title = 'Settings'; view = <SettingsView data={data} install={install} /> }
   else if (slug) {
@@ -318,7 +325,7 @@ function Shell({ user }) {
       <CommandPalette
         open={palette}
         onClose={() => setPalette(false)}
-        pages={[...PAGES, ...MARKETING_TABS.map((t) => ({ to: `/marketing/${t.key}`, label: `Marketing · ${t.label}`, icon: Megaphone })), ...INFRA_TABS.map((t) => ({ to: `/infra/${t.key}`, label: `Infrastructure · ${t.label}`, icon: Server })), SETTINGS]}
+        pages={[...PAGES, ...MARKETING_TABS.map((t) => ({ to: `/marketing/${t.key}`, label: `Marketing · ${t.label}`, icon: Megaphone })), ...PORTFOLIO_TABS.map((t) => ({ to: `/portfolio/${t.key}`, label: `Portfolio · ${t.label}`, icon: Briefcase })), ...INFRA_TABS.map((t) => ({ to: `/infra/${t.key}`, label: `Infrastructure · ${t.label}`, icon: Server })), SETTINGS]}
         projects={data.projects}
         go={go}
         actions={[{ label: 'Refresh everything', icon: RefreshCw, run: data.refresh }, { label: 'Sign out', icon: LogOut, run: () => signOut(auth) }]}

@@ -11,6 +11,7 @@ import Footer from './Sections/Footer'
 import LoadingScreen from './components/LoadingScreen'
 import ScrollProgress from './components/ScrollProgress'
 import BackToTop from './components/BackToTop'
+import { PortfolioProvider } from './contexts/PortfolioContext'
 
 const LOADER_KEY = 'portfolio_loader_seen'
 
@@ -33,7 +34,7 @@ export default function App() {
   }
 
   return (
-    <>
+    <PortfolioProvider>
       <ScrollProgress />
       <BackToTop />
       <AnimatePresence mode="wait">
@@ -52,6 +53,6 @@ export default function App() {
           </div>
         )}
       </AnimatePresence>
-    </>
+    </PortfolioProvider>
   )
 }
