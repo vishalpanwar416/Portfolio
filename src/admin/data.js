@@ -304,6 +304,7 @@ export function useAdminData() {
   const [vercelError, setVercelError] = useState(null)
   const [docs, setDocs] = useState({})
   const [docsReady, setDocsReady] = useState(false)
+  const [docsError, setDocsError] = useState(null)
   const [checks, setChecks] = useState({})
   const [checking, setChecking] = useState(false)
   const [lastChecked, setLastChecked] = useState(null)
@@ -320,12 +321,19 @@ export function useAdminData() {
   useEffect(() => { loadVercel() }, [loadVercel])
 
   useEffect(
-    () => onSnapshot(collection(db, SITES_COLLECTION), (snap) => {
-      const next = {}
-      snap.forEach((d) => { next[d.id] = d.data() })
-      setDocs(next)
-      setDocsReady(true)
-    }),
+    () => onSnapshot(
+      collection(db, SITES_COLLECTION),
+      (snap) => {
+        const next = {}
+        snap.forEach((d) => { next[d.id] = d.data() })
+        setDocs(next)
+        setDocsReady(true)
+        setDocsError(null)
+      },
+      // Most likely permission-denied: the vp_sites rule isn't deployed on
+      // sanero-media. Say so rather than leaving pages on "Loading…".
+      (e) => { setDocsError(e.code || e.message); setDocsReady(true) }
+    ),
     []
   )
 
@@ -429,7 +437,7 @@ export function useAdminData() {
   }, [loadVercel, runChecks, reloadDomains, reloadTraffic, reloadStacky, reloadPayments, reloadApps, reloadSupabase])
 
   return {
-    projects, vercel, vercelError, docs, docsReady, checks, checking, lastChecked, refresh,
+    projects, vercel, vercelError, docs, docsReady, docsError, checks, checking, lastChecked, refresh,
     settings, domains, integrations, traffic, stacky, hiddenProjects, payments, apps, supabase,
   }
 }

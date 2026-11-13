@@ -311,6 +311,12 @@ function Shell({ user }) {
         </div>
 
         <main className="px-3 pb-10 pt-5 lg:px-4">
+          {data.docsError && (
+            <div className="mb-5 rounded-2xl border border-red-500/20 bg-red-500/[0.06] px-4 py-3 text-sm text-red-300 backdrop-blur-xl">
+              Can't read the dashboard's saved data ({data.docsError}). Notes, leads, campaigns and the portfolio editor need the
+              vp_sites rule deployed on sanero-media: run <code className="text-red-200">firebase deploy --only firestore:rules --project sanero-media</code> in sanero-next.
+            </div>
+          )}
           {data.vercelError && (
             <div className="mb-5 rounded-2xl border border-red-500/20 bg-red-500/[0.06] px-4 py-3 text-sm text-red-300 backdrop-blur-xl">
               Couldn't load Vercel projects: {data.vercelError}

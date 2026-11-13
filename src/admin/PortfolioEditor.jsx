@@ -307,9 +307,9 @@ export default function PortfolioEditor({ data, go, tab }) {
 
   // Load once; after that the local draft is the source of truth while editing.
   useEffect(() => {
-    if (draft || !data.docsReady) return
+    if (draft || !data.docsReady || data.docsError) return
     setDraft(doc?.draft || doc?.published || builtInContent())
-  }, [data.docsReady, doc, draft])
+  }, [data.docsReady, data.docsError, doc, draft])
 
   const flush = useCallback((next) => {
     clearTimeout(timer.current)
@@ -325,6 +325,7 @@ export default function PortfolioEditor({ data, go, tab }) {
     timer.current = setTimeout(() => flush(next), 800)
   }
 
+  if (data.docsError) return <Empty>The editor can't load or save until the dashboard can read its saved data — see the message above.</Empty>
   if (!draft) return <div className="text-sm text-zinc-500">Loading…</div>
 
   const published = doc?.published

@@ -156,3 +156,8 @@ test('portfolio content round-trips through the public endpoint into the site', 
   expect(fallback.projects.length).toBe(builtInContent().projects.length)
   expect(fallback.workExperience[0].company).toBe('Bluecopa')
 })
+
+test('portfolio editor explains a Firestore read failure instead of loading forever', () => {
+  render(<PortfolioEditor data={{ ...data, docsReady: true, docsError: 'permission-denied' }} go={go} tab="projects" />)
+  expect(screen.getByText(/can't load or save/)).toBeTruthy()
+})
