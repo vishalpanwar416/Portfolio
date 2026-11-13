@@ -2,6 +2,36 @@ import tableTapLogo from '../assets/Tabletap.png'
 
 export const projects = [
   {
+    title: "EditionTV",
+    description: "News platform for independent, investigative journalism — Flutter reader app for Android, iOS and web, Node.js backend and CMS, a reel audio service, and GCP infrastructure in Terraform.",
+    tech: ["Flutter", "Node.js", "GCP", "Cloud SQL", "Terraform"],
+    features: ["Live blogs with a 30s timeline", "Search, bookmarks and history", "On-device text-to-speech", "Infra as code on GCP"],
+    image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/flutter/flutter-original.svg",
+    github: null,
+    live: "https://edition.tv",
+    featured: true
+  },
+  {
+    title: "Splink Pro",
+    description: "Athlete assessment platform for schools and academies — Go modular-monolith API, Next.js console and portals, an offline-first Flutter assessor app, and a private AI service, all on AWS via Terraform.",
+    tech: ["Go", "PostgreSQL", "Next.js", "Flutter", "Python", "AWS", "Terraform"],
+    features: ["Offline-first field capture", "Explainable individual and cohort scores", "Claude on Amazon Bedrock for guidance", "ECS Fargate + Aurora, KMS, Cognito"],
+    image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original-wordmark.svg",
+    github: null,
+    live: "https://splinkpro.ai",
+    featured: true
+  },
+  {
+    title: "Sanero Media",
+    description: "AI-powered influencer-marketing firm I built and run — Next.js 16 site with every page prerendered for SEO, an admin for creators, brands and campaigns, and AI creator matching.",
+    tech: ["Next.js", "TypeScript", "Firebase", "Vercel", "LLM"],
+    features: ["49 prerendered SEO routes", "AI brand–creator matching", "Campaign proposals brands approve by link", "Automated Instagram posting"],
+    image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg",
+    github: null,
+    live: "https://sanero.in",
+    featured: true
+  },
+  {
     title: "Table-Tap",
     description: "Contactless QR food ordering platform with GPT-4 RAG analytics for restaurant operators — 80% faster order processing for 10K+ customers.",
     tech: ["React", "Node.js", "MongoDB", "OpenAI", "GCP", "Twilio"],
@@ -32,6 +62,60 @@ export const projects = [
     github: null,
     live: "https://aysdevelopers.ae",
     featured: true
+  },
+  {
+    title: "Aarambh",
+    description: "Fitness app for a client — Flutter app, a strict-TypeScript Express 5 backend for payments, subscriptions and webhooks on Azure, and a React admin panel.",
+    tech: ["Flutter", "Node.js", "TypeScript", "PostgreSQL", "Firebase", "Azure", "React"],
+    features: ["Subscriptions and payment webhooks", "Admin: comp plans, cancels, audit log", "React + TanStack Query admin", "Workout charts"],
+    image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/flutter/flutter-original.svg",
+    github: null,
+    live: "https://aarambh.app"
+  },
+  {
+    title: "VP Control",
+    description: "My private ops dashboard for every project — uptime and SSL checks, Vercel deploys, cloud bills, Razorpay revenue, app-store ratings, marketing analytics and phone alerts, plus the editor that powers this site.",
+    tech: ["React", "Vercel Functions", "Firebase", "GitHub Actions", "Tailwind CSS"],
+    features: ["Uptime monitor every 10 minutes", "Phone alerts via ntfy", "Traffic, SEO, campaigns and leads", "Live portfolio editor"],
+    image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg",
+    github: "https://github.com/vishalpanwar416/Portfolio",
+    live: null
+  },
+  {
+    title: "Stacky",
+    description: "Personal productivity tracker with workspaces, a focused task queue and shared tasks — plus an MCP server so Claude can read and update tasks.",
+    tech: ["React", "Firebase", "MCP", "Zod"],
+    features: ["Workspaces and priorities", "Task queue for focus", "Shared tasks with comments", "MCP server for AI agents"],
+    image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg",
+    github: "https://github.com/vishalpanwar416/Stacky",
+    live: "https://stackyy.vercel.app"
+  },
+  {
+    title: "Sarai",
+    description: "Search-first CRM for PGs, hostels and co-living — replaces an operator's five spreadsheets with live registers fed by public QR forms for visits, enrollment, notices and service requests.",
+    tech: ["React", "Firebase"],
+    features: ["QR forms, no app install", "Rooms-and-beds occupancy grid", "Visitor pipeline", "Notice and service registers"],
+    image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-original.svg",
+    github: null,
+    live: "https://sarai.vishalpanwar.in"
+  },
+  {
+    title: "Panwar Travels",
+    description: "Website for a Saharanpur travel agency — cab booking, airport transfers, hill trips and Char Dham packages, with SEO landing pages and hand-written CSS, no UI libraries.",
+    tech: ["Next.js", "TypeScript", "Resend"],
+    features: ["SEO landing pages", "Booking enquiries by email", "Editorial design", "No UI framework"],
+    image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg",
+    github: null,
+    live: "https://panwar-travels.vercel.app"
+  },
+  {
+    title: "Media-man",
+    description: "AI content pipeline for the Table Tap and Sanero Instagram pages — an LLM writes the concept and caption, an image model renders the poster, and it publishes through the Instagram Graph API on a schedule.",
+    tech: ["Node.js", "LLM", "Instagram Graph API", "Firestore", "systemd"],
+    features: ["Posters and captions generated daily", "Scheduled publishing", "Engagement synced back", "Runs on a home server"],
+    image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg",
+    github: null,
+    live: null
   },
   {
     title: "Top Selling Properties — Mobile App",
