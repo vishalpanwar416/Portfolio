@@ -9,6 +9,16 @@ export const workExperience = [
     ]
   },
   {
+    position: "Freelance Software Engineer",
+    company: "Client work · Splink Pro, EditionTV, Aarambh, Top Selling Properties",
+    duration: "Dec 2025 – Present · Remote",
+    highlights: [
+      "Splink Pro: Go API, Next.js portals and an offline-first Flutter app on AWS with Terraform",
+      "EditionTV: Flutter news app, Node.js backend and CMS, GCP infrastructure as code",
+      "Aarambh: Flutter fitness app with a TypeScript payments and subscriptions backend on Azure"
+    ]
+  },
+  {
     position: "Software Development Engineer (Contract)",
     company: "Discovr.ai",
     duration: "Jan 2026 – Apr 2026 · Remote, India",
