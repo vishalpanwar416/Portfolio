@@ -55,6 +55,8 @@ async function run(host, creds) {
     const body = await r.json().catch(() => ({}));
     if (!r.ok) return { at, error: explain(body.error?.message || `HTTP ${r.status}`, creds.sa) };
     const lh = body.lighthouseResult || {};
+    // Lighthouse answers 200 with no scores when it can't measure the page (e.g. NO_FCP: nothing painted).
+    if (lh.runtimeError?.code) return { at, error: `Lighthouse couldn’t measure it (${lh.runtimeError.code}): ${String(lh.runtimeError.message || '').slice(0, 160)}` };
     const cats = lh.categories || {};
     const audits = lh.audits || {};
     const score = (k) => (cats[k]?.score == null ? null : Math.round(cats[k].score * 100));
