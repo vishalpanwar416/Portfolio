@@ -45,6 +45,15 @@ nav { display: flex; align-items: center; justify-content: space-between; gap: 1
 .brand svg { width: 34px; height: 34px; filter: drop-shadow(0 0 6px rgba(255,255,255,0.35)) }
 .home { display: inline-flex; align-items: center; gap: 6px; background: var(--ink); color: #000; text-decoration: none; font-weight: 600; font-size: 14px; padding: 9px 16px; border-radius: 10px; transition: background .2s }
 .home:hover { background: #e5e5e5 }
+.nav-links { display: flex; gap: 8px; align-items: center }
+.ghost { display: inline-flex; align-items: center; gap: 6px; color: var(--text); text-decoration: none; font-weight: 600; font-size: 14px; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--line); background: rgba(0,0,0,0.4); transition: border-color .2s }
+.ghost:hover { border-color: var(--orange-line); color: var(--ink) }
+.ext { width: 13px; height: 13px; flex: none; color: var(--faint); transition: color .15s, transform .15s }
+a:hover .ext { color: var(--orange); transform: translate(1px, -1px) }
+.fp { display: inline-flex; align-items: center; gap: 5px; font: 500 12.5px var(--sans); color: var(--muted); text-decoration: none; border-bottom: 1px solid transparent }
+.fp:hover { color: var(--orange); border-bottom-color: var(--orange-line) }
+.more { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 12px; font-size: 13px; color: var(--faint) }
+.more .lock { font: 11px var(--mono); color: var(--faint) }
 
 /* header */
 header { padding-block: 40px 8px }
@@ -116,6 +125,8 @@ section.part { margin-top: 56px; scroll-margin-top: 130px }
 .part-head h2 span { color: var(--orange) }
 .part-head .eyebrow { margin: 0 0 10px }
 .part-head .meta { font: 12.5px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums }
+.part-side { display: grid; justify-items: end; gap: 4px }
+@media (max-width: 520px) { .part-side { justify-items: start } }
 .topics { display: grid; gap: 10px }
 
 details.topic { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; transition: border-color .2s }
@@ -132,7 +143,7 @@ details[open] > summary .chev { transform: rotate(90deg); color: var(--orange) }
 .tmeter { grid-column: 2 / -1; height: 2px; border-radius: 2px; background: rgba(255,255,255,0.06); overflow: hidden }
 .tmeter i { display: block; height: 100%; background: var(--orange) }
 .tbody { padding: 0 12px 14px 44px }
-.tbody-head { display: flex; justify-content: flex-end; margin-bottom: 4px }
+.tbody-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px }
 .all { font: 500 12px var(--sans); color: var(--muted); background: rgba(0,0,0,0.4); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer }
 .all:hover { color: var(--ink); border-color: rgba(255,255,255,0.25) }
 .gname { display: flex; align-items: center; gap: 10px; font-size: 10.5px; letter-spacing: .24em; text-transform: uppercase; color: var(--faint); margin: 14px 0 4px }
@@ -146,7 +157,9 @@ li.item + li.item { border-top: 1px solid var(--line-soft) }
 .tick:hover { border-color: var(--orange) }
 .tick:checked { background: var(--orange); border-color: var(--orange) }
 .tick:checked::after { content: ""; width: 5px; height: 10px; border: solid #000; border-width: 0 2px 2px 0; transform: translateY(-1px) rotate(45deg) }
-.it-title { color: var(--text); text-decoration: none; font-size: 14.5px }
+.it-title { color: var(--text); text-decoration: none; font-size: 14.5px; display: inline-flex; align-items: center; gap: 7px }
+.it-title .ext { opacity: .55 }
+li.item:hover .it-title .ext { opacity: 1 }
 .it-title:hover { color: var(--orange) }
 li.is-done .it-title { color: var(--faint); text-decoration: line-through; text-decoration-color: rgba(255,255,255,0.2) }
 .it-min { font: 11.5px var(--mono); color: var(--faint); white-space: nowrap; font-variant-numeric: tabular-nums }
@@ -159,6 +172,8 @@ footer a { color: var(--muted) }
 .reset:hover { color: var(--text) }
 
 @media (max-width: 520px) {
+  .ghost { padding: 8px 10px }
+  .brand span { display: none }
   .tbody { padding-left: 12px }
   details.topic > summary { padding: 13px 14px }
   .controls { gap: 10px; padding-block: 10px }
@@ -175,15 +190,18 @@ footer a { color: var(--muted) }
       <svg viewBox="0 0 100 100" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="miter" aria-hidden="true">
         <path d="M24 26 L49 65 L52 65 L52 45 L63 45 A9.5 9.5 0 0 0 63 26 L51 26"/>
       </svg>
-      Vishal Panwar
+      <span>Vishal Panwar</span>
     </a>
-    <a class="home" href="/">Back to site</a>
+    <div class="nav-links">
+      <a class="ghost" href="https://www.faangplus.com/practice/hld" target="_blank" rel="noopener">FAANGPlus <svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+      <a class="home" href="/">Back to site</a>
+    </div>
   </nav>
 
   <header>
     <p class="eyebrow"><b>Study</b><i>/</i>System design</p>
     <h1>System Design <span>Checklist</span></h1>
-    <p class="lede">Every HLD and LLD lesson in the <a href="https://www.faangplus.com/practice/hld" target="_blank" rel="noopener">FAANGPlus practice syllabus</a>, in their course order. Tick a lesson once you've studied it. Each title opens the lesson on FAANGPlus.</p>
+    <p class="lede">Every HLD and LLD lesson in the <a href="https://www.faangplus.com/practice/hld" target="_blank" rel="noopener">FAANGPlus practice syllabus</a>, in their course order. Tick a lesson once you've studied it. Every title, topic and section links straight to it on FAANGPlus.</p>
   </header>
 
   <div class="summary">
@@ -202,6 +220,7 @@ footer a { color: var(--muted) }
   </div>
 
   <div class="parts" id="parts"></div>
+  <div class="more" id="more"></div>
   <div id="list"></div>
 
   <footer>
@@ -215,6 +234,7 @@ const SYLLABUS = [{"k":"hld","t":"HLD","parts":[{"k":"key-concepts","t":"Key con
 const SITE = "https://www.faangplus.com";
 const KEY = "fp-checklist-done";
 const TAB_KEY = "fp-checklist-tab";
+const EXT = '<svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>';
 const CHEV = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>';
 
 const $ = (s) => document.querySelector(s);
@@ -294,6 +314,15 @@ const mark = (text, q) => {
 };
 
 const openTopics = new Set();
+function renderMore(course) {
+  const base = `${SITE}/practice/${course.k}`;
+  $("#more").innerHTML = `<span>More ${course.t} on FAANGPlus:</span>
+    <a class="fp" href="${base}" target="_blank" rel="noopener">Course home ${EXT}</a>
+    <a class="fp" href="${base}/question-bank" target="_blank" rel="noopener">Question bank ${EXT}</a>
+    <a class="fp" href="${base}/problem-planner" target="_blank" rel="noopener">Problem planner ${EXT}</a>
+    <span class="lock">(these two need a FAANGPlus sign-in)</span>`;
+}
+
 function renderList() {
   const course = SYLLABUS.find((c) => c.k === tab);
   const q = $("#q").value.trim().toLowerCase();
@@ -316,11 +345,11 @@ function renderList() {
         <summary>${CHEV}<span class="tname">${mark(t.t, q)}</span>
           <span class="tstat"><b>${d}/${tl.length}</b> · ${hours(mins(tl))}</span>
           <span class="tmeter"><i style="width:${pct(d, tl.length)}%"></i></span></summary>
-        <div class="tbody"><div class="tbody-head"><button class="all" data-all="${id}">${full ? "Untick all" : "Tick all"}</button></div>
+        <div class="tbody"><div class="tbody-head"><a class="fp" href="${SITE}${esc(tl[0].u)}" target="_blank" rel="noopener">Start ${esc(t.t)} on FAANGPlus ${EXT}</a><button class="all" data-all="${id}">${full ? "Untick all" : "Tick all"}</button></div>
           ${groups.map((g) => `${g.g ? `<div class="gname">${esc(g.g)}</div>` : ""}<ul class="items">${g.p.map((l) => `
             <li class="item${done[l.k] ? " is-done" : ""}">
               <input class="tick" type="checkbox" id="c-${esc(l.k)}" data-k="${esc(l.k)}"${done[l.k] ? " checked" : ""} aria-label="Studied: ${esc(l.t)}">
-              <a class="it-title" href="${SITE}${esc(l.u)}" target="_blank" rel="noopener">${mark(l.t, q)}</a>
+              <a class="it-title" href="${SITE}${esc(l.u)}" target="_blank" rel="noopener" title="Open on FAANGPlus">${mark(l.t, q)}${EXT}</a>
               <span class="it-min">${l.m ? `${l.m} min` : ""}</span>
             </li>`).join("")}</ul>`).join("")}
         </div></details>`;
@@ -330,7 +359,8 @@ function renderList() {
     const left = mins(all.filter((l) => !done[l.k]));
     return `<section class="part" id="${course.k}-${part.k}">
       <div class="part-head"><div><p class="eyebrow"><b>${course.t}</b><i>/</i>${part.topics.length} topics</p><h2>${accentLast(part.t)}</h2></div>
-        <span class="meta">${d}/${all.length} done · ${hours(left)} left</span></div>
+        <div class="part-side"><span class="meta">${d}/${all.length} done · ${hours(left)} left</span>
+          <a class="fp" href="${SITE}/practice/${course.k}/${part.k}" target="_blank" rel="noopener">${esc(part.t)} on FAANGPlus ${EXT}</a></div></div>
       <div class="topics">${topics}</div></section>`;
   }).join("");
   $("#list").innerHTML = shown ? html
@@ -343,6 +373,7 @@ function render() {
   renderNext();
   renderTabs();
   renderParts(course);
+  renderMore(course);
   renderList();
 }
 
