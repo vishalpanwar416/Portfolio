@@ -20,3 +20,7 @@ export const db = getFirestore(app)
 // Notes, links and hand-added sites, one doc per site. Owner-only in
 // sanero-next/firestore.rules.
 export const SITES_COLLECTION = 'vp_sites'
+
+// Job openings for the Jobs page, one doc per opening (fp-<FAANGPlus id>).
+// Same owner-only rule, kept separate so other pages don't load them.
+export const JOBS_COLLECTION = 'vp_jobs'

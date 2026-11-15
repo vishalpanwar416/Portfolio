@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import projectsJson from './projects.json'
 import OverviewView from './OverviewView'
 import ProjectsView from './ProjectsView'
@@ -12,14 +12,23 @@ import MarketingView, { seoIssues } from './MarketingView'
 import PortfolioEditor, { builtInContent } from './PortfolioEditor'
 import { mergeContent } from '../contexts/PortfolioContext'
 import LinkedInView from './LinkedInView'
+import JobsView from './JobsView'
 import { campaignMonths, costIn, leadProject, leadsFrom } from './data'
 
-jest.mock('./firebase', () => ({ auth: { currentUser: { getIdToken: async () => 't' } }, db: {}, SITES_COLLECTION: 'vp_sites' }))
+jest.mock('./firebase', () => ({ auth: { currentUser: { getIdToken: async () => 't' } }, db: {}, SITES_COLLECTION: 'vp_sites', JOBS_COLLECTION: 'vp_jobs' }))
 // Pipeline posts (PostsView) arrive through onSnapshot; one sample per brand.
+// Saved openings (JobsView) also arrive through onSnapshot, already cleaned by api/admin/_routes/jobs.js.
+const FEED = [
+  { id: 1, company: 'Google', title: 'Staff Software Engineer, Search Evals', location: 'Bengaluru, Karnataka, India', url: 'https://www.google.com/about/careers/applications/jobs/results/1', techStack: 'C++, Go, Not specified', minExperienceYears: 8, maxExperienceYears: 8, scrapedAt: '2026-11-13T17:56:06Z', qualifications: '- 8 years of experience' },
+  { id: 2, company: 'Microsoft', title: 'Support Escalation Engineer - CSP', location: 'Hyderabad, TS, IN', url: 'https://apply.careers.microsoft.com/careers/job/2', minExperienceYears: 3, scrapedAt: '2026-11-13T17:56:06Z' },
+  { id: 3, company: 'PhonePe', title: 'Software Engineer, Backend (3-5 years)', location: 'Pune', url: 'javascript:alert(1)', minExperienceYears: 3, maxExperienceYears: 5, scrapedAt: '2026-11-12T10:00:00Z' },
+  { id: 4, company: 'Confluent', title: 'Software Developer - Confluent', location: 'Bangalore', url: 'https://careers.ibm.com/x', minExperienceYears: 6, maxExperienceYears: 1, scrapedAt: '2026-11-11T10:00:00Z' },
+]
+const JOBS = () => FEED.map((j) => require('../../api/admin/_routes/jobs').clean(j)).map((j, i) => ({ id: `fp-${j.sourceId}`, data: () => ({ ...j, ...(i === 3 ? { status: 'applied', appliedOn: '2026-11-14', notes: 'Referral from Riya' } : {}) }) }))
 const POST = (brand) => ({ id: `${brand}-1`, data: () => ({ postId: `${brand}-1`, title: `${brand} sample post`, caption: 'caption', pillar: 'product', state: 'published', createdAt: '2026-11-13T10:00:00.000Z', publishedAt: '2026-11-13T12:00:00.000Z', permalink: 'https://instagram.com/p/x', metrics: { likes: 12, comments: 3, reach: 400 } }) })
 jest.mock('firebase/firestore', () => ({
   collection: (_, name) => ({ name }), doc: () => ({}), query: (c) => c, orderBy: () => ({}), limit: () => ({}),
-  onSnapshot: (ref, ok) => { if (ref?.name?.endsWith('_posts')) ok({ docs: [POST(ref.name)] }); return () => {} },
+  onSnapshot: (ref, ok) => { if (ref?.name?.endsWith('_posts')) ok({ docs: [POST(ref.name)] }); if (ref?.name === 'vp_jobs') ok({ docs: JOBS() }); return () => {} },
   setDoc: async () => {}, deleteDoc: async () => {},
 }))
 global.fetch = jest.fn(async () => ({ ok: true, json: async () => ({}) }))
@@ -172,4 +181,24 @@ test('posts tab lists pipeline posts from both brands', () => {
   render(<MarketingView data={data} go={go} tab="posts" />)
   expect(screen.getByText('tabletap_posts sample post')).toBeTruthy()
   expect(screen.getByText('media_posts sample post')).toBeTruthy()
+})
+
+test('jobs are tagged on the server and listed SDE-at-multinationals first', () => {
+  const { clean } = require('../../api/admin/_routes/jobs')
+  const [google, support, phonepe, confluent] = FEED.map(clean)
+  expect([google.sde, google.mnc, google.stack]).toEqual([true, true, ['C++', 'Go']])
+  expect(support.sde).toBe(false)
+  expect([phonepe.sde, phonepe.mnc, phonepe.url]).toEqual([true, false, null])
+  expect([confluent.minYears, confluent.maxYears]).toEqual([6, null])
+  render(<JobsView />)
+  expect(screen.getByText('Staff Software Engineer, Search Evals')).toBeTruthy()
+  expect(screen.getByText('Software Developer - Confluent')).toBeTruthy()
+  expect(screen.getByText('6+ yrs')).toBeTruthy()
+  expect(screen.queryByText('Support Escalation Engineer - CSP')).toBeNull()
+  expect(screen.queryByText('Software Engineer, Backend (3-5 years)')).toBeNull()
+  fireEvent.click(screen.getByText('All openings'))
+  expect(screen.getByText('Support Escalation Engineer - CSP')).toBeTruthy()
+  fireEvent.click(screen.getByText('Software Developer - Confluent'))
+  expect(screen.getByDisplayValue('Referral from Riya')).toBeTruthy()
+  expect(screen.getByText('Apply on Confluent')).toBeTruthy()
 })

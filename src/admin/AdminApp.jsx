@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
 import {
-  Bell, Briefcase, ChevronRight, FolderKanban, IndianRupee, LayoutDashboard, Linkedin, LogOut, Megaphone, Menu, Plus, RefreshCw, Search, Server,
+  Bell, Briefcase, BriefcaseBusiness, ChevronRight, FolderKanban, IndianRupee, LayoutDashboard, Linkedin, LogOut, Megaphone, Menu, Plus, RefreshCw, Search, Server,
   Settings, ShieldAlert, Smartphone, X,
 } from 'lucide-react'
 import { auth } from './firebase'
@@ -16,13 +16,14 @@ import AppsView from './AppsView'
 import InfraView, { INFRA_TABS } from './InfraView'
 import MarketingView, { MARKETING_TABS } from './MarketingView'
 import LinkedInView, { linkedinReplies } from './LinkedInView'
+import JobsView from './JobsView'
 import PortfolioEditor, { PORTFOLIO_TABS } from './PortfolioEditor'
 import AlertsView from './AlertsView'
 import SettingsView from './SettingsView'
 import CommandPalette, { useHotkey } from './CommandPalette'
 
 // ── routing ────────────────────────────────────────────
-// #/ #/alerts #/projects #/money #/marketing/<tab> #/portfolio/<tab> #/apps #/infra/<tab> #/linkedin #/settings #/p/<slug>
+// #/ #/alerts #/projects #/money #/marketing/<tab> #/portfolio/<tab> #/apps #/infra/<tab> #/linkedin #/jobs #/settings #/p/<slug>
 
 const LEGACY = { '/sites': '/infra/uptime', '/renewals': '/infra/renewals' }
 
@@ -60,6 +61,7 @@ export const PAGES = [
   { to: '/apps', label: 'Apps', icon: Smartphone },
   { to: '/infra/uptime', label: 'Infrastructure', icon: Server, match: '/infra' },
   { to: '/linkedin', label: 'LinkedIn', icon: Linkedin },
+  { to: '/jobs', label: 'Jobs', icon: BriefcaseBusiness },
 ]
 const SETTINGS = { to: '/settings', label: 'Settings', icon: Settings }
 
@@ -254,6 +256,7 @@ function Shell({ user }) {
     sub = PORTFOLIO_TABS.find((t) => t.key === tab)?.label
     view = <PortfolioEditor data={data} go={go} tab={tab} />
   } else if (route === '/linkedin') { title = 'LinkedIn'; sub = 'Outreach'; view = <LinkedInView data={data} /> }
+  else if (route === '/jobs') { title = 'Jobs'; sub = 'Openings'; view = <JobsView /> }
   else if (route === '/settings') { title = 'Settings'; view = <SettingsView data={data} install={install} /> }
   else if (slug) {
     title = project?.name || 'Project'

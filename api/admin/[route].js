@@ -10,6 +10,7 @@ const routes = {
   firebase: require('./_routes/firebase'),
   github: require('./_routes/github'),
   instagram: require('./_routes/instagram'),
+  jobs: require('./_routes/jobs'),
   laptop: require('./_routes/laptop'),
   lead: require('./_routes/lead'),
   linkedin: require('./_routes/linkedin'),
