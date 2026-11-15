@@ -1,4 +1,5 @@
-// Marketing, one page with tabs: where traffic comes from, on-page SEO for
+// Marketing, one page with tabs: where traffic comes from, the Instagram
+// pipeline's posts (PostsView.jsx), on-page SEO for
 // every public site, campaigns with their spend, and leads from contact forms.
 //
 // Campaigns live on the project doc (`campaigns`, like expenses) so their
@@ -11,6 +12,7 @@ import {
   monthKey, newId, removeDoc, saveDoc, timeAgo, today, useApi,
 } from './data'
 import { trafficFor } from './IntegrationSections'
+import PostsView from './PostsView'
 import {
   Badge, Button, ConnectHint, Empty, FIELD_MAIN, Input, Progress, Section, Select, ShareBars, Sparkline, Stat, Textarea,
   cx, formRow,
@@ -19,6 +21,7 @@ import {
 export const MARKETING_TABS = [
   { key: 'traffic', label: 'Traffic' },
   { key: 'instagram', label: 'Instagram' },
+  { key: 'posts', label: 'Posts' },
   { key: 'seo', label: 'SEO' },
   { key: 'campaigns', label: 'Campaigns' },
   { key: 'leads', label: 'Leads' },
@@ -633,6 +636,7 @@ export default function MarketingView({ data, go, tab }) {
       </div>
       {current === 'traffic' && <Traffic data={data} go={go} leads={leads} />}
       {current === 'instagram' && <Instagram data={data} go={go} />}
+      {current === 'posts' && <PostsView />}
       {current === 'seo' && <Seo data={data} />}
       {current === 'campaigns' && <Campaigns data={data} go={go} leads={leads} />}
       {current === 'leads' && <Leads data={data} go={go} leads={leads} />}

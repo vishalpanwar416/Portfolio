@@ -15,7 +15,13 @@ import LinkedInView from './LinkedInView'
 import { campaignMonths, costIn, leadProject, leadsFrom } from './data'
 
 jest.mock('./firebase', () => ({ auth: { currentUser: { getIdToken: async () => 't' } }, db: {}, SITES_COLLECTION: 'vp_sites' }))
-jest.mock('firebase/firestore', () => ({ collection: () => ({}), doc: () => ({}), onSnapshot: () => () => {}, setDoc: async () => {}, deleteDoc: async () => {} }))
+// Pipeline posts (PostsView) arrive through onSnapshot; one sample per brand.
+const POST = (brand) => ({ id: `${brand}-1`, data: () => ({ postId: `${brand}-1`, title: `${brand} sample post`, caption: 'caption', pillar: 'product', state: 'published', createdAt: '2026-11-13T10:00:00.000Z', publishedAt: '2026-11-13T12:00:00.000Z', permalink: 'https://instagram.com/p/x', metrics: { likes: 12, comments: 3, reach: 400 } }) })
+jest.mock('firebase/firestore', () => ({
+  collection: (_, name) => ({ name }), doc: () => ({}), query: (c) => c, orderBy: () => ({}), limit: () => ({}),
+  onSnapshot: (ref, ok) => { if (ref?.name?.endsWith('_posts')) ok({ docs: [POST(ref.name)] }); return () => {} },
+  setDoc: async () => {}, deleteDoc: async () => {},
+}))
 global.fetch = jest.fn(async () => ({ ok: true, json: async () => ({}) }))
 
 const EMPTY = { summary: '', stack: [], domains: [], repos: [], vercel: [], firebase: [], stacky: [], cloud: [], apps: [], payments: [], supabase: [], services: [], revenue: [], invoices: [], expenses: [], clients: [], updates: [], links: [], notes: '' }
@@ -49,7 +55,7 @@ test.each([
   ['money', <MoneyView data={data} go={go} />],
   ['settings', <SettingsView data={data} install={null} />],
   ...['uptime', 'renewals', 'cloud', 'data', 'laptop'].map((t) => [`infra ${t}`, <InfraView data={data} go={go} tab={t} />]),
-  ...['traffic', 'instagram', 'seo', 'campaigns', 'leads'].map((t) => [`marketing ${t}`, <MarketingView data={data} go={go} tab={t} />]),
+  ...['traffic', 'instagram', 'posts', 'seo', 'campaigns', 'leads'].map((t) => [`marketing ${t}`, <MarketingView data={data} go={go} tab={t} />]),
   ...['profile', 'projects', 'skills', 'experience', 'education', 'certifications'].map((t) => [`portfolio ${t}`, <PortfolioEditor data={data} go={go} tab={t} />]),
   ...['aarambh', 'table-tap', 'media-man', 'splinkpro'].map((s) => [`project ${s}`, <ProjectView project={projects.find((p) => p.slug === s)} data={data} go={go} />]),
 ])('%s renders', (name, el) => {
@@ -160,4 +166,10 @@ test('portfolio content round-trips through the public endpoint into the site', 
 test('portfolio editor explains a Firestore read failure instead of loading forever', () => {
   render(<PortfolioEditor data={{ ...data, docsReady: true, docsError: 'permission-denied' }} go={go} tab="projects" />)
   expect(screen.getByText(/can't load or save/)).toBeTruthy()
+})
+
+test('posts tab lists pipeline posts from both brands', () => {
+  render(<MarketingView data={data} go={go} tab="posts" />)
+  expect(screen.getByText('tabletap_posts sample post')).toBeTruthy()
+  expect(screen.getByText('media_posts sample post')).toBeTruthy()
 })
