@@ -16,6 +16,9 @@
       "permanent": true
     }
   ],
+  "rewrites": [
+    { "source": "/sdc", "destination": "/sdc/index.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
