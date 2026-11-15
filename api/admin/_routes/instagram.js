@@ -6,13 +6,18 @@
 // Tokens last 60 days; this route refreshes one once it's a week old and keeps
 // the new copy in vp_secrets (server-only), so the env value only has to be
 // set once.
+//
+// Instagram only reports today's follower count, so each account's count is
+// also kept per day in the vp_sites doc igstats-<key> ({ daily: { date: n } }),
+// written whenever this route loads and once a day by the monitor
+// (monitor.js ?daily=1), which is what draws the follower trend.
 const { requireOwner } = require('../_auth');
-const { getSecret, putSecret } = require('../_firestore');
+const { getSecret, putSecret, getSite, writeSite } = require('../_firestore');
 
 const HOST = 'https://graph.instagram.com';
 const VERSION = process.env.IG_GRAPH_VERSION || 'v23.0';
 const KEY_RE = /^[a-z0-9_-]{1,40}$/;
-const POSTS = 24;
+const POSTS = 100; // enough history for best-time and format breakdowns
 const WITH_INSIGHTS = 12; // per-post insights are one call each
 const REFRESH_AFTER_MS = 7 * 86400e3;
 
@@ -76,6 +81,35 @@ async function accountInsights(token) {
   }
 }
 
+const istDay = () => new Date(Date.now() + 5.5 * 3600e3).toISOString().slice(0, 10);
+
+/** Record today's follower count for an account; best-effort, at most one write a day per change. */
+async function saveFollowers(key, followers) {
+  if (typeof followers !== 'number') return;
+  try {
+    const id = `igstats-${key}`;
+    const doc = (await getSite(id)) || {};
+    const day = istDay();
+    if (doc.daily?.[day] === followers) return;
+    await writeSite(id, { kind: 'igstats', account: key, daily: { ...(doc.daily || {}), [day]: followers }, updatedAt: Date.now() });
+  } catch { /* the trend just misses a day */ }
+}
+
+/** Snapshot every account's follower count (the monitor's daily run). */
+async function snapshotFollowers(keys) {
+  return Promise.all(keys.map(async (key) => {
+    const auth = await tokenFor(key);
+    if (!auth) return { account: key, error: 'no token' };
+    try {
+      const me = await graph('me', { fields: 'followers_count' }, auth.token);
+      await saveFollowers(key, me.followers_count);
+      return { account: key, followers: me.followers_count ?? null };
+    } catch (e) {
+      return { account: key, error: String(e.message || e).slice(0, 200) };
+    }
+  }));
+}
+
 async function loadAccount(key) {
   const auth = await tokenFor(key);
   if (!auth) return { account: key, notConfigured: true, error: `IG_TOKEN_${key.toUpperCase()} missing on the server` };
@@ -87,7 +121,10 @@ async function loadAccount(key) {
       accountInsights(token),
     ]);
     const list = media.data || [];
-    const extra = await Promise.all(list.slice(0, WITH_INSIGHTS).map((m) => postInsights(m.id, token)));
+    const [extra] = await Promise.all([
+      Promise.all(list.slice(0, WITH_INSIGHTS).map((m) => postInsights(m.id, token))),
+      saveFollowers(key, me.followers_count),
+    ]);
     return {
       account: key,
       username: me.username,
@@ -115,9 +152,11 @@ async function loadAccount(key) {
   }
 }
 
-module.exports = async (req, res) => {
+module.exports = async function instagram(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   if (!(await requireOwner(req, res))) return;
   const keys = [...new Set(String(req.query.accounts || '').split(',').map((k) => k.trim().toLowerCase()))].filter((k) => KEY_RE.test(k)).slice(0, 10);
   res.status(200).json({ accounts: await Promise.all(keys.map(loadAccount)) });
 };
+
+module.exports.snapshotFollowers = snapshotFollowers;

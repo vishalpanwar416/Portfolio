@@ -8,12 +8,14 @@ import InfraView from './InfraView'
 import MoneyView from './MoneyView'
 import ProjectView from './ProjectView'
 import SettingsView from './SettingsView'
-import MarketingView, { seoIssues } from './MarketingView'
+import MarketingView, { followUpDue, replyText, seoIssues, utmUrl } from './MarketingView'
 import PortfolioEditor, { builtInContent } from './PortfolioEditor'
 import { mergeContent } from '../contexts/PortfolioContext'
 import LinkedInView from './LinkedInView'
 import JobsView from './JobsView'
 import { campaignMonths, costIn, leadProject, leadsFrom } from './data'
+import { bestTimes, followerSeries, formatStats, slotOf } from './InstagramInsights'
+import { matchPlan, plansFrom } from './CalendarView'
 
 jest.mock('./firebase', () => ({ auth: { currentUser: { getIdToken: async () => 't' } }, db: {}, SITES_COLLECTION: 'vp_sites', JOBS_COLLECTION: 'vp_jobs' }))
 // Pipeline posts (PostsView) arrive through onSnapshot; one sample per brand.
@@ -64,7 +66,7 @@ test.each([
   ['money', <MoneyView data={data} go={go} />],
   ['settings', <SettingsView data={data} install={null} />],
   ...['uptime', 'renewals', 'cloud', 'data', 'laptop'].map((t) => [`infra ${t}`, <InfraView data={data} go={go} tab={t} />]),
-  ...['traffic', 'instagram', 'posts', 'seo', 'campaigns', 'leads'].map((t) => [`marketing ${t}`, <MarketingView data={data} go={go} tab={t} />]),
+  ...['traffic', 'instagram', 'posts', 'calendar', 'seo', 'search', 'speed', 'campaigns', 'leads'].map((t) => [`marketing ${t}`, <MarketingView data={data} go={go} tab={t} />]),
   ...['profile', 'projects', 'skills', 'experience', 'education', 'certifications'].map((t) => [`portfolio ${t}`, <PortfolioEditor data={data} go={go} tab={t} />]),
   ...['aarambh', 'table-tap', 'media-man', 'splinkpro'].map((s) => [`project ${s}`, <ProjectView project={projects.find((p) => p.slug === s)} data={data} go={go} />]),
 ])('%s renders', (name, el) => {
@@ -94,6 +96,36 @@ test('leads are matched to projects by site', () => {
   expect(leadProject(lead, projects)?.slug).toBe('sanero')
   expect(leadProject({ site: 'www.sanero.in' }, projects)?.slug).toBe('sanero')
   expect(leadProject({ site: 'unknown.example' }, projects)).toBeNull()
+})
+
+test('tracked links carry clean utm tags', () => {
+  expect(utmUrl({ host: 'sanero.in', path: 'offers', source: 'Instagram', medium: 'social', campaign: 'Diwali Offer!', content: '' }))
+    .toBe('https://sanero.in/offers?utm_source=instagram&utm_medium=social&utm_campaign=diwali-offer')
+  expect(utmUrl({ host: '' })).toBe('')
+})
+
+test('follow-ups are due on or after their date, only while the lead is open', () => {
+  expect(followUpDue({ status: 'contacted', followUp: '2026-11-10' }, '2026-11-15')).toBe(true)
+  expect(followUpDue({ status: 'new', followUp: '2026-11-15' }, '2026-11-15')).toBe(true)
+  expect(followUpDue({ status: 'new', followUp: '2026-11-16' }, '2026-11-15')).toBe(false)
+  expect(followUpDue({ status: 'won', followUp: '2026-11-10' }, '2026-11-15')).toBe(false)
+  expect(replyText({ name: 'Asha Rao' }, { name: 'Sanero' })).toMatch(/^Hi Asha, thanks for getting in touch about Sanero\./)
+})
+
+test('leads tab flags an overdue follow-up and offers a prefilled reply', () => {
+  const docs = { ...data.docs, 'lead-2': { kind: 'lead', status: 'contacted', name: 'Ravi', phone: '9876543210', site: 'sanero.in', followUp: '2020-01-01', createdAt: Date.now() - 1000 } }
+  render(<MarketingView data={{ ...data, docs }} go={go} tab="leads" />)
+  expect(screen.getByText('Follow up · 2020-01-01')).toBeTruthy()
+  fireEvent.click(screen.getByText('Ravi'))
+  expect(screen.getByText('Reply on WhatsApp').closest('a').getAttribute('href')).toMatch(/^https:\/\/wa\.me\/919876543210\?text=Hi%20Ravi/)
+})
+
+test('speed tab shows saved PageSpeed runs with the change since last time', () => {
+  const runs = [{ at: Date.now() - 864e5, performance: 90 }, { at: Date.now(), performance: 72, seo: 100, accessibility: 95, bestPractices: 100, lcp: 3100, cls: 0.02, tbt: 120, field: null }]
+  render(<MarketingView data={{ ...data, docs: { ...data.docs, vitals: { kind: 'vitals', sites: [{ host: 'sanero.in', runs }] } } }} go={go} tab="speed" />)
+  expect(screen.getByText('72')).toBeTruthy()
+  expect(screen.getByText(/-18/)).toBeTruthy()
+  expect(screen.getByText('3.1s')).toBeTruthy()
 })
 
 test('seo issues flag the basics', () => {
@@ -181,6 +213,51 @@ test('posts tab lists pipeline posts from both brands', () => {
   render(<MarketingView data={data} go={go} tab="posts" />)
   expect(screen.getByText('tabletap_posts sample post')).toBeTruthy()
   expect(screen.getByText('media_posts sample post')).toBeTruthy()
+})
+
+test('best time groups posts by IST day and 3-hour block, and needs two posts to pick a winner', () => {
+  // 2026-11-16 is a Monday; 13:00Z is 6:30pm IST.
+  expect(slotOf('2026-11-16T13:00:00Z')).toEqual({ day: 0, block: 18 })
+  const posts = [
+    { at: '2026-11-16T13:00:00Z', likes: 40, comments: 10, type: 'REEL' },
+    { at: '2026-11-23T13:30:00Z', likes: 30, comments: 0, type: 'REEL' },
+    { at: '2026-11-18T04:00:00Z', likes: 500, comments: 0, type: 'IMAGE' }, // one viral Wednesday morning post
+    { at: '2026-11-19T04:00:00Z', likes: 5, comments: 1, type: 'IMAGE' },
+  ]
+  const t = bestTimes(posts)
+  expect(t.bestSlot).toMatchObject({ key: '0-18', n: 2, avg: 40 })
+  expect(t.grid['2-9']).toEqual({ avg: 500, n: 1 })
+  expect(t.bestBlock.key).toBe('9') // Wed + Thu mornings average 253
+  expect(formatStats(posts).map((f) => f.label)).toEqual(['Post', 'Reel'])
+})
+
+test('follower series keeps the window and reports the change', () => {
+  const day = (n) => new Date(Date.now() + 5.5 * 3600e3 - n * 86400e3).toISOString().slice(0, 10)
+  const s = followerSeries({ [day(100)]: 800, [day(20)]: 1000, [day(10)]: 1040, [day(0)]: 1100 }, 30)
+  expect(s.points.map((p) => p.n)).toEqual([1000, 1040, 1100])
+  expect(s.change).toBe(100)
+  expect(followerSeries({ [day(0)]: 5 }, 30).change).toBe(null)
+})
+
+test('plans link to the published post they became', () => {
+  const post = (id, brandKey, publishedAt, title) => ({ id, brandKey, state: 'published', publishedAt, title, caption: '' })
+  const posts = [
+    post('a', 'sanero', '2026-11-13T12:00:00Z', 'Five creator contracts every D2C brand needs'),
+    post('b', 'tabletap', '2026-11-13T12:00:00Z', 'Sold out dilemma'),
+    post('c', 'sanero', '2026-11-14T12:00:00Z', 'Something unrelated entirely'),
+  ]
+  const plan = { brand: 'sanero', date: '2026-11-13', title: 'creator contracts', caption: '' }
+  expect(matchPlan(plan, posts, new Set())?.id).toBe('a')
+  expect(matchPlan(plan, posts, new Set(['a']))).toBe(null) // a day off needs similar captions
+  expect(matchPlan({ ...plan, date: '2026-11-12' }, posts, new Set())?.id).toBe('a')
+  expect(plansFrom({ 'plan-1': { kind: 'plan', date: '2026-12-01' }, 'plan-0': { kind: 'plan', date: '2026-11-01' }, 'lead-1': { kind: 'lead' } }).map((p) => p.id)).toEqual(['plan-0', 'plan-1'])
+})
+
+test('calendar shows a plan and marks it posted', () => {
+  const d = { ...data, docs: { ...data.docs, 'plan-x': { kind: 'plan', brand: 'sanero', date: new Date().toISOString().slice(0, 10), title: 'Contracts carousel', caption: 'draft', postId: 'media_posts-1' } } }
+  render(<MarketingView data={d} go={go} tab="calendar" />)
+  expect(screen.getAllByText(/Contracts carousel/).length).toBeGreaterThan(0)
+  expect(screen.getByText('Posted as planned')).toBeTruthy()
 })
 
 test('jobs are tagged on the server and listed SDE-at-multinationals first', () => {

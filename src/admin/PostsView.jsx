@@ -13,7 +13,7 @@ import { db } from './firebase'
 import { timeAgo } from './data'
 import { Badge, Empty, Glass, Input, Section, Stat, cx } from './ui'
 
-const BRANDS = [
+export const BRANDS = [
   { key: 'tabletap', label: 'Table Tap', handle: 'table_tap.in', posts: 'tabletap_posts', runs: 'tabletap_runs' },
   { key: 'sanero', label: 'Sanero', handle: 'saneromedia', posts: 'media_posts', runs: 'media_runs' },
 ]
@@ -27,7 +27,7 @@ const stateTone = (s) => STATES.find((x) => x.key === s)?.tone || 'zinc'
 
 const compact = new Intl.NumberFormat('en-IN', { notation: 'compact', maximumFractionDigits: 1 })
 const fmt = (v) => (v === null || v === undefined ? '—' : compact.format(v))
-const ms = (v) => (v?.toMillis ? v.toMillis() : Date.parse(v || '') || 0)
+export const ms = (v) => (v?.toMillis ? v.toMillis() : Date.parse(v || '') || 0)
 const when = (p) => ms(p.publishedAt) || ms(p.createdAt)
 const day = (t) => (t ? new Date(t).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—')
 
@@ -42,7 +42,7 @@ function useCollection(name, order, max) {
   return state
 }
 
-function usePipeline() {
+export function usePipeline() {
   const ttPosts = useCollection('tabletap_posts', 'createdAt')
   const snPosts = useCollection('media_posts', 'createdAt')
   const ttRuns = useCollection('tabletap_runs', 'at', 40)

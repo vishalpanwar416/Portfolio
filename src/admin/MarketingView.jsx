@@ -1,6 +1,9 @@
-// Marketing, one page with tabs: where traffic comes from, the Instagram
-// pipeline's posts (PostsView.jsx), on-page SEO for
-// every public site, campaigns with their spend, and leads from contact forms.
+// Marketing, one page with tabs: where traffic comes from, Instagram accounts
+// (with best-time and follower trend, InstagramInsights.jsx), the pipeline's
+// posts (PostsView.jsx), the content calendar (CalendarView.jsx), on-page SEO for
+// every public site, Search Console rankings, PageSpeed scores (saved in the
+// `vitals` doc by api/admin/_routes/vitals.js), campaigns with their spend and
+// a tracked-link builder, and leads from contact forms with follow-up dates.
 //
 // Campaigns live on the project doc (`campaigns`, like expenses) so their
 // spend lands in Money. Leads are `lead-<id>` docs in vp_sites, written by
@@ -12,6 +15,8 @@ import {
   monthKey, newId, removeDoc, saveDoc, timeAgo, today, useApi,
 } from './data'
 import { trafficFor } from './IntegrationSections'
+import CalendarView from './CalendarView'
+import { BestTime, FollowerTrend } from './InstagramInsights'
 import PostsView from './PostsView'
 import {
   Badge, Button, ConnectHint, Empty, FIELD_MAIN, Input, Progress, Section, Select, ShareBars, Sparkline, Stat, Textarea,
@@ -22,7 +27,10 @@ export const MARKETING_TABS = [
   { key: 'traffic', label: 'Traffic' },
   { key: 'instagram', label: 'Instagram' },
   { key: 'posts', label: 'Posts' },
+  { key: 'calendar', label: 'Calendar' },
   { key: 'seo', label: 'SEO' },
+  { key: 'search', label: 'Search' },
+  { key: 'speed', label: 'Speed' },
   { key: 'campaigns', label: 'Campaigns' },
   { key: 'leads', label: 'Leads' },
 ]
@@ -172,7 +180,9 @@ function PostCard({ post }) {
   )
 }
 
-function InstagramAccount({ a, project, go }) {
+const SHOWN_POSTS = 24
+
+function InstagramAccount({ a, project, go, docs }) {
   const posts = a.posts || []
   const likes = avg(posts, 'likes')
   const comments = avg(posts, 'comments')
@@ -223,9 +233,12 @@ function InstagramAccount({ a, project, go }) {
         </div>
       ) : null}
 
+      <FollowerTrend daily={docs?.[`igstats-${a.account}`]?.daily} />
+      <BestTime posts={posts} />
+
       {posts.length === 0 ? <Empty>No posts yet.</Empty> : (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
-          {posts.map((p) => <PostCard key={p.id} post={p} />)}
+          {posts.slice(0, SHOWN_POSTS).map((p) => <PostCard key={p.id} post={p} />)}
         </div>
       )}
     </div>
@@ -258,7 +271,7 @@ function Instagram({ data, go }) {
       {!current ? null
         : current.notConfigured ? <ConnectHint>Add <code className="text-zinc-300">IG_TOKEN_{current.account.toUpperCase()}</code> (the account’s long-lived Instagram token) to the Vercel project’s environment variables.</ConnectHint>
           : current.error ? <Empty>{owner[current.account]?.name}: {current.error}</Empty>
-            : <InstagramAccount a={current} project={owner[current.account]} go={go} />}
+            : <InstagramAccount a={current} project={owner[current.account]} go={go} docs={data.docs} />}
     </div>
   )
 }
@@ -356,9 +369,259 @@ function Seo({ data }) {
   )
 }
 
+// ── Search Console ─────────────────────────────────────
+
+const pos = (v) => (v == null ? '—' : v.toFixed(1))
+const ctrPct = (v) => (v == null ? '—' : `${(v * 100).toFixed(1)}%`)
+
+function SearchTable({ rows, label, render = (v) => v }) {
+  if (!rows?.length) return <div className="text-xs text-zinc-600">No {label.toLowerCase()} yet.</div>
+  return (
+    <table className="w-full table-fixed text-xs">
+      <thead>
+        <tr className="text-left text-[11px] uppercase tracking-[0.08em] text-zinc-600">
+          <th className="pb-1.5 font-normal">{label}</th>
+          <th className="w-14 pb-1.5 text-right font-normal">Clicks</th>
+          <th className="hidden w-16 pb-1.5 text-right font-normal sm:table-cell">Impr.</th>
+          <th className="w-14 pb-1.5 text-right font-normal">Pos.</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-white/[0.04]">
+        {rows.slice(0, 10).map((r) => {
+          const key = r.query ?? r.page
+          return (
+            <tr key={key}>
+              <td className="truncate py-1.5 pr-2 text-zinc-300" title={key}>{render(key)}</td>
+              <td className="py-1.5 text-right tabular-nums text-zinc-100">{compact.format(r.clicks)}</td>
+              <td className="hidden py-1.5 text-right tabular-nums text-zinc-400 sm:table-cell">{compact.format(r.impressions)}</td>
+              <td className="py-1.5 text-right tabular-nums text-zinc-400">{pos(r.position)}</td>
+            </tr>
+          )
+        })}
+      </tbody>
+    </table>
+  )
+}
+
+function Search({ data, go }) {
+  const [days, setDays] = useState(28)
+  const res = useApi(`/api/admin/searchconsole?days=${days}`)
+  const sites = (res.data?.sites || []).filter((s) => !s.error).sort((a, b) => b.clicks - a.clicks)
+  const failed = (res.data?.sites || []).filter((s) => s.error)
+  const clicks = sites.reduce((t, s) => t + s.clicks, 0)
+  const impressions = sites.reduce((t, s) => t + s.impressions, 0)
+  const position = impressions ? sites.reduce((t, s) => t + (s.position || 0) * s.impressions, 0) / impressions : null
+  const covered = new Set(sites.map((s) => s.host.replace(/^www\./, '')))
+  const missing = seoHosts(data.projects).filter((h) => !covered.has(h.replace(/^www\./, '')) && ![...covered].some((c) => h.endsWith(`.${c}`)))
+  const owner = (host) => data.projects.find((p) => (p.domains || []).some((d) => d.replace(/^www\./, '') === host.replace(/^www\./, '')))
+  const account = res.data?.account
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-xs text-zinc-500">Google Search Console{res.data ? ` · ${res.data.startDate} → ${res.data.endDate}` : ''}</div>
+        <div className="flex gap-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-0.5">
+          {[7, 28, 90].map((d) => (
+            <button key={d} onClick={() => setDays(d)} className={cx('rounded-md px-2.5 py-1 text-xs', d === days ? 'bg-white/[0.1] text-white' : 'text-zinc-400 hover:text-zinc-100')}>{d}d</button>
+          ))}
+        </div>
+      </div>
+
+      {res.notConfigured ? <ConnectHint go={go}>Search Console needs the Google service account (GCP_SA_KEY).</ConnectHint>
+        : res.error ? <Empty>{res.error}</Empty>
+          : !res.data ? <div className="text-sm text-zinc-500">Loading Search Console…</div> : (
+            <>
+              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <Stat label="Clicks" value={compact.format(clicks)} sub={`${sites.length} site${sites.length === 1 ? '' : 's'}`} />
+                <Stat label="Impressions" value={compact.format(impressions)} />
+                <Stat label="CTR" value={pct(clicks, impressions)} />
+                <Stat label="Avg position" value={pos(position)} sub="weighted by impressions" />
+              </div>
+
+              {sites.map((s) => (
+                <Section
+                  key={s.siteUrl}
+                  title={<a href={`https://${s.host}`} target="_blank" rel="noreferrer" className="normal-case tracking-normal hover:text-white">{s.host}{owner(s.host) ? ` · ${owner(s.host).name}` : ''}</a>}
+                  action={<Sparkline values={s.daily.map((d) => d.clicks)} width={100} height={22} />}
+                >
+                  <div className="mb-4 flex flex-wrap gap-x-6 gap-y-1 text-sm">
+                    <span><span className="tabular-nums text-zinc-100">{compact.format(s.clicks)}</span> <span className="text-zinc-500">clicks</span></span>
+                    <span><span className="tabular-nums text-zinc-100">{compact.format(s.impressions)}</span> <span className="text-zinc-500">impressions</span></span>
+                    <span><span className="tabular-nums text-zinc-100">{ctrPct(s.ctr)}</span> <span className="text-zinc-500">CTR</span></span>
+                    <span><span className="tabular-nums text-zinc-100">{pos(s.position)}</span> <span className="text-zinc-500">avg position</span></span>
+                  </div>
+                  <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                    <SearchTable rows={s.queries} label="Queries" />
+                    <SearchTable rows={s.pages} label="Pages" render={(u) => u.replace(/^https?:\/\/[^/]+/, '') || '/'} />
+                  </div>
+                </Section>
+              ))}
+
+              {failed.map((s) => <Empty key={s.siteUrl}>{s.host}: {s.error}</Empty>)}
+
+              {(missing.length > 0 || sites.length === 0) && (
+                <ConnectHint>
+                  {sites.length === 0 ? 'No Search Console sites shared with the dashboard yet. ' : `Not in Search Console: ${missing.join(', ')}. `}
+                  In Search Console open each property → Settings → Users and permissions → Add user, and add
+                  {account ? <code className="mx-1 break-all text-zinc-300">{account}</code> : ' the GCP_SA_KEY service account '}
+                  with Restricted access.
+                </ConnectHint>
+              )}
+            </>
+          )}
+    </div>
+  )
+}
+
+// ── PageSpeed ──────────────────────────────────────────
+
+const scoreTone = (s) => (s == null ? 'text-zinc-500' : s >= 90 ? 'text-emerald-300' : s >= 50 ? 'text-amber-300' : 'text-red-300')
+const secs = (ms) => (ms == null ? '—' : `${(ms / 1000).toFixed(1)}s`)
+const FIELD_TONE = { FAST: 'green', AVERAGE: 'amber', SLOW: 'red' }
+
+function Vitals({ data }) {
+  const hosts = useMemo(() => seoHosts(data.projects), [data.projects])
+  const saved = data.docs?.vitals?.sites || []
+  const [state, setState] = useState({ running: false, error: null })
+  const run = async () => {
+    setState({ running: true, error: null })
+    try {
+      const r = await api('/api/admin/vitals', { method: 'POST', body: JSON.stringify({ hosts }) })
+      setState({ running: false, error: r.saveError || null })
+    } catch (e) {
+      setState({ running: false, error: e.message })
+    }
+  }
+
+  const rows = hosts.map((host) => {
+    const runs = saved.find((s) => s.host === host)?.runs || []
+    const ok = runs.filter((r) => r.performance != null)
+    return { host, runs, last: runs[runs.length - 1], good: ok[ok.length - 1], prev: ok[ok.length - 2], trend: ok.map((r) => r.performance) }
+  }).sort((a, b) => (a.good?.performance ?? 101) - (b.good?.performance ?? 101))
+  const lastAt = Math.max(0, ...saved.flatMap((s) => (s.runs || []).map((r) => r.at)))
+
+  return (
+    <Section
+      title={`PageSpeed · mobile · ${hosts.length} site${hosts.length === 1 ? '' : 's'}`}
+      action={<Button variant="glass" onClick={run} disabled={state.running || !hosts.length}><RefreshCw size={13} className={state.running ? 'animate-spin' : ''} /> {state.running ? 'Running…' : 'Run now'}</Button>}
+    >
+      {state.error && <div className="mb-3 text-xs text-red-300">{state.error}</div>}
+      {!hosts.length ? <Empty>No public sites on live projects.</Empty>
+        : !saved.length && !state.running ? <Empty>No runs yet. Run now, or wait for the daily check at 9am.</Empty> : (
+          <ul className="divide-y divide-white/[0.05]">
+            {rows.map(({ host, last, good, prev, trend }) => {
+              const delta = good && prev ? good.performance - prev.performance : null
+              return (
+                <li key={host} className="py-3">
+                  <div className="flex items-center gap-3">
+                    <span className={cx('w-10 shrink-0 text-right text-lg font-semibold tabular-nums', scoreTone(good?.performance))}>{good?.performance ?? '—'}</span>
+                    <div className="min-w-0 flex-1">
+                      <a href={`https://pagespeed.web.dev/analysis?url=${encodeURIComponent(`https://${host}/`)}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm text-zinc-100 hover:text-white">{host} <ExternalLink size={11} className="text-zinc-600" /></a>
+                      <div className="text-xs text-zinc-500">
+                        {delta ? <span className={delta < 0 ? 'text-red-300' : 'text-emerald-300'}>{delta > 0 ? '+' : ''}{delta} · </span> : null}
+                        {good ? `checked ${timeAgo(good.at)}` : 'not checked yet'}
+                        {last?.error && <span className="text-red-300"> · last run failed: {last.error}</span>}
+                      </div>
+                    </div>
+                    {trend.length > 1 && <Sparkline values={trend} width={80} height={22} className="hidden shrink-0 sm:block" />}
+                  </div>
+                  {good && (
+                    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 pl-[3.25rem] text-xs text-zinc-500">
+                      {[['SEO', good.seo], ['Accessibility', good.accessibility], ['Best practices', good.bestPractices]].map(([k, v]) => (
+                        <span key={k}>{k} <span className={cx('tabular-nums', scoreTone(v))}>{v ?? '—'}</span></span>
+                      ))}
+                      <span>LCP <span className="tabular-nums text-zinc-300">{secs(good.lcp)}</span></span>
+                      <span>CLS <span className="tabular-nums text-zinc-300">{good.cls == null ? '—' : good.cls.toFixed(2)}</span></span>
+                      <span>TBT <span className="tabular-nums text-zinc-300">{good.tbt == null ? '—' : `${Math.round(good.tbt)}ms`}</span></span>
+                      {good.field && <Badge tone={FIELD_TONE[good.field.overall] || 'zinc'}>Real users · {good.field.overall.toLowerCase()}</Badge>}
+                    </div>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      <div className="mt-3 text-xs text-zinc-600">
+        Lab scores from Lighthouse on a simulated phone{lastAt ? `, last run ${timeAgo(lastAt)}` : ''}. Runs every morning and alerts you when a site loses {10}+ points.
+      </div>
+    </Section>
+  )
+}
+
 // ── campaigns ──────────────────────────────────────────
 
 const blankCampaign = () => ({ project: '', name: '', channel: CHANNELS[0], start: today(), end: '', budget: '', spent: '', utm: '' })
+
+// Source/medium a link gets when it's built for a campaign on this channel.
+const CHANNEL_UTM = {
+  'Google Ads': ['google', 'cpc'], 'Meta Ads': ['facebook', 'paid-social'], Instagram: ['instagram', 'social'],
+  LinkedIn: ['linkedin', 'social'], YouTube: ['youtube', 'video'], Email: ['newsletter', 'email'],
+  WhatsApp: ['whatsapp', 'messaging'], 'SEO / content': ['blog', 'content'], Referral: ['partner', 'referral'],
+  Offline: ['qr', 'offline'], Other: ['other', 'other'],
+}
+const slug = (v) => String(v || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+
+/** utm-tagged URL for a site; empty values are left out. */
+export function utmUrl({ host, path, source, medium, campaign, content }) {
+  if (!host) return ''
+  const url = new URL(`https://${host}${path && !path.startsWith('/') ? '/' : ''}${path || '/'}`)
+  for (const [k, v] of [['source', source], ['medium', medium], ['campaign', campaign], ['content', content]]) {
+    if (v && v.trim()) url.searchParams.set(`utm_${k}`, slug(v))
+  }
+  return url.toString()
+}
+
+function LinkBuilder({ data, campaigns, onCampaignUtm }) {
+  const hosts = useMemo(() => [...new Set(data.projects.filter((p) => p.status !== 'decommissioned').flatMap((p) => checkable(p.domains)))].sort(), [data.projects])
+  const [row, setRow] = useState({ host: '', path: '/', source: '', medium: '', campaign: '', content: '', pick: '' })
+  const [copied, setCopied] = useState(false)
+  const timer = useRef(null)
+  useEffect(() => () => clearTimeout(timer.current), [])
+  const host = row.host || hosts[0] || ''
+  const url = utmUrl({ ...row, host })
+
+  const choose = (id) => {
+    const c = campaigns.find((x) => x.id === id)
+    if (!c) return setRow({ ...row, pick: '' })
+    const [source, medium] = CHANNEL_UTM[c.channel] || ['', '']
+    const site = checkable(c.p.domains).find((h) => !NOT_PUBLIC.test(h))
+    setRow({ ...row, pick: id, campaign: c.utm || slug(c.name), source, medium, host: site || row.host })
+  }
+  const copy = async () => {
+    const c = campaigns.find((x) => x.id === row.pick)
+    // Leads are credited by utm_campaign, so a campaign without one takes this link's.
+    if (c && !c.utm && row.campaign) onCampaignUtm(c, slug(row.campaign))
+    try { await navigator.clipboard.writeText(url); setCopied(true); timer.current = setTimeout(() => setCopied(false), 2000) } catch { /* no clipboard */ }
+  }
+
+  return (
+    <Section title="Tracked link">
+      <div className="space-y-2">
+        <div className={formRow}>
+          <Select value={row.pick} onChange={(e) => choose(e.target.value)} className="col-span-2 min-w-0 sm:w-56" aria-label="Campaign">
+            <option value="">For a campaign…</option>
+            {campaigns.map((c) => <option key={c.id} value={c.id}>{c.name} · {c.p.name}</option>)}
+          </Select>
+          <Select value={host} onChange={(e) => setRow({ ...row, host: e.target.value })} className="min-w-0" aria-label="Site">
+            {hosts.map((h) => <option key={h}>{h}</option>)}
+          </Select>
+          <Input value={row.path} onChange={(e) => setRow({ ...row, path: e.target.value })} placeholder="/page" className="min-w-0 sm:w-32" aria-label="Path" />
+        </div>
+        <div className={formRow}>
+          <Input value={row.source} onChange={(e) => setRow({ ...row, source: e.target.value })} placeholder="Source (instagram)" className="min-w-0 sm:w-36" aria-label="utm_source" />
+          <Input value={row.medium} onChange={(e) => setRow({ ...row, medium: e.target.value })} placeholder="Medium (social)" className="min-w-0 sm:w-36" aria-label="utm_medium" />
+          <Input value={row.campaign} onChange={(e) => setRow({ ...row, campaign: e.target.value })} placeholder="Campaign (diwali-offer)" className="min-w-0 sm:w-44" aria-label="utm_campaign" />
+          <Input value={row.content} onChange={(e) => setRow({ ...row, content: e.target.value })} placeholder="Content (bio-link)" className="min-w-0 sm:w-36" aria-label="utm_content" />
+        </div>
+        <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-black/40 px-3 py-2">
+          <code className="min-w-0 flex-1 break-all text-[11px] text-zinc-300">{url || 'Pick a site'}</code>
+          <Button variant="glass" onClick={copy} disabled={!url}><Copy size={13} /> {copied ? 'Copied' : 'Copy'}</Button>
+        </div>
+        <div className="text-xs text-zinc-600">Leads that arrive through this link carry its utm_campaign and are credited to the matching campaign.</div>
+      </div>
+    </Section>
+  )
+}
 
 function Campaigns({ data, go, leads }) {
   const [row, setRow] = useState(blankCampaign)
@@ -418,6 +681,8 @@ function Campaigns({ data, go, leads }) {
         </div>
       </Section>
 
+      <LinkBuilder data={data} campaigns={all} onCampaignUtm={(c, utm) => update(c, { utm })} />
+
       <Section title="Campaigns">
         {all.length === 0 ? <Empty>No campaigns yet. Log ads, posts and offers to see what they cost and what they bring in.</Empty> : (
           <ul className="divide-y divide-white/[0.05]">
@@ -475,9 +740,52 @@ const SNIPPET = `fetch('${ENDPOINT}', {
   }),
 })`
 
-const waLink = (phone) => {
+const waLink = (phone, text) => {
   const d = String(phone).replace(/\D/g, '')
-  return `https://wa.me/${d.length === 10 ? `91${d}` : d}`
+  return `https://wa.me/${d.length === 10 ? `91${d}` : d}${text ? `?text=${encodeURIComponent(text)}` : ''}`
+}
+
+const openLead = (l) => l.status === 'new' || l.status === 'contacted'
+/** An open lead whose follow-up date is today or earlier. */
+export const followUpDue = (l, day = today()) => openLead(l) && !!l.followUp && l.followUp <= day
+const inDays = (n) => new Date(Date.parse(today()) + n * 86400e3).toISOString().slice(0, 10)
+
+export function replyText(l, p) {
+  const first = String(l.name || '').trim().split(/\s+/)[0]
+  return `Hi${first ? ` ${first}` : ''}, thanks for getting in touch${p ? ` about ${p.name}` : ''}. When would be a good time for a quick call?`
+}
+
+function FollowUp({ l, p, set }) {
+  const [text, setText] = useState(() => replyText(l, p))
+  // Replying marks a new lead contacted and, unless a later date is set, asks again in 3 days.
+  const sent = () => set(l, {
+    status: l.status === 'new' ? 'contacted' : l.status,
+    lastContactAt: Date.now(),
+    followUp: l.followUp && l.followUp > today() ? l.followUp : inDays(3),
+  })
+  const subject = `Re: your enquiry${p ? ` · ${p.name}` : ''}`
+  return (
+    <div className="space-y-2 border-t border-white/[0.06] pt-3">
+      <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+        <span>Follow up on</span>
+        <Input type="date" value={l.followUp || ''} onChange={(e) => set(l, { followUp: e.target.value || null })} className="w-36 py-1 text-xs sm:text-xs" aria-label="Follow up on" />
+        {[['Tomorrow', 1], ['3 days', 3], ['1 week', 7]].map(([label, n]) => (
+          <button key={label} onClick={() => set(l, { followUp: inDays(n) })} className="rounded-md px-2 py-1 hover:bg-white/[0.06] hover:text-zinc-200">{label}</button>
+        ))}
+        {l.followUp && <button onClick={() => set(l, { followUp: null })} className="rounded-md px-2 py-1 hover:bg-white/[0.06] hover:text-zinc-200">Clear</button>}
+        {l.lastContactAt && <span className="ml-auto">Last reply {timeAgo(l.lastContactAt)}</span>}
+      </div>
+      {(l.phone || l.email) && (
+        <>
+          <Textarea value={text} onChange={(e) => setText(e.target.value)} rows={2} aria-label="Reply" />
+          <div className="flex flex-wrap gap-2">
+            {l.phone && <a href={waLink(l.phone, text)} target="_blank" rel="noreferrer" onClick={sent} className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-1 text-xs text-zinc-200 hover:bg-white/[0.08]"><MessageCircle size={12} /> Reply on WhatsApp</a>}
+            {l.email && <a href={`mailto:${l.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`} onClick={sent} className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-1 text-xs text-zinc-200 hover:bg-white/[0.08]"><Mail size={12} /> Reply by email</a>}
+          </div>
+        </>
+      )}
+    </div>
+  )
 }
 
 function AddLead({ projects, onDone }) {
@@ -522,7 +830,9 @@ function Leads({ data, go, leads }) {
   const projects = data.projects.filter((p) => p.status !== 'decommissioned')
   const campaigns = data.projects.flatMap((p) => (p.campaigns || []).map((c) => ({ ...c, p })))
 
-  const shown = leads.filter((l) => (filter === 'open' ? l.status === 'new' || l.status === 'contacted' : filter === 'all' || l.status === filter))
+  const day = today()
+  const due = leads.filter((l) => followUpDue(l, day))
+  const shown = filter === 'due' ? due : leads.filter((l) => (filter === 'open' ? openLead(l) : filter === 'all' || l.status === filter))
   const count = (s) => leads.filter((l) => l.status === s).length
   const closed = count('won') + count('lost')
   const set = (l, patch) => saveDoc(l.id, patch)
@@ -534,7 +844,7 @@ function Leads({ data, go, leads }) {
     <div className="space-y-5">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat label="New" value={count('new')} sub="waiting on you" tone={count('new') ? 'text-sky-300' : 'text-zinc-50'} />
-        <Stat label="Contacted" value={count('contacted')} />
+        <Stat label="Contacted" value={count('contacted')} sub={due.length ? `${due.length} follow-up${due.length === 1 ? '' : 's'} due` : 'no follow-ups due'} tone={due.length ? 'text-amber-300' : 'text-zinc-50'} />
         <Stat label="Won" value={count('won')} sub={`${count('lost')} lost`} />
         <Stat label="Win rate" value={pct(count('won'), closed)} sub="of closed leads" />
       </div>
@@ -545,9 +855,9 @@ function Leads({ data, go, leads }) {
       >
         {adding && <div className="mb-4 rounded-xl border border-white/[0.08] bg-white/[0.02] p-3"><AddLead projects={projects} onDone={() => setAdding(false)} /></div>}
         <div className="mb-3 flex gap-1 overflow-x-auto [scrollbar-width:none]">
-          {['open', ...LEAD_STATUSES, 'all'].map((s) => (
+          {['open', 'due', ...LEAD_STATUSES, 'all'].map((s) => (
             <button key={s} onClick={() => setFilter(s)} className={cx('shrink-0 rounded-md px-2.5 py-1 text-xs capitalize', filter === s ? 'bg-white/[0.1] text-white' : 'text-zinc-500 hover:text-zinc-200')}>
-              {s}{s !== 'open' && s !== 'all' ? ` · ${count(s)}` : ''}
+              {s === 'due' ? 'Follow up' : s}{s === 'due' ? ` · ${due.length}` : s !== 'open' && s !== 'all' ? ` · ${count(s)}` : ''}
             </button>
           ))}
         </div>
@@ -564,6 +874,9 @@ function Leads({ data, go, leads }) {
                       <div className="truncate text-sm text-zinc-100">{l.name || l.email || l.phone}</div>
                       <div className="truncate text-xs text-zinc-500">{p?.name || l.site || '—'} · {source} · {timeAgo(l.createdAt)}</div>
                     </button>
+                    {openLead(l) && l.followUp && (followUpDue(l, day)
+                      ? <Badge tone="amber">{l.followUp < day ? `Follow up · ${l.followUp}` : 'Follow up today'}</Badge>
+                      : <span className="hidden shrink-0 text-xs text-zinc-600 sm:block">follow up {l.followUp}</span>)}
                     {l.email && <a href={`mailto:${l.email}`} className="text-zinc-500 hover:text-white" aria-label="Email"><Mail size={15} /></a>}
                     {l.phone && <a href={waLink(l.phone)} target="_blank" rel="noreferrer" className="text-zinc-500 hover:text-white" aria-label="WhatsApp"><MessageCircle size={15} /></a>}
                     <Select value={l.status || 'new'} onChange={(e) => set(l, { status: e.target.value })} className="w-28 py-1 text-xs sm:text-xs" aria-label="Status">
@@ -593,6 +906,7 @@ function Leads({ data, go, leads }) {
                         {p && <Button className="px-2 py-1 text-xs" onClick={() => go(`/p/${p.slug}`)}>Open project</Button>}
                         <Button variant="danger" className="ml-auto px-2 py-1 text-xs" onClick={() => removeDoc(l.id)}><Trash2 size={12} /> Delete</Button>
                       </div>
+                      {openLead(l) && <FollowUp l={l} p={p} set={set} />}
                     </div>
                   )}
                 </li>
@@ -617,7 +931,7 @@ function Leads({ data, go, leads }) {
 export default function MarketingView({ data, go, tab }) {
   const current = MARKETING_TABS.some((t) => t.key === tab) ? tab : 'traffic'
   const leads = useMemo(() => leadsFrom(data.docs), [data.docs])
-  const fresh = leads.filter((l) => l.status === 'new').length
+  const fresh = leads.filter((l) => l.status === 'new' || followUpDue(l)).length
   const active = useRef(null)
   useEffect(() => { active.current?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' }) }, [current])
   return (
@@ -637,7 +951,10 @@ export default function MarketingView({ data, go, tab }) {
       {current === 'traffic' && <Traffic data={data} go={go} leads={leads} />}
       {current === 'instagram' && <Instagram data={data} go={go} />}
       {current === 'posts' && <PostsView />}
+      {current === 'calendar' && <CalendarView docs={data.docs} />}
       {current === 'seo' && <Seo data={data} />}
+      {current === 'search' && <Search data={data} go={go} />}
+      {current === 'speed' && <Vitals data={data} />}
       {current === 'campaigns' && <Campaigns data={data} go={go} leads={leads} />}
       {current === 'leads' && <Leads data={data} go={go} leads={leads} />}
     </div>

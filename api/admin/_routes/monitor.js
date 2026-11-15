@@ -1,13 +1,18 @@
 // Everything the scheduled monitor (scripts/monitor.mjs in GitHub Actions)
 // needs in one call: hosts to ping (with dashboard edits applied), laptop
 // services, Supabase status, and with ?daily=1 the slower checks (store
-// listings, cloud bill forecasts, overdue invoices, contract renewals).
+// listings, cloud bill forecasts, overdue invoices, contract renewals, and
+// the day's Instagram follower counts for the trend chart).
 // Auth: MONITOR_SECRET bearer, or the owner.
 const { requireOwnerOrMonitor } = require('../_auth');
 const { mergedProjects } = require('../_firestore');
 const { loadLaptop } = require('./laptop');
 const { loadProject } = require('./supabase');
 const { loadApp } = require('./apps');
+const { snapshotFollowers } = require('./instagram');
+
+// Same rule as the dashboard's SEO tab: app, admin and API hosts aren't public sites.
+const NOT_PUBLIC = /^(admin|app|api|api\d+|owner|restaurant|creator|automation|cms|dashboard|staging|dev)\./;
 
 const today = () => new Date(Date.now() + 5.5 * 3600e3).toISOString().slice(0, 10);
 
@@ -44,7 +49,11 @@ module.exports = async (req, res) => {
   if (req.query.daily === '1') {
     const t = today();
     const appSpecs = active.flatMap((p) => (p.apps || []).map((a) => [a, p.name]));
-    out.apps = await Promise.all(appSpecs.map(async ([a, name]) => ({ project: name, ...(await loadApp(a)) })));
+    const igKeys = [...new Set(active.flatMap((p) => p.instagram || []))];
+    [out.apps, out.instagram] = await Promise.all([
+      Promise.all(appSpecs.map(async ([a, name]) => ({ project: name, ...(await loadApp(a)) }))),
+      snapshotFollowers(igKeys),
+    ]);
     out.overdue = active.flatMap((p) => (p.invoices || [])
       .filter((i) => i.status === 'sent' && i.due && i.due < t)
       .map((i) => ({ project: p.name, client: i.client, number: i.number, amount: i.amount, due: i.due })));
@@ -52,6 +61,12 @@ module.exports = async (req, res) => {
       .filter((c) => c.status !== 'past' && c.contractEnd)
       .map((c) => ({ project: p.name, client: c.name, ends: c.contractEnd, days: Math.floor((Date.parse(c.contractEnd) - Date.parse(t)) / 86400e3) }))
       .filter((c) => c.days <= 14));
+    out.followUps = Object.entries(docs || {})
+      .filter(([id, d]) => id.startsWith('lead-') && d.kind === 'lead' && d.followUp && d.followUp <= t && (d.status === 'new' || d.status === 'contacted'))
+      .map(([, d]) => ({ name: d.name || d.email || d.phone || 'lead', site: d.site || d.project || '', due: d.followUp }));
+    out.vitalsHosts = [...new Set(active
+      .filter((p) => p.status === 'live')
+      .flatMap((p) => (p.domains || []).filter((h) => !h.startsWith('www.') && !NOT_PUBLIC.test(h))))];
   }
   res.status(200).json(out);
 };
