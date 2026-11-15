@@ -20,11 +20,13 @@ const routes = {
   payments: require('./_routes/payments'),
   portfolio: require('./_routes/portfolio'),
   projects: require('./_routes/projects'),
+  searchconsole: require('./_routes/searchconsole'),
   seo: require('./_routes/seo'),
   stacky: require('./_routes/stacky'),
   status: require('./_routes/status'),
   supabase: require('./_routes/supabase'),
   traffic: require('./_routes/traffic'),
+  vitals: require('./_routes/vitals'),
 };
 
 module.exports = async (req, res) => {

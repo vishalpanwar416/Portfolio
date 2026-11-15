@@ -6,7 +6,8 @@
 //             project paused or unhealthy, a domain or certificate < 7 days
 //   warning   (normal push): other sites down, laptop services failing
 //   digest    (once a day, 9am IST): renewals, overdue invoices, contracts,
-//             low store ratings
+//             low store ratings, lead follow-ups due, and a PageSpeed run
+//             that warns when a site's performance score drops
 // Only changes are sent (down / back up); a still-open critical problem is
 // repeated every 6 hours. Channels: ntfy (NTFY_TOPIC) and Telegram
 // (TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID). State is cached between runs.
@@ -160,8 +161,24 @@ if (digestDue) {
   for (const i of remote?.overdue || []) lines.push(`💸 Overdue: ${i.project} · ${i.client || i.number} · ₹${i.amount} (due ${i.due})`)
   for (const c of remote?.contracts || []) lines.push(`📄 ${c.client} (${c.project}) contract ${c.days < 0 ? 'ended' : `ends in ${c.days}d`}`)
   for (const a of remote?.apps || []) if (a.published && a.rating && a.rating < 4) lines.push(`⭐ ${a.name} (${a.platform}) rated ${a.rating}`)
+  for (const f of remote?.followUps || []) lines.push(`📞 Follow up with ${f.name}${f.site ? ` (${f.site})` : ''}${f.due < todayKey ? ` · due ${f.due}` : ''}`)
   if (laptop && !laptop.online && laptop.at) lines.push(`💻 Laptop last checked in ${dur(now - Date.parse(laptop.at))} ago`)
   if (lines.length) messages.push({ severity: 'info', title: `Morning check · ${lines.length}`, text: lines.join('\n') })
+
+  if (remote?.vitalsHosts?.length) {
+    try {
+      const r = await fetch(`${API}/vitals`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${process.env.MONITOR_SECRET}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hosts: remote.vitalsHosts }),
+        signal: AbortSignal.timeout(180e3),
+      })
+      const { drops = [] } = r.ok ? await r.json() : {}
+      if (drops.length) messages.push({ severity: 'warning', title: 'PageSpeed dropped', text: drops.map((d) => `⚡ ${d.host}: performance ${d.from} → ${d.to}`).join('\n') })
+    } catch (e) {
+      console.warn('PageSpeed run failed:', e.message)
+    }
+  }
 }
 
 writeFileSync(STATE_FILE, JSON.stringify(state, null, 2))

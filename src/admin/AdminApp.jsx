@@ -14,7 +14,7 @@ import ProjectsView from './ProjectsView'
 import MoneyView from './MoneyView'
 import AppsView from './AppsView'
 import InfraView, { INFRA_TABS } from './InfraView'
-import MarketingView, { MARKETING_TABS } from './MarketingView'
+import MarketingView, { MARKETING_TABS, followUpDue } from './MarketingView'
 import LinkedInView, { linkedinReplies } from './LinkedInView'
 import JobsView from './JobsView'
 import PortfolioEditor, { PORTFOLIO_TABS } from './PortfolioEditor'
@@ -227,7 +227,7 @@ function Shell({ user }) {
   const critical = alerts.filter((a) => a.severity === 'critical').length
   const overdue = data.projects.reduce((t, p) => t + projectStats(p).owed.overdueCount, 0)
   const infraIssues = alerts.filter((a) => ['site', 'ssl', 'domain', 'database', 'laptop'].includes(a.kind)).length
-  const newLeads = leadsFrom(data.docs).filter((l) => l.status === 'new').length
+  const newLeads = leadsFrom(data.docs).filter((l) => l.status === 'new' || followUpDue(l)).length
   const badges = { '/alerts': alerts.filter((a) => a.severity !== 'info').length, critical, '/money': overdue, '/marketing/traffic': newLeads, '/infra/uptime': infraIssues, '/linkedin': linkedinReplies(data.docs.linkedin).length }
 
   const slug = route.startsWith('/p/') ? route.slice(3) : null
