@@ -14,7 +14,7 @@ import { mergeContent } from '../contexts/PortfolioContext'
 import LinkedInView from './LinkedInView'
 import JobsView from './JobsView'
 import { campaignMonths, costIn, leadProject, leadsFrom } from './data'
-import { bestTimes, followerSeries, formatStats, slotOf } from './InstagramInsights'
+import { bestTimes, followerSeries, formatStats, relativePosts, slotOf } from './InstagramInsights'
 import { matchPlan, plansFrom } from './CalendarView'
 
 jest.mock('./firebase', () => ({ auth: { currentUser: { getIdToken: async () => 't' } }, db: {}, SITES_COLLECTION: 'vp_sites', JOBS_COLLECTION: 'vp_jobs' }))
@@ -229,6 +229,30 @@ test('best time groups posts by IST day and 3-hour block, and needs two posts to
   expect(t.grid['2-9']).toEqual({ avg: 500, n: 1 })
   expect(t.bestBlock.key).toBe('9') // Wed + Thu mornings average 253
   expect(formatStats(posts).map((f) => f.label)).toEqual(['Post', 'Reel'])
+})
+
+test('combined heatmap weighs each post against its own account', () => {
+  const at = '2026-11-16T13:00:00Z'
+  const rel = relativePosts([
+    { key: 'big', label: 'Big', posts: [{ at, likes: 1000 }, { at, likes: 3000 }] },
+    { key: 'small', label: 'Small', posts: [{ at, likes: 10 }, { at, likes: 30 }] },
+  ])
+  expect(rel.map((p) => p.rel)).toEqual([0.5, 1.5, 0.5, 1.5])
+  expect(relativePosts([{ key: 'none', label: 'None', posts: [{ at, likes: 0 }] }])).toEqual([])
+})
+
+test('instagram tab opens on the combined heatmap when two accounts load', async () => {
+  const posts = (n, base) => Array.from({ length: n }, (_, i) => ({ id: `${base}${i}`, type: i % 2 ? 'REEL' : 'IMAGE', permalink: 'https://instagram.com/p/x', at: `2026-11-${10 + i}T13:00:00Z`, likes: base + i, comments: 1 }))
+  global.fetch = jest.fn(async () => ({ ok: true, json: async () => ({ accounts: [
+    { account: 'tabletap', username: 'table_tap.in', followers: 1200, posts: posts(6, 100) },
+    { account: 'sanero', username: 'saneromedia', followers: 300, posts: posts(5, 10) },
+  ] }) }))
+  render(<MarketingView data={data} go={go} tab="instagram" />)
+  expect(await screen.findByText(/all accounts · 11 posts/)).toBeTruthy()
+  expect(screen.getByText('vs account average')).toBeTruthy()
+  fireEvent.click(screen.getByText('Table Tap'))
+  expect(await screen.findByText('@table_tap.in')).toBeTruthy()
+  global.fetch = jest.fn(async () => ({ ok: true, json: async () => ({}) }))
 })
 
 test('follower series keeps the window and reports the change', () => {

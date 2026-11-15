@@ -1,7 +1,8 @@
-// Instagram → per-account analysis drawn from data the tab already loads:
-// best day and time to post and which formats do best (from the account's
-// last 100 posts), and the follower trend (from the daily snapshots that
-// api/admin/_routes/instagram.js keeps in vp_sites igstats-<key>).
+// Instagram → analysis drawn from data the tab already loads: best day and
+// time to post and which formats do best (from each account's last 100
+// posts), per account and combined across accounts, and the follower trend
+// (from the daily snapshots api/admin/_routes/instagram.js keeps in vp_sites
+// igstats-<key>).
 import { useState } from 'react'
 import { Empty, Section, cx } from './ui'
 
@@ -28,17 +29,18 @@ export function slotOf(at) {
 }
 
 /**
- * Average engagement by weekday × time block, plus the best day, block and
- * slot. A best pick needs at least two posts so one viral post can't decide it.
+ * Average `value` (engagement by default) by weekday × time block, plus the
+ * best day, block and slot. A best pick needs at least two posts so one viral
+ * post can't decide it.
  */
-export function bestTimes(posts) {
+export function bestTimes(posts, value = engagement) {
   const dated = posts.filter((p) => p.at)
   const cells = {}
   const byDay = {}
   const byBlock = {}
   for (const p of dated) {
     const { day, block } = slotOf(p.at)
-    const e = engagement(p)
+    const e = value(p)
     ;(cells[`${day}-${block}`] ||= []).push(e)
     ;(byDay[day] ||= []).push(e)
     ;(byBlock[block] ||= []).push(e)
@@ -65,6 +67,30 @@ export function formatStats(posts) {
     .sort((a, b) => b.engagement - a.engagement)
 }
 
+/**
+ * Every account's posts on one scale: each post's engagement divided by its
+ * own account's average, so 1.5 means "50% above that account's norm". Raw
+ * likes would let the bigger account decide every slot.
+ */
+export function relativePosts(accounts) {
+  return accounts.flatMap(({ key, label, posts }) => {
+    const avg = mean(posts.map(engagement))
+    return avg ? posts.map((p) => ({ ...p, account: key, accountLabel: label, rel: engagement(p) / avg })) : []
+  })
+}
+
+/** Per-format average relative engagement across accounts, best first. */
+export function relativeFormats(posts) {
+  const by = {}
+  for (const p of posts) (by[p.type] ||= []).push(p)
+  return Object.entries(by)
+    .map(([type, list]) => ({
+      type, label: TYPES[type] || type, n: list.length, rel: mean(list.map((p) => p.rel)),
+      perAccount: Object.entries(list.reduce((o, p) => ({ ...o, [p.accountLabel]: (o[p.accountLabel] || 0) + 1 }), {})),
+    }))
+    .sort((a, b) => b.rel - a.rel)
+}
+
 /** Follower snapshots as [{ day, n }] oldest first, and the change over `days`. */
 export function followerSeries(daily, days) {
   const all = Object.entries(daily || {})
@@ -77,48 +103,64 @@ export function followerSeries(daily, days) {
   return { all, points, change }
 }
 
+const times = (n) => `${n.toFixed(1)}×`
+
+function Summary({ t, format }) {
+  const slot = t.bestSlot && t.bestSlot.key.split('-').map(Number)
+  return (
+    <div className="mb-4 flex flex-wrap gap-x-6 gap-y-1 text-sm">
+      {slot && <span><span className="text-zinc-500">Best slot</span> <span className="text-zinc-100">{DAYS[slot[0]]} {blockLabel(slot[1])}</span> <span className="text-xs text-zinc-500">· {format(t.bestSlot.avg)} avg · {t.bestSlot.n} posts</span></span>}
+      {t.bestDay && <span><span className="text-zinc-500">Best day</span> <span className="text-zinc-100">{DAYS[t.bestDay.key]}</span> <span className="text-xs text-zinc-500">· {format(t.bestDay.avg)} avg</span></span>}
+      {t.bestBlock && <span><span className="text-zinc-500">Best time</span> <span className="text-zinc-100">{blockLabel(Number(t.bestBlock.key))}</span> <span className="text-xs text-zinc-500">· {format(t.bestBlock.avg)} avg</span></span>}
+    </div>
+  )
+}
+
+/** Weekday × 3-hour grid shaded by t.grid averages; `detail` adds to each cell's tooltip. */
+function Heatmap({ t, format, unit, detail }) {
+  const max = Math.max(1e-9, ...Object.values(t.grid).map((c) => c.avg))
+  const slot = t.bestSlot && t.bestSlot.key.split('-').map(Number)
+  return (
+    <div className="overflow-x-auto [scrollbar-width:none]">
+      <table className="w-full min-w-[30rem] border-separate border-spacing-1 text-[10px]">
+        <thead>
+          <tr><th />{BLOCKS.map((b) => <th key={b} className="font-normal text-zinc-500">{blockLabel(b)}</th>)}</tr>
+        </thead>
+        <tbody>
+          {DAYS.map((d, di) => (
+            <tr key={d}>
+              <th className="w-8 pr-1 text-right font-normal text-zinc-500">{d}</th>
+              {BLOCKS.map((b) => {
+                const k = `${di}-${b}`
+                const c = t.grid[k]
+                const best = slot && slot[0] === di && slot[1] === b
+                return (
+                  <td
+                    key={b}
+                    title={c ? `${d} ${blockLabel(b)} · ${format(c.avg)} ${unit} · ${c.n} post${c.n === 1 ? '' : 's'}${detail ? detail(k) : ''}` : `${d} ${blockLabel(b)} · no posts`}
+                    className={cx('h-7 rounded-md text-center tabular-nums', best && 'ring-1 ring-emerald-300/70', c ? 'text-zinc-100' : 'text-zinc-700')}
+                    style={{ background: c ? `rgba(52, 211, 153, ${0.08 + 0.6 * (c.avg / max)})` : 'rgba(255,255,255,0.02)' }}
+                  >
+                    {c ? c.n : '·'}
+                  </td>
+                )
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 export function BestTime({ posts }) {
   const t = bestTimes(posts)
   const formats = formatStats(posts)
   if (t.posts < 4) return null
-  const max = Math.max(1, ...Object.values(t.grid).map((c) => c.avg))
-  const slot = t.bestSlot && t.bestSlot.key.split('-').map(Number)
   return (
     <Section title={`Best time to post · last ${t.posts} posts`}>
-      <div className="mb-4 flex flex-wrap gap-x-6 gap-y-1 text-sm">
-        {slot && <span><span className="text-zinc-500">Best slot</span> <span className="text-zinc-100">{DAYS[slot[0]]} {blockLabel(slot[1])}</span> <span className="text-xs text-zinc-500">· {fmt(t.bestSlot.avg)} avg · {t.bestSlot.n} posts</span></span>}
-        {t.bestDay && <span><span className="text-zinc-500">Best day</span> <span className="text-zinc-100">{DAYS[t.bestDay.key]}</span> <span className="text-xs text-zinc-500">· {fmt(t.bestDay.avg)} avg</span></span>}
-        {t.bestBlock && <span><span className="text-zinc-500">Best time</span> <span className="text-zinc-100">{blockLabel(Number(t.bestBlock.key))}</span> <span className="text-xs text-zinc-500">· {fmt(t.bestBlock.avg)} avg</span></span>}
-      </div>
-
-      <div className="overflow-x-auto [scrollbar-width:none]">
-        <table className="w-full min-w-[30rem] border-separate border-spacing-1 text-[10px]">
-          <thead>
-            <tr><th />{BLOCKS.map((b) => <th key={b} className="font-normal text-zinc-500">{blockLabel(b)}</th>)}</tr>
-          </thead>
-          <tbody>
-            {DAYS.map((d, di) => (
-              <tr key={d}>
-                <th className="w-8 pr-1 text-right font-normal text-zinc-500">{d}</th>
-                {BLOCKS.map((b) => {
-                  const c = t.grid[`${di}-${b}`]
-                  const best = slot && slot[0] === di && slot[1] === b
-                  return (
-                    <td
-                      key={b}
-                      title={c ? `${d} ${blockLabel(b)} · ${fmt(c.avg)} avg engagement · ${c.n} post${c.n === 1 ? '' : 's'}` : `${d} ${blockLabel(b)} · no posts`}
-                      className={cx('h-7 rounded-md text-center tabular-nums', best && 'ring-1 ring-emerald-300/70', c ? 'text-zinc-100' : 'text-zinc-700')}
-                      style={{ background: c ? `rgba(52, 211, 153, ${0.08 + 0.6 * (c.avg / max)})` : 'rgba(255,255,255,0.02)' }}
-                    >
-                      {c ? c.n : '·'}
-                    </td>
-                  )
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Summary t={t} format={fmt} />
+      <Heatmap t={t} format={fmt} unit="avg engagement" />
       <div className="mt-2 text-xs text-zinc-600">Times in IST. Shade is average likes + comments per post; the number is how many posts went out in that slot.</div>
 
       {formats.length > 0 && (
@@ -190,5 +232,64 @@ export function FollowerTrend({ daily }) {
         </>
       )}
     </Section>
+  )
+}
+
+/** One heatmap for several accounts, each post weighed against its own account's average. */
+export function CombinedBestTime({ accounts }) {
+  const posts = relativePosts(accounts).filter((p) => p.at)
+  if (posts.length < 4) return <Empty>Not enough posts across the accounts to compare times yet.</Empty>
+  const t = bestTimes(posts, (p) => p.rel)
+  const formats = relativeFormats(posts)
+  const counts = {}
+  for (const p of posts) {
+    const { day, block } = slotOf(p.at)
+    const k = `${day}-${block}`
+    ;(counts[k] ||= {})[p.accountLabel] = (counts[k][p.accountLabel] || 0) + 1
+  }
+  const detail = (k) => ` (${Object.entries(counts[k] || {}).map(([a, n]) => `${a} ${n}`).join(', ')})`
+  const perAccount = accounts
+    .map((a) => ({ ...a, t: bestTimes(a.posts) }))
+    .filter((a) => a.t.bestSlot)
+
+  return (
+    <div className="space-y-5">
+      <Section title={`Best time to post · all accounts · ${posts.length} posts`}>
+        <Summary t={t} format={times} />
+        <Heatmap t={t} format={times} unit="each account’s average" detail={detail} />
+        <div className="mt-2 text-xs text-zinc-600">
+          Times in IST. Each post is scored against its own account’s average likes + comments (1.0× = normal for that account), so a bigger account doesn’t drown out a smaller one. The number is how many posts went out in that slot; hover for the split by account.
+        </div>
+
+        {perAccount.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-xs">
+            {perAccount.map((a) => {
+              const [d, b] = a.t.bestSlot.key.split('-').map(Number)
+              return <span key={a.key}><span className="text-zinc-500">{a.label} alone:</span> <span className="text-zinc-200">{DAYS[d]} {blockLabel(b)}</span> <span className="text-zinc-500">· {fmt(a.t.bestSlot.avg)} avg</span></span>
+            })}
+          </div>
+        )}
+
+        {formats.length > 0 && (
+          <div className="mt-5 overflow-x-auto [scrollbar-width:none]">
+            <table className="w-full min-w-[22rem] text-left text-xs">
+              <thead className="text-zinc-500">
+                <tr>{['Format', 'Posts', 'vs account average', 'By account'].map((h) => <th key={h} className="pb-2 font-normal">{h}</th>)}</tr>
+              </thead>
+              <tbody className="divide-y divide-white/[0.05] tabular-nums text-zinc-300">
+                {formats.map((f, i) => (
+                  <tr key={f.type}>
+                    <td className="py-1.5 text-zinc-100">{f.label}{i === 0 && formats.length > 1 && <span className="ml-1.5 text-[10px] text-emerald-300">best</span>}</td>
+                    <td>{f.n}</td>
+                    <td className={f.rel >= 1 ? 'text-emerald-300' : 'text-zinc-400'}>{times(f.rel)}</td>
+                    <td className="text-zinc-500">{f.perAccount.map(([a, n]) => `${a} ${n}`).join(' · ')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Section>
+    </div>
   )
 }

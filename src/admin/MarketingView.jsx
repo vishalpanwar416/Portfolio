@@ -16,7 +16,7 @@ import {
 } from './data'
 import { trafficFor } from './IntegrationSections'
 import CalendarView from './CalendarView'
-import { BestTime, FollowerTrend } from './InstagramInsights'
+import { BestTime, CombinedBestTime, FollowerTrend } from './InstagramInsights'
 import PostsView from './PostsView'
 import {
   Badge, Button, ConnectHint, Empty, FIELD_MAIN, Input, Progress, Section, Select, ShareBars, Sparkline, Stat, Textarea,
@@ -245,6 +245,8 @@ function InstagramAccount({ a, project, go, docs }) {
   )
 }
 
+const ALL = '*'
+
 function Instagram({ data, go }) {
   const owners = data.projects.flatMap((p) => (p.instagram || []).map((acc) => [acc, p]))
   const key = [...new Set(owners.map(([acc]) => acc))].sort().join(',')
@@ -256,19 +258,26 @@ function Instagram({ data, go }) {
 
   const owner = Object.fromEntries(owners)
   const accounts = res.data.accounts || []
-  const current = accounts.find((a) => a.account === pick) || accounts[0]
+  const loaded = accounts.filter((a) => a.posts?.length)
+  // With two or more accounts loaded, the tab opens on the combined view.
+  const combined = loaded.length > 1 && (pick === null || pick === ALL)
+  const current = combined ? null : accounts.find((a) => a.account === pick) || accounts[0]
   return (
     <div className="space-y-5">
       {accounts.length > 1 && (
-        <div className="flex gap-1">
+        <div className="flex gap-1 overflow-x-auto [scrollbar-width:none]">
+          {loaded.length > 1 && (
+            <button onClick={() => setPick(ALL)} className={cx('shrink-0 rounded-lg px-3 py-1.5 text-sm', combined ? 'bg-white/[0.1] text-white' : 'text-zinc-400 hover:text-zinc-100')}>All accounts</button>
+          )}
           {accounts.map((a) => (
-            <button key={a.account} onClick={() => setPick(a.account)} className={cx('rounded-lg px-3 py-1.5 text-sm', a.account === current?.account ? 'bg-white/[0.1] text-white' : 'text-zinc-400 hover:text-zinc-100')}>
+            <button key={a.account} onClick={() => setPick(a.account)} className={cx('shrink-0 rounded-lg px-3 py-1.5 text-sm', a.account === current?.account ? 'bg-white/[0.1] text-white' : 'text-zinc-400 hover:text-zinc-100')}>
               {owner[a.account]?.name || a.account}{a.followers != null && <span className="ml-1.5 text-xs text-zinc-500">{fmt(a.followers)}</span>}
             </button>
           ))}
         </div>
       )}
-      {!current ? null
+      {combined ? <CombinedBestTime accounts={loaded.map((a) => ({ key: a.account, label: owner[a.account]?.name || a.account, posts: a.posts }))} />
+        : !current ? null
         : current.notConfigured ? <ConnectHint>Add <code className="text-zinc-300">IG_TOKEN_{current.account.toUpperCase()}</code> (the account’s long-lived Instagram token) to the Vercel project’s environment variables.</ConnectHint>
           : current.error ? <Empty>{owner[current.account]?.name}: {current.error}</Empty>
             : <InstagramAccount a={current} project={owner[current.account]} go={go} docs={data.docs} />}
