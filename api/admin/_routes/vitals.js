@@ -39,7 +39,7 @@ async function auth() {
   try { sa = serviceAccount(); } catch { sa = null; }
   if (!sa) return {};
   try {
-    return { sa, headers: { Authorization: `Bearer ${await accessToken(sa, 'https://www.googleapis.com/auth/cloud-platform')}` } };
+    return { sa, headers: { Authorization: `Bearer ${await accessToken(sa, 'openid')}` } };
   } catch {
     return {};
   }
