@@ -62,8 +62,13 @@ async function run(host, creds) {
     const score = (k) => (cats[k]?.score == null ? null : Math.round(cats[k].score * 100));
     const field = body.loadingExperience?.metrics || {};
     const p75 = (k) => field[k]?.percentile ?? null;
+    // A single metric that errors (e.g. NO_LCP) leaves the performance score empty with no runtimeError.
+    const broken = cats.performance && cats.performance.score == null
+      ? Object.values(audits).find((a) => a.scoreDisplayMode === 'error' && a.errorMessage)
+      : null;
     return {
       at,
+      ...(cats.performance?.score == null ? { error: broken ? `Lighthouse couldn’t score performance: ${broken.title} failed (${String(broken.errorMessage).slice(0, 140)})` : 'Lighthouse returned no performance score' } : {}),
       performance: score('performance'),
       seo: score('seo'),
       accessibility: score('accessibility'),
