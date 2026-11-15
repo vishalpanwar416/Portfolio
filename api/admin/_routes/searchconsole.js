@@ -29,7 +29,7 @@ async function gsc(token, path, body) {
   const json = await r.json().catch(() => ({}));
   if (!r.ok) {
     const msg = json.error?.message || `HTTP ${r.status}`;
-    throw new Error(/has not been used|is disabled/i.test(msg) ? 'Turn on the Search Console API in the service account’s Google Cloud project.' : msg);
+    throw new Error(/has not been used|is disabled/i.test(msg) ? 'Turn on the Search Console API in the service account’s Google Cloud project' : msg);
   }
   return json;
 }
@@ -85,6 +85,6 @@ module.exports = async (req, res) => {
     cache.set(days, { at: Date.now(), body });
     res.status(200).json(body);
   } catch (e) {
-    res.status(502).json({ error: e.message, account: sa.client_email });
+    res.status(502).json({ error: `${e.message} (service account ${sa.client_email}, project ${sa.project_id}).`, account: sa.client_email });
   }
 };

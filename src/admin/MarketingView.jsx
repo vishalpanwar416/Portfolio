@@ -496,7 +496,9 @@ function Vitals({ data }) {
     setState({ running: true, error: null })
     try {
       const r = await api('/api/admin/vitals', { method: 'POST', body: JSON.stringify({ hosts }) })
-      setState({ running: false, error: r.saveError || null })
+      const failed = (r.results || []).filter((x) => x.run.error)
+      // When every site fails it's the same quota or setup problem; say it once.
+      setState({ running: false, error: r.saveError || (failed.length && failed.length === r.results.length ? failed[0].run.error : null) })
     } catch (e) {
       setState({ running: false, error: e.message })
     }
@@ -529,7 +531,7 @@ function Vitals({ data }) {
                       <div className="text-xs text-zinc-500">
                         {delta ? <span className={delta < 0 ? 'text-red-300' : 'text-emerald-300'}>{delta > 0 ? '+' : ''}{delta} · </span> : null}
                         {good ? `checked ${timeAgo(good.at)}` : 'not checked yet'}
-                        {last?.error && <span className="text-red-300"> · last run failed: {last.error}</span>}
+                        {last?.error && <span className="text-red-300" title={last.error}> · last run failed{state.error === last.error ? '' : `: ${last.error}`}</span>}
                       </div>
                     </div>
                     {trend.length > 1 && <Sparkline values={trend} width={80} height={22} className="hidden shrink-0 sm:block" />}

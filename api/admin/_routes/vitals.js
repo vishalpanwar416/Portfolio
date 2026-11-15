@@ -5,9 +5,12 @@
 // POST { hosts } runs the checks and saves them to the `vitals` doc in
 // vp_sites (last 30 runs per host), so the dashboard shows the history live.
 // The scheduled monitor calls it once a day with MONITOR_SECRET and alerts on
-// `drops`. PAGESPEED_API_KEY is optional but anonymous calls are throttled.
+// `drops`. Calls are billed to PAGESPEED_API_KEY if set, else to the
+// GCP_SA_KEY service account's project (which needs the PageSpeed Insights
+// API turned on); anonymous calls share a quota that's often used up.
 const { requireOwnerOrMonitor } = require('../_auth');
 const { getSite, writeSite } = require('../_firestore');
+const { serviceAccount, accessToken } = require('../_gcp');
 
 const MAX_HOSTS = 20;
 const KEEP = 30;
@@ -17,15 +20,40 @@ const DROP = 10; // points of performance lost since the last run
 
 const pick = (audits, id) => (audits[id]?.numericValue ?? null);
 
-async function run(host) {
+/** Turns Google's quota and API-disabled errors into what to do about them. */
+function explain(msg, sa) {
+  if (/has not been used|is disabled|SERVICE_DISABLED/i.test(msg)) {
+    return `Turn on the PageSpeed Insights API in Google Cloud project ${sa?.project_id || '(service account’s)'}.`;
+  }
+  if (/quota/i.test(msg)) {
+    return sa || process.env.PAGESPEED_API_KEY
+      ? 'PageSpeed daily quota used up; try again tomorrow.'
+      : 'Google’s shared PageSpeed quota is used up. Add PAGESPEED_API_KEY or GCP_SA_KEY on the server.';
+  }
+  return msg.slice(0, 200);
+}
+
+async function auth() {
+  if (process.env.PAGESPEED_API_KEY) return { key: process.env.PAGESPEED_API_KEY };
+  let sa = null;
+  try { sa = serviceAccount(); } catch { sa = null; }
+  if (!sa) return {};
+  try {
+    return { sa, headers: { Authorization: `Bearer ${await accessToken(sa, 'https://www.googleapis.com/auth/cloud-platform')}` } };
+  } catch {
+    return {};
+  }
+}
+
+async function run(host, creds) {
   const qs = new URLSearchParams({ url: `https://${host}/`, strategy: 'mobile' });
   for (const c of CATEGORIES) qs.append('category', c);
-  if (process.env.PAGESPEED_API_KEY) qs.set('key', process.env.PAGESPEED_API_KEY);
+  if (creds.key) qs.set('key', creds.key);
   const at = Date.now();
   try {
-    const r = await fetch(`https://www.googleapis.com/pagespeedonline/v5/runPagespeed?${qs}`, { signal: AbortSignal.timeout(120e3) });
+    const r = await fetch(`https://www.googleapis.com/pagespeedonline/v5/runPagespeed?${qs}`, { headers: creds.headers, signal: AbortSignal.timeout(120e3) });
     const body = await r.json().catch(() => ({}));
-    if (!r.ok) return { at, error: body.error?.message?.slice(0, 200) || `HTTP ${r.status}` };
+    if (!r.ok) return { at, error: explain(body.error?.message || `HTTP ${r.status}`, creds.sa) };
     const lh = body.lighthouseResult || {};
     const cats = lh.categories || {};
     const audits = lh.audits || {};
@@ -66,7 +94,8 @@ module.exports = async (req, res) => {
     .slice(0, MAX_HOSTS);
   if (!hosts.length) return res.status(400).json({ error: 'No hosts' });
 
-  const results = await Promise.all(hosts.map(async (host) => ({ host, run: await run(host) })));
+  const creds = await auth();
+  const results = await Promise.all(hosts.map(async (host) => ({ host, run: await run(host, creds) })));
 
   let saved = null;
   try { saved = await getSite('vitals'); } catch { saved = null; }
