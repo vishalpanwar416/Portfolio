@@ -68,7 +68,7 @@ async function run(host, creds) {
       : null;
     return {
       at,
-      ...(cats.performance?.score == null ? { error: broken ? `Lighthouse couldn’t score performance: ${broken.title} failed (${String(broken.errorMessage).slice(0, 140)})` : 'Lighthouse returned no performance score' } : {}),
+      ...(cats.performance?.score == null ? { error: broken ? `Lighthouse couldn’t score performance (${String(broken.errorMessage).slice(0, 140)})${broken.errorMessage === 'NO_LCP' ? ': the page never paints a main element for a logged-out visitor' : ''}` : 'Lighthouse returned no performance score' } : {}),
       performance: score('performance'),
       seo: score('seo'),
       accessibility: score('accessibility'),
