@@ -3,10 +3,9 @@ import SectionShell from '../components/SectionShell'
 import SectionHeader from '../components/SectionHeader'
 import { detailedCertifications } from '../data/certifications'
 import { usePortfolio } from '../contexts/PortfolioContext'
-import { sectionContent } from '../data'
 
 export default function About() {
-  const { workExperience, education } = usePortfolio()
+  const { workExperience, education, sectionContent } = usePortfolio()
   return (
     <SectionShell id="about">
       <SectionHeader

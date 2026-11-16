@@ -3,7 +3,7 @@ import {
   ExternalLink, GitBranch, Github, IndianRupee, Pencil, Pin, PinOff, Plus, Repeat, Trash2, Users, Globe, Wallet, TrendingUp,
 } from 'lucide-react'
 import {
-  CATEGORIES, STATUSES, VERCEL_TEAM_SLUG, api, daysUntil, lastMonths, money, moneyShort, monthKey,
+  ALERT_LEVELS, CATEGORIES, STATUSES, VERCEL_TEAM_SLUG, alertLevel, api, daysUntil, lastMonths, money, moneyShort, monthKey,
   monthLabel, newId, projectStats, removeDoc, revenueByMonth, saveDoc, SSL_WARN_DAYS, timeAgo, today,
 } from './data'
 import {
@@ -201,7 +201,7 @@ function Infra({ p, checks }) {
 
 function EditDetails({ p, save, onClose, go }) {
   const [f, setF] = useState({
-    name: p.name, category: p.category, summary: p.summary || '', stack: (p.stack || []).join(', '),
+    name: p.name, category: p.category, summary: p.summary || '', alerts: alertLevel(p), hidden: !!p.hidden, stack: (p.stack || []).join(', '),
     domains: (p.domains || []).join('\n'), repos: (p.repos || []).join('\n'), vercel: (p.vercel || []).join('\n'),
     firebase: (p.firebase || []).join('\n'), stacky: (p.stacky || []).join('\n'), cloud: (p.cloud || []).join('\n'),
     apps: (p.apps || []).join('\n'), payments: (p.payments || []).join('\n'), supabase: (p.supabase || []).join('\n'), services: (p.services || []).join('\n'),
@@ -210,18 +210,19 @@ function EditDetails({ p, save, onClose, go }) {
 
   const submit = async () => {
     await save({
-      name: f.name.trim() || p.name, category: f.category, summary: f.summary.trim(), stack: list(f.stack),
+      name: f.name.trim() || p.name, category: f.category, summary: f.summary.trim(), alerts: f.alerts, hidden: f.hidden, stack: list(f.stack),
       domains: list(f.domains).map((d) => d.toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '')),
       repos: list(f.repos).map((r) => r.replace(/^https?:\/\/github\.com\//, '').replace(/\.git$/, '')),
       vercel: list(f.vercel), firebase: list(f.firebase), stacky: list(f.stacky), cloud: list(f.cloud),
       apps: list(f.apps), payments: list(f.payments), supabase: list(f.supabase), services: list(f.services),
     })
-    onClose()
+    if (f.hidden) go('/')
+    else onClose()
   }
 
   const remove = async () => {
-    if (p.custom) await removeDoc(p.id)
-    else await save({ deleted: true })
+    if (!window.confirm(`Remove ${p.name}? Its record, money and notes are deleted for good.`)) return
+    await removeDoc(p.id)
     go('/')
   }
 
@@ -233,6 +234,17 @@ function EditDetails({ p, save, onClose, go }) {
         <label><span className={label}>Category</span>
           <Select value={f.category} onChange={set('category')} className="w-full">
             {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+          </Select>
+        </label>
+        <label><span className={label}>Uptime alerts</span>
+          <Select value={f.alerts} onChange={set('alerts')} className="w-full">
+            {Object.entries(ALERT_LEVELS).map(([k, v]) => <option key={k} value={k}>{v.label} — {v.hint}</option>)}
+          </Select>
+        </label>
+        <label><span className={label}>Visibility</span>
+          <Select value={f.hidden ? 'hidden' : 'shown'} onChange={(e) => setF({ ...f, hidden: e.target.value === 'hidden' })} className="w-full">
+            <option value="shown">Shown everywhere</option>
+            <option value="hidden">Hidden (left out of pages, totals and alerts)</option>
           </Select>
         </label>
         <label className="sm:col-span-2"><span className={label}>Summary</span><Input value={f.summary} onChange={set('summary')} className="w-full" /></label>

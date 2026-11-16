@@ -3,12 +3,11 @@
 //
 // Project records live in vp_sites as `proj-<slug>` docs with kind:'project'
 // so they fall under the existing owner-only rule in sanero-next's
-// firestore.rules — no rules deploy needed. A doc only holds what was edited;
-// everything else comes from DEFAULT_PROJECTS below.
+// firestore.rules. They are the only copy: add, edit, hide and remove
+// projects from the dashboard (the server reads the same docs).
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { collection, deleteDoc, doc, onSnapshot, setDoc } from 'firebase/firestore'
 import { auth, db, SITES_COLLECTION } from './firebase'
-import defaultProjects from './projects.json'
 
 export const VERCEL_TEAM_SLUG = 'vishal-panwars-projects'
 export const CHECK_EVERY_MS = 5 * 60e3
@@ -33,10 +32,15 @@ export const GROUPS = [
   { title: 'Utilities & automation', categories: ['Utility', 'Automation'] },
 ]
 
-// Starting point, taken from ~/Development on 2026-11-08 (projects.json is
-// shared with scripts/monitor.mjs). Status is a best guess from recent
-// activity; revenue and clients start empty on purpose.
-export const DEFAULT_PROJECTS = defaultProjects
+// Uptime alert level per project: 'critical' messages you straight away,
+// 'digest' waits for the 9am check, 'off' isn't watched. Default: critical
+// for live projects. Same rule as alertLevel() in api/admin/_firestore.js.
+export const ALERT_LEVELS = {
+  critical: { label: 'Message me', hint: 'WhatsApp as soon as a site goes down' },
+  digest: { label: 'Morning check', hint: 'Listed in the 9am digest' },
+  off: { label: 'Off', hint: 'Not watched' },
+}
+export const alertLevel = (p) => (ALERT_LEVELS[p?.alerts] ? p.alerts : p?.status === 'live' ? 'critical' : 'digest')
 
 const EMPTY = {
   summary: '', stack: [], domains: [], repos: [], vercel: [], firebase: [], stacky: [], cloud: [],
@@ -337,21 +341,17 @@ export function useAdminData() {
     []
   )
 
-  // Defaults overlaid with their Firestore edits, plus projects added by hand.
+  // Every project doc, in sidebar order.
   const allProjects = useMemo(() => {
     const vercelByName = Object.fromEntries(vercel.map((v) => [v.name, v]))
-    const known = new Set(DEFAULT_PROJECTS.map((p) => p.slug))
-    const custom = Object.entries(docs)
-      .filter(([id, d]) => d.kind === 'project' && id.startsWith('proj-') && !known.has(id.slice(5)))
-      .map(([id, d]) => ({ slug: id.slice(5), name: d.name || id.slice(5), category: 'Product', status: 'building', custom: true }))
-    return [...DEFAULT_PROJECTS, ...custom]
-      .map((base) => {
-        const p = { ...EMPTY, ...base, ...(docs[projectDocId(base.slug)] || {}) }
-        p.id = projectDocId(p.slug)
+    return Object.entries(docs)
+      .filter(([id, d]) => d.kind === 'project' && id.startsWith('proj-') && !d.deleted)
+      .map(([id, d]) => {
+        const p = { ...EMPTY, name: id.slice(5), category: 'Product', status: 'building', ...d, slug: id.slice(5), id }
         p.vercelProjects = (p.vercel || []).map((n) => vercelByName[n]).filter(Boolean)
         return p
       })
-      .filter((p) => !p.deleted)
+      .sort((a, b) => (a.order ?? 1e9) - (b.order ?? 1e9) || a.name.localeCompare(b.name))
   }, [docs, vercel])
   // Hidden projects stay in data (and can be shown again from Settings) but
   // are left out of every page, total and alert.

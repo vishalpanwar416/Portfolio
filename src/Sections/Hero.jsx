@@ -3,7 +3,6 @@ import { motion } from 'framer-motion'
 import { smoothScrollTo } from '../lib/utils.js'
 import profilePhoto from '../assets/vishal-panwar-profile.jpeg'
 import TypingAnimation from '../components/TypingAnimation'
-import { socialLinks, externalLinks, sectionContent } from '../data'
 import { usePortfolio } from '../contexts/PortfolioContext'
 
 const ease = [0.22, 1, 0.36, 1]
@@ -15,7 +14,7 @@ const reveal = (delay = 0, x = 0) => ({
 })
 
 export default function Hero() {
-  const { personalInfo, typingAnimationTexts, workExperience } = usePortfolio()
+  const { personalInfo, typingAnimationTexts, workExperience, socialLinks, externalLinks, sectionContent } = usePortfolio()
   const titleParts = personalInfo.title.split('|').map((s) => s.trim())
   const currentRole = workExperience[0]
 

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import profilePhoto from '../assets/vishal-panwar-profile.jpeg'
-import { personalInfo } from '../data'
+import { usePortfolio } from '../contexts/PortfolioContext'
 
 const MIN_MS = 1200
 
@@ -15,6 +15,7 @@ function preloadImage(src) {
 }
 
 export default function LoadingScreen({ onComplete }) {
+  const { personalInfo } = usePortfolio()
   const [progress, setProgress] = useState(0)
   const [ready, setReady] = useState(false)
 

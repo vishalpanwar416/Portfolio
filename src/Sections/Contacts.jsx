@@ -3,8 +3,7 @@ import { motion } from 'framer-motion'
 import { User, MessageSquare, Mail, Download, Calendar } from 'lucide-react'
 import SectionShell from '../components/SectionShell'
 import SectionHeader from '../components/SectionHeader'
-import { contactLinks } from '../data/social'
-import { personalInfo, sectionContent, externalLinks } from '../data'
+import { usePortfolio } from '../contexts/PortfolioContext'
 
 // Copy of the enquiry for the admin's Leads list; WhatsApp still opens either way.
 function logLead({ name, email, message }) {
@@ -25,6 +24,7 @@ function logLead({ name, email, message }) {
 }
 
 export default function Contact() {
+  const { contactLinks, personalInfo, sectionContent, externalLinks } = usePortfolio()
   const [formData, setFormData] = useState({ name: '', email: '', message: '' })
   const [isFocused, setIsFocused] = useState({})
   const [whatsappSent, setWhatsappSent] = useState(false)

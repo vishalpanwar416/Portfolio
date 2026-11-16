@@ -2,11 +2,10 @@ import { motion } from 'framer-motion'
 import CodingStats from '../components/CodingStats'
 import SectionShell from '../components/SectionShell'
 import SectionHeader from '../components/SectionHeader'
-import { personalInfo, sectionContent } from '../data'
 import { usePortfolio } from '../contexts/PortfolioContext'
 
 export default function Skills() {
-  const { skillCategories } = usePortfolio()
+  const { skillCategories, personalInfo, sectionContent } = usePortfolio()
   return (
     <SectionShell id="skills">
       <SectionHeader

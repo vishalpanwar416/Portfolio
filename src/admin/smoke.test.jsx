@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import projectsJson from './projects.json'
+import projectsJson from './__fixtures__/projects.json' // test data only; the app reads projects from Firestore
 import OverviewView from './OverviewView'
 import ProjectsView from './ProjectsView'
 import AlertsView from './AlertsView'
@@ -13,7 +13,7 @@ import PortfolioEditor, { builtInContent } from './PortfolioEditor'
 import { mergeContent } from '../contexts/PortfolioContext'
 import LinkedInView from './LinkedInView'
 import JobsView from './JobsView'
-import { campaignMonths, costIn, leadProject, leadsFrom } from './data'
+import { alertLevel, campaignMonths, costIn, leadProject, leadsFrom } from './data'
 import { bestTimes, followerSeries, formatStats, relativePosts, slotOf } from './InstagramInsights'
 import { matchPlan, plansFrom } from './CalendarView'
 
@@ -306,4 +306,39 @@ test('jobs are tagged on the server and listed SDE-at-multinationals first', () 
   fireEvent.click(screen.getByText('Software Developer - Confluent'))
   expect(screen.getByDisplayValue('Referral from Riya')).toBeTruthy()
   expect(screen.getByText('Apply on Confluent')).toBeTruthy()
+})
+
+test('alert level per project decides how a down site is reported', () => {
+  const { computeAlerts } = require('./alerts')
+  expect(alertLevel({ status: 'live' })).toBe('critical')
+  expect(alertLevel({ status: 'building' })).toBe('digest')
+  expect(alertLevel({ status: 'live', alerts: 'off' })).toBe('off')
+  const down = { 'a.test': { host: 'a.test', up: false, error: 'ENOTFOUND' } }
+  const base = { ...data, checks: down }
+  const sev = (p) => computeAlerts({ ...base, projects: [{ ...p, slug: 'a', name: 'A', domains: ['a.test'] }] }).find((x) => x.kind === 'site')?.severity
+  expect(sev({ status: 'live' })).toBe('critical')
+  expect(sev({ status: 'live', alerts: 'digest' })).toBe('warning')
+  expect(sev({ status: 'building', alerts: 'critical' })).toBe('critical')
+  expect(sev({ status: 'live', alerts: 'off' })).toBeUndefined()
+})
+
+test('contact details, links and page text round-trip through published content', () => {
+  const { socialLinks, contactLinks, sectionContent, personalInfo } = require('../data')
+  const fromDb = mergeContent(JSON.parse(JSON.stringify(builtInContent())))
+  expect(fromDb.socialLinks.map((l) => l.url)).toEqual(socialLinks.map((l) => l.url))
+  expect(fromDb.contactLinks.map((l) => l.link).sort()).toEqual(contactLinks.map((l) => l.link).sort())
+  expect(fromDb.sectionContent.about.content).toEqual(sectionContent.about.content)
+  expect(fromDb.personalInfo.contact.email).toBe(personalInfo.contact.email)
+  const edited = mergeContent({
+    contact: { email: 'new@x.test', phone: '+1 555 0100' },
+    links: [{ kind: 'github', label: 'GitHub', url: 'https://github.com/new', social: true, contact: false }],
+    text: { heroDescription: 'Hello', about: ['One', 'Two'] },
+  })
+  expect(edited.personalInfo.contact.phoneLink).toBe('tel:+15550100')
+  expect(edited.socialLinks).toHaveLength(1)
+  expect(edited.contactLinks).toHaveLength(0)
+  expect(edited.externalLinks.github).toBe('https://github.com/new')
+  expect(edited.sectionContent.hero.description).toBe('Hello')
+  expect(edited.sectionContent.about.content).toEqual(['One', 'Two'])
+  expect(edited.sectionContent.skills.title).toBe(sectionContent.skills.title)
 })

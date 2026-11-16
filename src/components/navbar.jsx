@@ -3,9 +3,11 @@ import { Menu, X, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { smoothScrollTo } from '../lib/utils.js'
 import logo from '../assets/logo.png'
-import { navItems, sectionContent } from '../data'
+import { navItems } from '../data'
+import { usePortfolio } from '../contexts/PortfolioContext'
 
 export default function Navbar() {
+  const { sectionContent } = usePortfolio()
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [lastScrollY, setLastScrollY] = useState(0)

@@ -5,7 +5,8 @@
 // when the laptop has checked within the last 20 minutes.
 //
 // Gets the list of things to watch from the dashboard API (/api/admin/monitor,
-// with MONITOR_SECRET), falling back to src/admin/projects.json, then:
+// with MONITOR_SECRET; projects and their alert levels live in the dashboard's
+// database), falling back to the host list cached from the last good run:
 //   critical  (own WhatsApp message): a live project's site down, a Supabase
 //             project paused or unhealthy, a domain or certificate < 7 days
 //   warning   (no message of its own): other sites down, laptop services
@@ -51,26 +52,24 @@ async function fromApi() {
     if (!r.ok) throw new Error(`HTTP ${r.status}`)
     return await r.json()
   } catch (e) {
-    console.warn('monitor API unavailable, using projects.json:', e.message)
+    console.warn('monitor API unavailable, using the cached host list:', e.message)
     return null
   }
 }
 
 const remote = await fromApi()
+if (!remote && !state.hosts?.length) {
+  console.error('monitor API unavailable and no cached host list yet')
+  process.exit(1)
+}
 // GitHub backup run: the laptop already did this recently, so don't double-send.
 const LAPTOP_FRESH_MS = 20 * 60e3
 if (process.env.GITHUB_ACTIONS && remote?.laptop?.monitor?.at && now - Date.parse(remote.laptop.monitor.at) < LAPTOP_FRESH_MS) {
   console.log(`laptop ran the monitor at ${remote.laptop.monitor.at}; skipping this backup run`)
   process.exit(0)
 }
-let hosts
-if (remote) {
-  hosts = remote.hosts
-} else {
-  const projects = JSON.parse(readFileSync(new URL('../src/admin/projects.json', import.meta.url)))
-  hosts = projects.filter((p) => p.status !== 'decommissioned' && !p.hidden)
-    .flatMap((p) => (p.domains || []).filter((h) => !h.startsWith('www.')).map((h) => ({ host: h, project: p.name, critical: p.status === 'live' })))
-}
+const hosts = remote ? remote.hosts : state.hosts.map((h) => ({ ...h }))
+if (remote) state.hosts = remote.hosts
 for (const h of String(process.env.MONITOR_EXTRA_HOSTS || '').split(',').map((x) => x.trim()).filter(Boolean)) {
   if (!hosts.some((x) => x.host === h)) hosts.push({ host: h, project: h, critical: false })
 }
@@ -197,9 +196,9 @@ if (digestDue) {
   if (lines.length) messages.push({ severity: 'info', title: `Morning check · ${lines.length}`, text: lines.join('\n') })
 }
 
-state.lastRun = { at: new Date(now).toISOString(), hosts: results.length, down: results.filter((r) => !r.up).length, open: Object.keys(state.open).length, source: remote ? 'api' : 'projects.json' }
+state.lastRun = { at: new Date(now).toISOString(), hosts: results.length, down: results.filter((r) => !r.up).length, open: Object.keys(state.open).length, source: remote ? 'api' : 'cache' }
 writeFileSync(STATE_FILE, JSON.stringify(state, null, 2))
-console.log(`source: ${remote ? 'dashboard API' : 'projects.json'} · ${results.length} hosts, ${results.filter((r) => !r.up).length} down · ${problems.length} open problems`)
+console.log(`source: ${remote ? 'dashboard API' : 'cached host list'} · ${results.length} hosts, ${results.filter((r) => !r.up).length} down · ${problems.length} open problems`)
 
 // ── send ───────────────────────────────────────────────
 

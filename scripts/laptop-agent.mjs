@@ -5,7 +5,7 @@
 // stores it in the owner-only Firestore collection and keeps 7 days of
 // history for the charts on Infrastructure → Laptop.
 //
-// Snapshot: every service listed under `services` in src/admin/projects.json
+// Snapshot: every service listed under a project's `services` in the dashboard
 // (+ any other failed user unit, with its last log lines), Docker and its
 // containers, the busiest processes, CPU load, memory, disk, battery, network.
 // It also forwards the LinkedIn outreach trackers when they change (bottom).
@@ -33,8 +33,25 @@ const readJson = (f, fallback) => { try { return JSON.parse(readFileSync(f, 'utf
 
 // ── services ───────────────────────────────────────────
 
-const projects = JSON.parse(readFileSync(new URL('../src/admin/projects.json', import.meta.url)))
-const watched = projects.flatMap((p) => (p.services || []).map((unit) => ({ unit, project: p.slug })))
+// Which units to watch comes from the project registry in the dashboard's
+// database; the last good copy is kept so the agent works offline.
+const REGISTRY = join(DIR, 'projects.json')
+async function loadRegistry() {
+  const { secret: key } = readJson(CONFIG, {})
+  try {
+    const r = await fetch(API.replace(/\/laptop$/, '/registry'), { headers: { Authorization: `Bearer ${key}` }, signal: AbortSignal.timeout(20000) })
+    if (!r.ok) throw new Error(`HTTP ${r.status}`)
+    const { projects } = await r.json()
+    writeFileSync(REGISTRY, JSON.stringify(projects))
+    return projects
+  } catch (e) {
+    console.warn('project registry unavailable, using the cached copy:', e.message)
+    return readJson(REGISTRY, [])
+  }
+}
+const projects = await loadRegistry()
+const watched = projects.filter((p) => !p.hidden && p.status !== 'decommissioned')
+  .flatMap((p) => (p.services || []).map((unit) => ({ unit, project: p.slug })))
 
 // The service's own last lines, without systemd's start/stop boilerplate.
 const BOILERPLATE = /^(Starting|Started|Stopping|Stopped|Finished|Failed to start|.*: (Consumed|Main process exited|Failed with result|Scheduled restart|Deactivated))/

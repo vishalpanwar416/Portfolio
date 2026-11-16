@@ -8,6 +8,10 @@ const str = (v, n = 500) => (typeof v === 'string' ? v.slice(0, n) : '');
 const url = (v) => (typeof v === 'string' && /^(https?:\/\/|\/)/i.test(v) ? v.slice(0, 1000) : null);
 const list = (v, fn, max = 100) => (Array.isArray(v) ? v.slice(0, max).map(fn).filter(Boolean) : undefined);
 const words = (v, max = 40) => list(v, (s) => str(s, 120) || null, max);
+// Profile links may also be mailto: and tel:.
+const link = (v) => (typeof v === 'string' && /^(https?:\/\/|mailto:|tel:)/i.test(v) ? v.slice(0, 500) : null);
+const LINK_KINDS = ['github', 'linkedin', 'email', 'instagram', 'twitter', 'phone', 'calendar', 'link'];
+const TEXT_KEYS = ['heroDescription', 'aboutTitle', 'aboutSubtitle', 'about', 'skillsTitle', 'skillsSubtitle', 'portfolioTitle', 'portfolioSubtitle', 'certificationsTitle', 'certificationsSubtitle', 'contactTitle', 'contactSubtitle', 'footerTagline'];
 
 function clean(d) {
   const p = d.profile || {};
@@ -28,6 +32,16 @@ function clean(d) {
       position: str(x.position, 120), company: str(x.company, 120), duration: str(x.duration, 120), highlights: words(x.highlights, 8) || [],
     }, 30),
     education: list(d.education, (x) => x && str(x.degree, 160) && { degree: str(x.degree, 160), institution: str(x.institution, 160), year: str(x.year, 40) }, 10),
+    contact: {
+      email: str(d.contact?.email, 120), phone: str(d.contact?.phone, 40), whatsapp: str(d.contact?.whatsapp, 40),
+      calendar: url(d.contact?.calendar) || '', resume: url(d.contact?.resume) || '',
+      workPreference: str(d.contact?.workPreference, 160), noticePeriod: str(d.contact?.noticePeriod, 80),
+    },
+    links: list(d.links, (x) => x && link(x.url) && {
+      kind: LINK_KINDS.includes(x.kind) ? x.kind : 'link', label: str(x.label, 60), url: link(x.url),
+      handle: str(x.handle, 120), social: !!x.social, contact: !!x.contact,
+    }, 20),
+    text: Object.fromEntries(TEXT_KEYS.map((k) => [k, k === 'about' ? list(d.text?.about, (x) => str(x, 1200) || null, 6) || [] : str(d.text?.[k], 600)])),
     certifications: list(d.certifications, (x) => x && str(x.title, 160) && {
       title: str(x.title, 160), issuer: str(x.issuer, 120), date: str(x.date, 40), icon: ['award', 'trophy', 'star'].includes(x.icon) ? x.icon : 'award', link: url(x.link),
     }, 30),

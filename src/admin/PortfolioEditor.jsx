@@ -1,14 +1,16 @@
 // Edit vishalpanwar.in: profile line, projects, tech stack, experience,
-// education and certifications. Edits autosave as a draft on vp_sites/portfolio
+// education, certifications, contact details and links, and section text. Edits autosave as a draft on vp_sites/portfolio
 // (`draft`); Publish copies it to `published`, which the site reads through
 // api/admin/_routes/portfolio.js. Starts from the site's built-in src/data.
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ArrowDown, ArrowUp, Award, ChevronRight, ExternalLink, Plus, RotateCcw, Star, Trash2, Trophy, X } from 'lucide-react'
 import {
-  certifications, education, personalInfo, projects, skillCategories, typingAnimationTexts, workExperience,
+  certifications, contactLinks, education, externalLinks, personalInfo, projects, sectionContent, skillCategories,
+  socialLinks, typingAnimationTexts, workExperience,
 } from '../data'
+import { LINK_ICONS } from '../contexts/PortfolioContext'
 import { saveDoc, timeAgo } from './data'
-import { Badge, Button, Empty, Input, Label, Section, Textarea, cx } from './ui'
+import { Badge, Button, Empty, Input, Label, Section, Select, Textarea, cx } from './ui'
 
 export const PORTFOLIO_TABS = [
   { key: 'profile', label: 'Profile' },
@@ -17,7 +19,35 @@ export const PORTFOLIO_TABS = [
   { key: 'experience', label: 'Experience' },
   { key: 'education', label: 'Education' },
   { key: 'certifications', label: 'Certifications' },
+  { key: 'links', label: 'Contact & links' },
+  { key: 'text', label: 'Page text' },
 ]
+
+const LINK_KIND_LABELS = { github: 'GitHub', linkedin: 'LinkedIn', email: 'Email', instagram: 'Instagram', twitter: 'X / Twitter', phone: 'Phone', calendar: 'Calendar', link: 'Other link' }
+const kindOf = (icon) => Object.entries(LINK_ICONS).find(([, I]) => I === icon)?.[0] || 'link'
+
+/** Social and contact links from src/data as one list, in the stored shape. */
+function builtInLinks() {
+  const out = socialLinks.map((l) => ({
+    kind: kindOf(l.icon), label: l.name, url: l.url, handle: l.username || '', social: true,
+    contact: contactLinks.some((c) => c.link === l.url),
+  }))
+  for (const c of contactLinks) {
+    if (!out.some((l) => l.url === c.link)) out.push({ kind: kindOf(c.icon), label: c.label, url: c.link, handle: c.value || '', social: false, contact: true })
+  }
+  return out
+}
+
+const T = sectionContent
+const builtInText = () => ({
+  heroDescription: T.hero.description,
+  aboutTitle: T.about.title, aboutSubtitle: T.about.subtitle, about: [...T.about.content],
+  skillsTitle: T.skills.title, skillsSubtitle: T.skills.subtitle,
+  portfolioTitle: T.portfolio.title, portfolioSubtitle: T.portfolio.subtitle,
+  certificationsTitle: T.certifications.title, certificationsSubtitle: T.certifications.subtitle,
+  contactTitle: T.contact.title, contactSubtitle: T.contact.subtitle,
+  footerTagline: T.footer.tagline,
+})
 
 const ICON_NAMES = new Map([[Award, 'award'], [Trophy, 'trophy'], [Star, 'star']])
 
@@ -42,6 +72,20 @@ export function builtInContent() {
     experience: workExperience.map((e) => ({ ...e, highlights: [...e.highlights] })),
     education: education.map((e) => ({ ...e })),
     certifications: certifications.map((c) => ({ title: c.title, issuer: c.issuer, date: c.date, icon: ICON_NAMES.get(c.icon) || 'award', link: c.link || null })),
+    ...builtInExtras(),
+  }
+}
+
+/** Contact details, links and section text (added after the first publish). */
+export function builtInExtras() {
+  return {
+    contact: {
+      email: personalInfo.contact.email, phone: personalInfo.contact.phone, whatsapp: personalInfo.contact.whatsapp,
+      calendar: externalLinks.calendarBooking, resume: externalLinks.resume,
+      workPreference: personalInfo.availability.workPreference, noticePeriod: personalInfo.availability.noticePeriod,
+    },
+    links: builtInLinks(),
+    text: builtInText(),
   }
 }
 
@@ -294,9 +338,93 @@ function CertificationsTab({ c, set }) {
   )
 }
 
+const blankLink = () => ({ kind: 'link', label: '', url: '', handle: '', social: true, contact: true })
+
+function LinksTab({ c, set }) {
+  const ct = c.contact || {}
+  const up = (patch) => set({ contact: { ...ct, ...patch } })
+  const input = (k, placeholder) => <Input value={ct[k] || ''} onChange={(e) => up({ [k]: e.target.value })} placeholder={placeholder} className="w-full" />
+  return (
+    <div className="space-y-5">
+      <Section title="Contact details">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Field label="Email">{input('email', 'you@example.com')}</Field>
+          <Field label="Phone">{input('phone', '+91 …')}</Field>
+          <Field label="WhatsApp number (digits, with country code)">{input('whatsapp', '91…')}</Field>
+          <Field label="Book-a-call link">{input('calendar', 'https://cal.com/…')}</Field>
+          <Field label="Resume (URL or /resume/… path)">{input('resume', '/resume/…pdf')}</Field>
+          <Field label="Work preference">{input('workPreference', 'Remote (India), US…')}</Field>
+          <Field label="Notice period">{input('noticePeriod', 'Immediate to 30 days')}</Field>
+        </div>
+      </Section>
+      <Section title="Links">
+        <p className="mb-3 text-xs text-zinc-500">“Social” links show in the hero (first four) and footer; “Contact” links show in the contact section.</p>
+        <ListEditor
+          items={c.links || []}
+          onChange={(links) => set({ links })}
+          blank={blankLink}
+          addLabel="Add link"
+          title={(l) => l.label || l.url}
+          summary={(l) => [l.handle || l.url, l.social && 'social', l.contact && 'contact'].filter(Boolean).join(' · ')}
+          render={(l, up2) => (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <Field label="Type">
+                <Select value={l.kind} onChange={(e) => up2({ kind: e.target.value })} className="w-full">
+                  {Object.entries(LINK_KIND_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                </Select>
+              </Field>
+              <Field label="Label"><Input value={l.label} onChange={(e) => up2({ label: e.target.value })} className="w-full" /></Field>
+              <Field label="URL (https://, mailto: or tel:)"><Input value={l.url} onChange={(e) => up2({ url: e.target.value.trim() })} className="w-full" /></Field>
+              <Field label="Shown as (blank = the URL)"><Input value={l.handle} onChange={(e) => up2({ handle: e.target.value })} className="w-full" /></Field>
+              <div className="flex gap-4 sm:col-span-2">
+                <Toggle checked={l.social} onChange={(social) => up2({ social })}>Social</Toggle>
+                <Toggle checked={l.contact} onChange={(contact) => up2({ contact })}>Contact</Toggle>
+              </div>
+            </div>
+          )}
+        />
+      </Section>
+    </div>
+  )
+}
+
+const TEXT_FIELDS = [
+  ['Hero', [['heroDescription', 'Intro paragraph', 3]]],
+  ['About', [['aboutTitle', 'Title'], ['aboutSubtitle', 'Subtitle']]],
+  ['Tech stack', [['skillsTitle', 'Title'], ['skillsSubtitle', 'Subtitle']]],
+  ['Projects', [['portfolioTitle', 'Title'], ['portfolioSubtitle', 'Subtitle']]],
+  ['Certifications', [['certificationsTitle', 'Title'], ['certificationsSubtitle', 'Subtitle']]],
+  ['Contact', [['contactTitle', 'Title'], ['contactSubtitle', 'Subtitle']]],
+  ['Footer', [['footerTagline', 'Tagline']]],
+]
+
+function TextTab({ c, set }) {
+  const t = c.text || {}
+  const up = (patch) => set({ text: { ...t, ...patch } })
+  return (
+    <div className="space-y-5">
+      {TEXT_FIELDS.map(([group, fields]) => (
+        <Section key={group} title={group}>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {fields.map(([k, label, rows]) => (
+              <Field key={k} label={label} className={rows ? 'sm:col-span-2' : ''}>
+                {rows ? <Textarea rows={rows} value={t[k] || ''} onChange={(e) => up({ [k]: e.target.value })} />
+                  : <Input value={t[k] || ''} onChange={(e) => up({ [k]: e.target.value })} className="w-full" />}
+              </Field>
+            ))}
+            {group === 'About' && (
+              <Field label="About paragraphs (one per line)" className="sm:col-span-2"><Lines value={t.about} onChange={(about) => up({ about })} rows={6} /></Field>
+            )}
+          </div>
+        </Section>
+      ))}
+    </div>
+  )
+}
+
 // ── page ───────────────────────────────────────────────
 
-const TAB_VIEWS = { profile: ProfileTab, projects: ProjectsTab, skills: SkillsTab, experience: ExperienceTab, education: EducationTab, certifications: CertificationsTab }
+const TAB_VIEWS = { profile: ProfileTab, projects: ProjectsTab, skills: SkillsTab, experience: ExperienceTab, education: EducationTab, certifications: CertificationsTab, links: LinksTab, text: TextTab }
 
 export default function PortfolioEditor({ data, go, tab }) {
   const current = TAB_VIEWS[tab] ? tab : 'profile'
@@ -308,7 +436,8 @@ export default function PortfolioEditor({ data, go, tab }) {
   // Load once; after that the local draft is the source of truth while editing.
   useEffect(() => {
     if (draft || !data.docsReady || data.docsError) return
-    setDraft(doc?.draft || doc?.published || builtInContent())
+    const saved = doc?.draft || doc?.published
+    setDraft(saved ? { ...builtInExtras(), ...saved } : builtInContent())
   }, [data.docsReady, data.docsError, doc, draft])
 
   const flush = useCallback((next) => {

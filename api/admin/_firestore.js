@@ -1,7 +1,7 @@
 // Server-side read of the dashboard's Firestore collection (vp_sites in
 // sanero-media) with the GCP_SA_KEY service account, so the monitor sees
 // domains and statuses edited in the dashboard. Needs roles/datastore.viewer
-// on sanero-media; without it callers fall back to projects.json.
+// on sanero-media. Projects live here too, as `proj-<slug>` docs.
 const { serviceAccount, accessToken } = require('./_gcp');
 
 const PROJECT = 'sanero-media';
@@ -42,21 +42,28 @@ async function readSites() {
   return docs;
 }
 
-/** projects.json merged with dashboard edits — same rules as the browser. */
-async function mergedProjects() {
-  const defaults = require('../../src/admin/projects.json');
+/**
+ * Uptime alert level for a project: 'critical' (own WhatsApp message),
+ * 'digest' (warning, listed in the morning check) or 'off' (not watched).
+ * Defaults to critical for live projects, digest otherwise. Same rule as
+ * alertLevel() in src/admin/data.js.
+ */
+const alertLevel = (p) => (['critical', 'digest', 'off'].includes(p?.alerts) ? p.alerts : p?.status === 'live' ? 'critical' : 'digest');
+
+/** Projects from their `proj-<slug>` docs, sorted like the sidebar. */
+async function registryProjects({ includeHidden = false } = {}) {
   let docs = null;
   try { docs = await readSites(); } catch { docs = null; }
-  if (!docs) return { projects: defaults.filter((p) => !p.hidden), docs: null };
-  const known = new Set(defaults.map((p) => p.slug));
-  const custom = Object.entries(docs)
-    .filter(([id, d]) => d.kind === 'project' && id.startsWith('proj-') && !known.has(id.slice(5)))
-    .map(([id, d]) => ({ slug: id.slice(5), name: d.name || id.slice(5), status: 'building' }));
-  const projects = [...defaults, ...custom]
-    .map((p) => ({ ...p, ...(docs[`proj-${p.slug}`] || {}) }))
-    .filter((p) => !p.deleted && !p.hidden);
+  if (!docs) return { projects: [], docs: null };
+  const projects = Object.entries(docs)
+    .filter(([id, d]) => d.kind === 'project' && id.startsWith('proj-') && !d.deleted && (includeHidden || !d.hidden))
+    .map(([id, d]) => ({ name: id.slice(5), status: 'building', category: 'Product', ...d, slug: id.slice(5) }))
+    .sort((a, b) => (a.order ?? 1e9) - (b.order ?? 1e9) || String(a.name).localeCompare(String(b.name)));
   return { projects, docs };
 }
+
+/** Visible projects (kept under this name for the routes that use it). */
+const mergedProjects = () => registryProjects();
 
 function encode(v) {
   if (v === null || v === undefined) return { nullValue: null };
@@ -176,4 +183,4 @@ async function deleteDoc(collection, id) {
   if (!r.ok && r.status !== 404) throw new Error(`Firestore ${r.status}`);
 }
 
-module.exports = { readSites, mergedProjects, writeSite, getSite, deleteSite, getSecret, putSecret, listDocs, mergeDocs, deleteDoc };
+module.exports = { readSites, mergedProjects, registryProjects, alertLevel, writeSite, getSite, deleteSite, getSecret, putSecret, listDocs, mergeDocs, deleteDoc };

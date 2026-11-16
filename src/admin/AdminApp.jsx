@@ -118,7 +118,8 @@ function Sidebar({ projects, route, go, onNavigate, badges, pinned }) {
   const addProject = async () => {
     const slug = slugify(name)
     if (!slug) return
-    await saveDoc(projectDocId(slug), { kind: 'project', name: name.trim(), status: 'building', category: 'Product' })
+    if (projects.some((p) => p.slug === slug)) { nav(`/p/${slug}`); return }
+    await saveDoc(projectDocId(slug), { kind: 'project', name: name.trim(), status: 'building', category: 'Product', order: Math.max(0, ...projects.map((p) => p.order ?? 0)) + 10, createdAt: Date.now() })
     setName('')
     setAdding(false)
     nav(`/p/${slug}`)

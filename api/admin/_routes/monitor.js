@@ -5,7 +5,7 @@
 // the day's Instagram follower counts for the trend chart).
 // Auth: MONITOR_SECRET bearer, or the owner.
 const { requireOwnerOrMonitor } = require('../_auth');
-const { mergedProjects } = require('../_firestore');
+const { mergedProjects, alertLevel } = require('../_firestore');
 const { loadLaptop } = require('./laptop');
 const { loadProject } = require('./supabase');
 const { loadApp } = require('./apps');
@@ -25,11 +25,13 @@ module.exports = async (req, res) => {
   const hosts = [];
   const seen = new Set();
   for (const p of active) {
+    const level = alertLevel(p);
+    if (level === 'off') continue;
     for (const h of p.domains || []) {
       if (h.startsWith('www.') || seen.has(h)) continue;
       seen.add(h);
-      // Only live projects page you at night; others are warnings.
-      hosts.push({ host: h, project: p.name, critical: p.status === 'live' });
+      // Each project's alert level: critical pages you, digest waits for the morning.
+      hosts.push({ host: h, project: p.name, critical: level === 'critical' });
     }
   }
   for (const d of Object.values(docs || {})) {

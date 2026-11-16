@@ -1,7 +1,7 @@
 // One set of alert rules for the whole dashboard: the sidebar badge, the
 // Alerts page and the Overview's "Needs attention" list all read this.
 // scripts/monitor.mjs applies the same thresholds for phone notifications.
-import { apexDomain, clientRenewals, daysUntil, invoiceState, money } from './data'
+import { alertLevel, apexDomain, clientRenewals, daysUntil, invoiceState, money } from './data'
 
 export const SEVERITY = {
   critical: { label: 'Critical', tone: 'red', rank: 0 },
@@ -35,14 +35,14 @@ export function computeAlerts(data) {
   const add = (severity, kind, title, detail, to) => out.push({ key: `${kind}:${title}`, severity, kind, title, detail, to })
   const { projects, checks } = data
 
-  // Sites: down on a live project is critical.
+  // Sites: each project's alert level decides (critical by default when live).
   const hostOwner = {}
   for (const p of projects) for (const h of p.domains || []) hostOwner[h] = p
   for (const c of Object.values(checks)) {
     if (c.up) continue
     const p = hostOwner[c.host]
-    if (p?.status === 'decommissioned') continue
-    add(p?.status === 'live' ? 'critical' : 'warning', 'site', `${c.host} is down`, `${p ? `${p.name} · ` : ''}${c.status ?? c.error}`, p ? `/p/${p.slug}` : '/infra/uptime')
+    if (p?.status === 'decommissioned' || (p && alertLevel(p) === 'off')) continue
+    add(p && alertLevel(p) === 'critical' ? 'critical' : 'warning', 'site', `${c.host} is down`, `${p ? `${p.name} · ` : ''}${c.status ?? c.error}`, p ? `/p/${p.slug}` : '/infra/uptime')
   }
 
   // Certificates and domain registrations.

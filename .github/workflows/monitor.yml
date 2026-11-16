@@ -21,7 +21,6 @@ jobs:
         with:
           sparse-checkout: |
             scripts
-            src/admin/projects.json
       - uses: actions/setup-node@v4
         with:
           node-version: 22

@@ -2,10 +2,10 @@ import { motion } from 'framer-motion'
 import { ExternalLink, Github, Lock } from 'lucide-react'
 import SectionShell from '../components/SectionShell'
 import SectionHeader from '../components/SectionHeader'
-import { sectionContent } from '../data'
 import { usePortfolio } from '../contexts/PortfolioContext'
 
 function ProjectCard({ project, className = '', index = 0 }) {
+  const { sectionContent } = usePortfolio()
   const hasLive = project.live && !project.private
   const hasGithub = Boolean(project.github)
 
@@ -83,7 +83,7 @@ function ProjectCard({ project, className = '', index = 0 }) {
 }
 
 export default function Portfolio() {
-  const { projects } = usePortfolio()
+  const { projects, sectionContent } = usePortfolio()
   const featured = projects.filter((p) => p.featured)
   const rest = projects.filter((p) => !p.featured)
 
