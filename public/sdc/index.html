@@ -45,6 +45,8 @@ nav { display: flex; align-items: center; justify-content: space-between; gap: 1
 .brand svg { width: 34px; height: 34px; filter: drop-shadow(0 0 6px rgba(255,255,255,0.35)) }
 .home { display: inline-flex; align-items: center; gap: 6px; background: var(--ink); color: #000; text-decoration: none; font-weight: 600; font-size: 14px; padding: 9px 16px; border-radius: 10px; transition: background .2s }
 .home:hover { background: #e5e5e5 }
+button.home { border: 0; cursor: pointer; font-family: inherit }
+.home:disabled { opacity: .6; cursor: default }
 .nav-links { display: flex; gap: 8px; align-items: center }
 .ghost { display: inline-flex; align-items: center; gap: 6px; color: var(--text); text-decoration: none; font-weight: 600; font-size: 14px; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--line); background: rgba(0,0,0,0.4); transition: border-color .2s }
 .ghost:hover { border-color: var(--orange-line); color: var(--ink) }
@@ -217,7 +219,7 @@ footer a { color: var(--muted) }
     </a>
     <div class="nav-links">
       <a class="ghost" href="https://www.faangplus.com/practice/hld" target="_blank" rel="noopener">FAANGPlus <svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
-      <a class="home" href="/">Back to site</a>
+      <button class="home" id="sync">Sign in</button>
     </div>
   </nav>
 
@@ -246,7 +248,6 @@ footer a { color: var(--muted) }
         <option value="notes">Topics with notes</option>
       </select>
       <span class="saved" id="saved"></span>
-      <button class="btn sm" id="sync">Sign in to sync</button>
     </div>
   </div>
 
@@ -341,7 +342,7 @@ function status(msg) {
     error: "Sync failed; everything is still saved in this browser",
   }[sync.state];
   const b = $("#sync");
-  b.textContent = sync.user ? "Sign out" : "Sign in to sync";
+  b.textContent = sync.user ? "Sign out" : "Sign in";
   b.disabled = sync.state === "connecting";
 }
 
