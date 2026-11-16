@@ -26,7 +26,7 @@ export default function AlertsView({ data, go }) {
   const sendTest = async () => {
     setTest('sending')
     try {
-      await api('/api/admin/notify', { method: 'POST', body: JSON.stringify({ title: 'VP Control test', message: 'WhatsApp alerts work. Critical ones arrive like this.' }) })
+      await api('/api/admin/notify', { method: 'POST', body: JSON.stringify({ title: 'Admin test', message: 'WhatsApp alerts work. Critical ones arrive like this.' }) })
       setTest('Queued: the laptop sends it to the ops group within 2 minutes')
     } catch (e) {
       setTest(e.message)
@@ -34,6 +34,7 @@ export default function AlertsView({ data, go }) {
   }
   const counts = Object.fromEntries(Object.keys(SEVERITY).map((k) => [k, alerts.filter((a) => a.severity === k).length]))
   const mon = st.monitor
+  const lap = data.docs?.laptop?.monitor
   const wa = data.docs?.whatsapp
 
   return (
@@ -71,9 +72,10 @@ export default function AlertsView({ data, go }) {
       <div className="space-y-5 xl:col-span-2">
         <Section title="Phone notifications" action={<BellRing size={14} className="text-zinc-500" />}>
           <ul className="divide-y divide-white/[0.05]">
-            <Channel name="Scheduled monitor" ok={!!st.monitorSecret && mon?.conclusion === 'success'}>
-              GitHub Actions checks everything every 10 minutes, even when this page and your laptop are closed.
-              {mon && <> Last run {timeAgo(mon.at)} — <a className="underline" href={mon.url} target="_blank" rel="noreferrer">{mon.conclusion || mon.status}</a>.</>}
+            <Channel name="Uptime monitor" ok={!!st.monitorSecret && (lap ? Date.now() - Date.parse(lap.at) < 30 * 60e3 : mon?.conclusion === 'success')}>
+              The laptop checks every site, certificate and Supabase project every 10 minutes while it’s on. GitHub Actions is the backup for when it’s off, but only runs every few hours.
+              {lap && <> Laptop last checked {timeAgo(lap.at)}: {lap.hosts} sites, {lap.down} down.</>}
+              {mon && <> GitHub last ran {timeAgo(mon.at)} (<a className="underline" href={mon.url} target="_blank" rel="noreferrer">{mon.conclusion || mon.status}</a>).</>}
             </Channel>
             <Channel name="WhatsApp · ops group" ok={!!wa?.deliveredAt && !st.whatsappWaiting}>
               Sent by the laptop agent through hermes, to the group Media-man reports to, so messages go out while the laptop is on and wait otherwise.

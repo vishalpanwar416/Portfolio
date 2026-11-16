@@ -21,6 +21,7 @@ import PortfolioEditor, { PORTFOLIO_TABS } from './PortfolioEditor'
 import AlertsView from './AlertsView'
 import SettingsView from './SettingsView'
 import CommandPalette, { useHotkey } from './CommandPalette'
+import logoMark from './logo-mark.png'
 
 // ── routing ────────────────────────────────────────────
 // #/ #/alerts #/projects #/money #/marketing/<tab> #/portfolio/<tab> #/apps #/infra/<tab> #/linkedin #/jobs #/settings #/p/<slug>
@@ -44,6 +45,7 @@ function useHashRoute() {
 
 const Backdrop = () => (
   <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-black">
+    <div className="absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(ellipse_60%_100%_at_50%_0%,rgba(255,255,255,0.075),transparent_70%)]" />
     <div className="absolute -left-40 -top-40 h-[36rem] w-[36rem] rounded-full bg-white/[0.07] blur-[120px]" />
     <div className="absolute -right-32 top-1/3 h-[30rem] w-[30rem] rounded-full bg-zinc-400/[0.06] blur-[120px]" />
     <div className="absolute bottom-[-12rem] left-1/3 h-[28rem] w-[28rem] rounded-full bg-white/[0.04] blur-[120px]" />
@@ -84,10 +86,10 @@ function NavItem({ active, onClick, children, badge, badgeTone = 'amber' }) {
       onClick={onClick}
       className={cx(
         'relative flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-left text-sm transition lg:py-1.5',
-        active ? 'bg-white/[0.09] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]' : 'text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-100'
+        active ? 'bg-gradient-to-r from-white/[0.11] to-white/[0.04] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]' : 'text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-100'
       )}
     >
-      {active && <span className="absolute -left-1.5 top-1/2 h-4 w-0.5 -translate-y-1/2 rounded-full bg-white/80" />}
+      {active && <span className="absolute -left-1.5 top-1/2 h-4 w-0.5 -translate-y-1/2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]" />}
       {children}
       {badge > 0 && (
         <span className={cx('ml-auto rounded-full px-1.5 text-[10px] tabular-nums', badgeTone === 'red' ? 'bg-red-500/20 text-red-300' : 'bg-amber-400/15 text-amber-300')}>{badge}</span>
@@ -95,6 +97,11 @@ function NavItem({ active, onClick, children, badge, badgeTone = 'amber' }) {
     </button>
   )
 }
+
+// The site's neon VP mark, with a soft glow like the original.
+export const Logo = ({ className }) => (
+  <img src={logoMark} alt="Vishal Panwar" className={cx('select-none object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.45)]', className)} draggable={false} />
+)
 
 const SectionLabel = ({ children, onClick, open }) => (
   <button onClick={onClick} disabled={!onClick} className="flex w-full items-center gap-1 px-2.5 pb-1 text-[10px] font-medium uppercase tracking-[0.1em] text-zinc-600 enabled:hover:text-zinc-400">
@@ -127,13 +134,13 @@ function Sidebar({ projects, route, go, onNavigate, badges, pinned }) {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center gap-2.5 px-3 pb-4 pt-1">
-        <div className="grid h-8 w-8 place-items-center rounded-lg border border-white/15 bg-gradient-to-br from-white/20 to-white/[0.04] text-sm font-semibold text-white">VP</div>
-        <div>
-          <div className="text-sm font-medium text-white">Control</div>
-          <div className="text-[11px] text-zinc-500">vishalpanwar.in</div>
+      <a href="https://vishalpanwar.in" target="_blank" rel="noreferrer" className="group mb-1 flex items-center gap-3 rounded-xl px-2.5 pb-4 pt-1" title="Open vishalpanwar.in">
+        <Logo className="h-10 w-10 transition duration-300 group-hover:drop-shadow-[0_0_16px_rgba(255,255,255,0.7)]" />
+        <div className="min-w-0">
+          <div className="truncate text-sm font-semibold tracking-tight text-white">Vishal Panwar</div>
+          <div className="text-[11px] text-zinc-500 transition group-hover:text-zinc-300">Admin · vishalpanwar.in</div>
         </div>
-      </div>
+      </a>
 
       <div className="space-y-0.5 px-1.5">
         {PAGES.map((pg) => (
@@ -265,7 +272,7 @@ function Shell({ user }) {
       : <Glass className="p-6 text-sm text-zinc-400">{data.docsReady ? 'No such project.' : 'Loading…'}</Glass>
   }
 
-  useEffect(() => { document.title = `${critical ? `(${critical}) ` : ''}${title} · Control` }, [title, critical])
+  useEffect(() => { document.title = `${critical ? `(${critical}) ` : ''}${title} · Admin` }, [title, critical])
 
   const pinned = data.settings.pinned || []
 
@@ -346,7 +353,7 @@ function Shell({ user }) {
 // ── installable app ────────────────────────────────────
 
 // Point the page at the admin manifest (the build ships the portfolio's), so
-// "Install" gives a VP Control app that opens on the dashboard.
+// "Install" gives an Admin app that opens on the dashboard.
 function useAdminManifest() {
   useEffect(() => {
     let link = document.querySelector('link[rel="manifest"]')
@@ -364,7 +371,12 @@ function useAdminManifest() {
     meta('theme-color', '#000000')
     meta('apple-mobile-web-app-capable', 'yes')
     meta('apple-mobile-web-app-status-bar-style', 'black-translucent')
-    meta('apple-mobile-web-app-title', 'VP Control')
+    meta('apple-mobile-web-app-title', 'Admin')
+    for (const rel of ['icon', 'apple-touch-icon']) {
+      let l = document.querySelector(`link[rel="${rel}"]`)
+      if (!l) { l = Object.assign(document.createElement('link'), { rel }); document.head.appendChild(l) }
+      l.href = '/admin-icon-192.png'
+    }
   }, [])
 }
 
@@ -399,7 +411,7 @@ export default function AdminApp() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    document.title = 'Control · vishalpanwar.in'
+    document.title = 'Admin · Vishal Panwar'
     return onAuthStateChanged(auth, async (u) => {
       // Force a fresh token so a newly granted claim is picked up.
       setAllowed(u ? (await u.getIdTokenResult(true)).claims.superAdmin === true : false)
@@ -418,8 +430,9 @@ export default function AdminApp() {
   if (!user) {
     return (
       <Centered>
-        <div className="mx-auto grid h-11 w-11 place-items-center rounded-xl border border-white/15 bg-gradient-to-br from-white/20 to-white/[0.04] font-semibold text-white">VP</div>
-        <h1 className="mt-4 text-lg font-semibold text-white">Control</h1>
+        <Logo className="mx-auto h-20 w-20 drop-shadow-[0_0_22px_rgba(255,255,255,0.55)]" />
+        <h1 className="mt-5 text-lg font-semibold tracking-tight text-white">Vishal Panwar</h1>
+        <div className="mt-0.5 text-[11px] uppercase tracking-[0.2em] text-zinc-500">Admin</div>
         <p className="mt-1 text-sm text-zinc-500">Projects, money, apps and alerts.</p>
         <Button variant="primary" onClick={signIn} className="mt-6 w-full py-2">Sign in with Google</Button>
         {error && <p className="mt-3 text-xs text-red-400">{error}</p>}

@@ -8,8 +8,8 @@ export function Glass({ className, children, as: Tag = 'div', ...rest }) {
   return (
     <Tag
       className={cx(
-        'rounded-2xl border border-white/[0.08] bg-white/[0.035] backdrop-blur-xl',
-        'shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_10px_40px_-12px_rgba(0,0,0,0.7)]',
+        'rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-white/[0.02] backdrop-blur-xl',
+        'shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_10px_40px_-12px_rgba(0,0,0,0.7)]',
         className
       )}
       {...rest}
@@ -35,12 +35,12 @@ export function Section({ title, action, children, className }) {
 
 export function Stat({ label, value, sub, tone = 'text-zinc-50', icon: Icon }) {
   return (
-    <Glass className="p-4">
+    <Glass className="group p-4 transition duration-300 hover:border-white/[0.16] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_0_30px_-10px_rgba(255,255,255,0.18)]">
       <div className="flex items-center justify-between text-xs text-zinc-500">
         <span>{label}</span>
-        {Icon && <Icon size={14} className="text-zinc-600" />}
+        {Icon && <span className="grid h-7 w-7 place-items-center rounded-lg border border-white/[0.06] bg-white/[0.03] text-zinc-500 transition group-hover:text-zinc-200"><Icon size={13} /></span>}
       </div>
-      <div className={cx('mt-2 text-2xl font-semibold tabular-nums tracking-tight', tone)}>{value}</div>
+      <div className={cx('mt-2 text-[1.7rem] font-semibold leading-tight tabular-nums tracking-tight', tone)}>{value}</div>
       {sub && <div className="mt-1 text-xs text-zinc-500">{sub}</div>}
     </Glass>
   )

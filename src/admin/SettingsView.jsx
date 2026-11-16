@@ -42,18 +42,19 @@ export default function SettingsView({ data, install }) {
   const st = data.integrations.data || {}
   const thisMonth = data.projects.reduce((t, p) => t + revenueIn(p, monthKey()), 0)
   const mon = st.monitor
-  const monitorOk = mon && mon.conclusion === 'success'
+  const lap = data.docs?.laptop?.monitor
+  const monitorOk = lap ? Date.now() - Date.parse(lap.at) < 30 * 60e3 : mon?.conclusion === 'success'
 
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <GoalCard settings={data.settings} thisMonth={thisMonth} />
         <Section title="Install as an app" className="lg:col-span-2">
-          <p className="text-sm text-zinc-400">Adds “VP Control” to your home screen or dock and opens it full-screen, without the browser bar.</p>
+          <p className="text-sm text-zinc-400">Adds “Admin” to your home screen or dock and opens it full-screen, without the browser bar.</p>
           <div className="mt-3 flex flex-wrap items-center gap-3">
             {install ? <Button variant="primary" onClick={install}><Download size={14} /> Install</Button> : (
               <span className="text-xs text-zinc-500">
-                Already installed, or your browser shows it in its own menu — Chrome: ⋮ → “Install VP Control”. iPhone Safari: Share → “Add to Home Screen”.
+                Already installed, or your browser shows it in its own menu — Chrome: ⋮ → “Install Vishal Panwar · Admin”. iPhone Safari: Share → “Add to Home Screen”.
               </span>
             )}
           </div>
@@ -82,7 +83,7 @@ export default function SettingsView({ data, install }) {
               Uses <code>VERCEL_TOKEN</code> and <code>VERCEL_TEAM_ID</code>. Traffic needs Web Analytics switched on per project in Vercel (Project → Analytics → Enable).
             </Integration>
 
-            <Integration name="Alerts on WhatsApp" ok={st.monitorSecret && monitorOk && !!data.docs?.whatsapp?.deliveredAt} detail={mon && <span className="text-xs text-zinc-500">monitor ran {timeAgo(mon.at)}</span>}>
+            <Integration name="Alerts on WhatsApp" ok={st.monitorSecret && monitorOk && !!data.docs?.whatsapp?.deliveredAt} detail={(lap || mon) && <span className="text-xs text-zinc-500">monitor ran {timeAgo((lap || mon).at)}</span>}>
               One script sets up the Google service account (backend storage), the monitor secret and the laptop agent, which delivers alerts to the WhatsApp ops group through hermes:
               <Cmd>{`bash ~/Development/Projects/Portfolio/scripts/setup.sh`}</Cmd>
               Test it from the <a className="underline" href="#/alerts">Alerts</a> page. Alerts go out while the laptop is on with hermes running; others wait until then.
