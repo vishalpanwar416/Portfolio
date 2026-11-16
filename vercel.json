@@ -41,11 +41,6 @@
     }
   ],
   "rewrites": [
-    {
-      "source": "/",
-      "has": [{ "type": "host", "value": "learn.vishalpanwar.in" }],
-      "destination": "/sdc/index.html"
-    },
     { "source": "/sdc", "destination": "/sdc/index.html" }
   ],
   "headers": [
