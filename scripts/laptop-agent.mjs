@@ -156,6 +156,48 @@ try {
   process.exitCode = 0 // not a failure of the agent itself
 }
 
+// ── WhatsApp alerts ────────────────────────────────────
+// The dashboard and the monitor queue messages at /api/admin/notify; this
+// delivers them through hermes' WhatsApp bridge (loopback only, which is why
+// the laptop does it) to the ops group Media-man reports to, then acks them.
+// If hermes is down they stay queued and go out on a later run.
+
+const BRIDGE = process.env.WHATSAPP_BRIDGE_URL || 'http://127.0.0.1:3000'
+const WA_CHAT = readJson(CONFIG, {}).whatsappChat || '120363411809952493@g.us'
+const NOTIFY = API.replace(/\/laptop$/, '/notify')
+
+try {
+  const r = await fetch(NOTIFY, { headers: { Authorization: `Bearer ${secret}` }, signal: AbortSignal.timeout(20000) })
+  if (!r.ok) throw new Error(`HTTP ${r.status}`)
+  const { items = [] } = await r.json()
+  const done = []
+  for (const m of items) {
+    // Held while the laptop was off: say when it actually happened.
+    const late = Date.now() - m.at > 15 * 60e3
+      ? `\n_${new Date(m.at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}_`
+      : ''
+    const sent = await fetch(`${BRIDGE}/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chatId: WA_CHAT, message: `${m.text}${late}` }),
+      signal: AbortSignal.timeout(20000),
+    }).catch((e) => ({ ok: false, status: e.message }))
+    if (!sent.ok) { console.error(`whatsapp: bridge ${sent.status}, ${items.length - done.length} left for next run`); break }
+    done.push(m.id)
+  }
+  if (done.length) {
+    await fetch(NOTIFY, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${secret}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ack: done }),
+      signal: AbortSignal.timeout(20000),
+    })
+    console.log(`whatsapp: delivered ${done.length}`)
+  }
+} catch (e) {
+  console.error(`whatsapp: not checked, retrying next run: ${e.message}`)
+}
+
 // ── linkedin trackers ──────────────────────────────────
 // The linkedin-followup-dms scheduled task keeps its trackers in
 // ~/linkedin-outreach. Send both files to /api/admin/linkedin whenever either

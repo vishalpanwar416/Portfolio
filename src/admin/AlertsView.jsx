@@ -26,14 +26,15 @@ export default function AlertsView({ data, go }) {
   const sendTest = async () => {
     setTest('sending')
     try {
-      const r = await api('/api/admin/notify', { method: 'POST', body: JSON.stringify({ title: 'VP Control test', message: 'Notifications work. Critical alerts arrive like this, loud.', priority: 'critical' }) })
-      setTest(r.sent.length ? `Sent via ${r.sent.join(' + ')}` : `Failed: ${r.errors.join(', ')}`)
+      await api('/api/admin/notify', { method: 'POST', body: JSON.stringify({ title: 'VP Control test', message: 'WhatsApp alerts work. Critical ones arrive like this.' }) })
+      setTest('Queued: the laptop sends it to the ops group within 2 minutes')
     } catch (e) {
       setTest(e.message)
     }
   }
   const counts = Object.fromEntries(Object.keys(SEVERITY).map((k) => [k, alerts.filter((a) => a.severity === k).length]))
   const mon = st.monitor
+  const wa = data.docs?.whatsapp
 
   return (
     <div className="grid grid-cols-1 gap-5 xl:grid-cols-5">
@@ -74,23 +75,23 @@ export default function AlertsView({ data, go }) {
               GitHub Actions checks everything every 10 minutes, even when this page and your laptop are closed.
               {mon && <> Last run {timeAgo(mon.at)} — <a className="underline" href={mon.url} target="_blank" rel="noreferrer">{mon.conclusion || mon.status}</a>.</>}
             </Channel>
-            <Channel name="ntfy push (recommended)" ok={st.ntfy}>
-              Real phone notifications; critical ones are “urgent” and ring through Do Not Disturb if you allow it in the ntfy app.
+            <Channel name="WhatsApp · ops group" ok={!!wa?.deliveredAt && !st.whatsappWaiting}>
+              Sent by the laptop agent through hermes, to the group Media-man reports to, so messages go out while the laptop is on and wait otherwise.
+              {wa?.deliveredAt && <> Last delivered {timeAgo(wa.deliveredAt)}.</>}
+              {st.whatsappWaiting > 0 && <span className="text-amber-300"> {st.whatsappWaiting} waiting.</span>}
             </Channel>
-            <Channel name="Telegram" ok={st.telegram}>Optional second channel.</Channel>
           </ul>
           <div className="mt-3 flex items-center gap-3">
-            <Button variant="glass" onClick={sendTest} disabled={test === 'sending' || !(st.ntfy || st.telegram)}><Send size={13} /> Send test</Button>
+            <Button variant="glass" onClick={sendTest} disabled={test === 'sending' || !st.monitorSecret}><Send size={13} /> Send test</Button>
             {test && test !== 'sending' && <span className="text-xs text-zinc-400">{test}</span>}
           </div>
-          {!(st.ntfy && st.monitorSecret) && (
+          {!st.monitorSecret && (
             <div className="mt-4 rounded-xl border border-white/[0.06] bg-black/30 p-3 text-xs leading-relaxed text-zinc-400">
               <b className="text-zinc-200">Set up once (2 minutes):</b>
               <ol className="mt-1 list-decimal space-y-1 pl-4">
                 <li>Run in a terminal (or in Claude Code with <code>!</code>):
                   <pre className="mt-1 overflow-x-auto rounded-lg bg-black/50 px-2 py-1.5 font-mono text-[11px] text-zinc-300">bash ~/Development/Projects/Portfolio/scripts/setup.sh</pre>
-                  It sets up the backend’s service account, the shared secret and a private ntfy topic, and starts the laptop agent (reports every 2 minutes while the laptop is on).</li>
-                <li>Install <b>ntfy</b> on your phone (Play Store / App Store), tap +, and subscribe to the topic the script printed.</li>
+                  It sets up the backend’s service account and the shared secret, and starts the laptop agent (reports every 2 minutes while the laptop is on and delivers WhatsApp alerts through hermes).</li>
                 <li>Come back here and press <b>Send test</b>.</li>
               </ol>
             </div>
@@ -99,10 +100,10 @@ export default function AlertsView({ data, go }) {
 
         <Section title="What wakes you up">
           <ul className="space-y-2 text-xs text-zinc-400">
-            <li><Badge tone="red">critical</Badge> a live project’s site down · Supabase paused or unhealthy · SSL or domain expiring within 7 days</li>
-            <li><Badge tone="amber">warning</Badge> other sites down · laptop service failing · disk nearly full · failed deploy · overdue invoice · rating under 4</li>
-            <li><Badge>digest</Badge> 9am: renewals within 30 days, contracts ending, overdue invoices</li>
-            <li className="text-zinc-600">You get one message when something breaks and one when it’s fixed; critical ones repeat every 6 hours until resolved.</li>
+            <li><Badge tone="red">critical</Badge> its own message: a live project’s site down · Supabase paused or unhealthy · SSL or domain expiring within 7 days</li>
+            <li><Badge>also</Badge> new leads from contact forms · new SDE roles each morning</li>
+            <li><Badge>digest</Badge> 9am: open warnings (other sites down, laptop services, disk) · renewals · contracts · overdue invoices · low ratings · lead follow-ups · PageSpeed drops</li>
+            <li className="text-zinc-600">Critical problems get one message when they start and one when they’re fixed, repeated every 6 hours while open. Everything else waits for the dashboard or the morning check.</li>
           </ul>
         </Section>
       </div>

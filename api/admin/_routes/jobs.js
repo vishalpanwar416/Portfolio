@@ -145,7 +145,7 @@ function emailHtml(matches) {
     <p style="margin:16px 0 0"><a href="${DASHBOARD}" style="color:#ea580c">Open the Jobs page</a> to save or mark them applied.</p></div>`;
 }
 
-/** Email (Resend, when RESEND_API_KEY and JOBS_EMAIL_TO are set) plus the ntfy/Telegram push. */
+/** Email (Resend, when RESEND_API_KEY and JOBS_EMAIL_TO are set) plus a WhatsApp message. */
 async function announce(matches) {
   if (!matches.length) return { sent: [], errors: [] };
   const sent = [];
@@ -165,7 +165,7 @@ async function announce(matches) {
   const lines = matches.slice(0, 8).map((j) => `• ${j.company}: ${j.title} (${yrs(j)})`);
   if (matches.length > 8) lines.push(`…and ${matches.length - 8} more`);
   const push = await sendNotification({ title: subject, message: lines.join('\n'), priority: 'info', url: DASHBOARD });
-  return { sent: [...sent, ...push.sent], errors: [...errors, ...push.errors] };
+  return { sent: push.queued ? [...sent, 'whatsapp'] : sent, errors: push.error ? [...errors, `whatsapp ${push.error}`] : errors };
 }
 
 module.exports = async (req, res) => {

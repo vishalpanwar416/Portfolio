@@ -3,10 +3,9 @@
 #   1. the vp-control Google service account → Vercel GCP_SA_KEY
 #      (Firestore storage for laptop data, monitor, Firestore/billing reads)
 #   2. MONITOR_SECRET shared by Vercel, GitHub Actions and the laptop agent
-#   3. a private ntfy topic for phone notifications
-#   4. the laptop agent timer
+#   3. the laptop agent timer (also delivers WhatsApp alerts through hermes)
 # Secrets go straight into Vercel / GitHub and ~/.config/vp-control (mode
-# 600); only the ntfy topic is printed, because you subscribe to it.
+# 600) and are never printed.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 REPO=vishalpanwar416/Portfolio
@@ -20,7 +19,7 @@ changed=0
 have_env() { vercel env ls production 2>/dev/null | grep -qE "^\s*$1\s"; }
 set_both() { vercel env add "$1" production --value "$2" --yes --force --sensitive >/dev/null; gh secret set "$1" -R "$REPO" --body "$2"; }
 
-echo "1/4 service account"
+echo "1/3 service account"
 if ! gcloud iam service-accounts describe "$SA" --project sanero-media --account "$OWNER" >/dev/null 2>&1; then
   gcloud iam service-accounts create vp-control --project sanero-media --account "$OWNER" --display-name "VP Control dashboard"
 fi
@@ -38,7 +37,7 @@ if ! have_env GCP_SA_KEY; then
   changed=1
 fi
 
-echo "2/4 monitor secret"
+echo "2/3 monitor secret"
 if [ ! -s "$CFG/agent.json" ] || ! have_env MONITOR_SECRET; then
   SECRET="$(openssl rand -hex 32)"
   printf '{\n  "secret": "%s"\n}\n' "$SECRET" > "$CFG/agent.json"
@@ -47,21 +46,14 @@ if [ ! -s "$CFG/agent.json" ] || ! have_env MONITOR_SECRET; then
   changed=1
 fi
 
-echo "3/4 phone notifications"
-if [ ! -s "$CFG/ntfy-topic" ] || ! have_env NTFY_TOPIC; then
-  echo "vp-control-$(openssl rand -hex 8)" > "$CFG/ntfy-topic"
-  set_both NTFY_TOPIC "$(cat "$CFG/ntfy-topic")"
-  changed=1
-fi
-
 if [ "$changed" = 1 ]; then
   echo "   redeploying so the new settings take effect…"
   vercel redeploy admin.vishalpanwar.in --target production >/dev/null
 fi
 
-echo "4/4 laptop agent"
+echo "3/3 laptop agent"
 bash scripts/install-laptop-agent.sh
 
 echo
-echo "All set. Phone: install ntfy → + → subscribe to:  $(cat "$CFG/ntfy-topic")"
-echo "Then open admin.vishalpanwar.in → Alerts → Send test."
+echo "All set. Alerts go to the WhatsApp ops group while the laptop and hermes are on."
+echo "Open admin.vishalpanwar.in → Alerts → Send test."

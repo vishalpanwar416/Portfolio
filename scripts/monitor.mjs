@@ -2,15 +2,17 @@
 //
 // Gets the list of things to watch from the dashboard API (/api/admin/monitor,
 // with MONITOR_SECRET), falling back to src/admin/projects.json, then:
-//   critical  (urgent phone push): a live project's site down, a Supabase
+//   critical  (own WhatsApp message): a live project's site down, a Supabase
 //             project paused or unhealthy, a domain or certificate < 7 days
-//   warning   (normal push): other sites down, laptop services failing
-//   digest    (once a day, 9am IST): renewals, overdue invoices, contracts,
-//             low store ratings, lead follow-ups due, and a PageSpeed run
-//             that warns when a site's performance score drops
-// Only changes are sent (down / back up); a still-open critical problem is
-// repeated every 6 hours. Channels: ntfy (NTFY_TOPIC) and Telegram
-// (TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID). State is cached between runs.
+//   warning   (no message of its own): other sites down, laptop services
+//             failing, disk nearly full; listed in the morning check instead
+//   digest    (once a day, 9am IST): open warnings, renewals, overdue
+//             invoices, contracts, low store ratings, lead follow-ups due,
+//             and a PageSpeed run that notes sites whose score dropped
+// Critical problems get one message when they start and one when they're
+// fixed, repeated every 6 hours while open. Messages are queued at
+// /api/admin/notify and the laptop agent delivers them to the WhatsApp ops
+// group, so they arrive while the laptop is on. State is cached between runs.
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import tls from 'node:tls'
 
@@ -124,7 +126,7 @@ for (const p of problems) {
   const prev = state.open[p.key]
   if (!prev) {
     state.open[p.key] = { since: now, alertedAt: now, severity: p.severity, text: p.text, back: p.back }
-    messages.push({ severity: p.severity, title: p.severity === 'critical' ? 'CRITICAL' : 'Warning', text: p.text })
+    if (p.severity === 'critical') messages.push({ severity: 'critical', title: 'CRITICAL', text: p.text })
   } else {
     prev.text = p.text
     if (p.severity === 'critical' && now - prev.alertedAt > REALERT_MS) {
@@ -136,7 +138,7 @@ for (const p of problems) {
 for (const [key, prev] of Object.entries(state.open)) {
   if (current.has(key)) continue
   delete state.open[key]
-  messages.push({ severity: 'info', title: 'Resolved', text: `${prev.back || `${key} resolved`} after ${dur(now - prev.since)}` })
+  if (prev.severity === 'critical') messages.push({ severity: 'info', title: 'Resolved', text: `${prev.back || `${key} resolved`} after ${dur(now - prev.since)}` })
 }
 
 // ── morning digest ─────────────────────────────────────
@@ -144,6 +146,7 @@ for (const [key, prev] of Object.entries(state.open)) {
 if (digestDue) {
   state.lastDigest = todayKey
   const lines = []
+  for (const p of problems) if (p.severity === 'warning') lines.push(`⚠️ ${p.text}`)
   for (const r of results) if (r.cert && days(r.cert) < 14 && days(r.cert) >= 7) lines.push(`🔐 SSL ${r.host}: ${days(r.cert)}d left`)
   const apex = (h) => {
     if (PLATFORM.some((s) => h === s || h.endsWith(`.${s}`))) return null
@@ -162,9 +165,6 @@ if (digestDue) {
   for (const c of remote?.contracts || []) lines.push(`📄 ${c.client} (${c.project}) contract ${c.days < 0 ? 'ended' : `ends in ${c.days}d`}`)
   for (const a of remote?.apps || []) if (a.published && a.rating && a.rating < 4) lines.push(`⭐ ${a.name} (${a.platform}) rated ${a.rating}`)
   for (const f of remote?.followUps || []) lines.push(`📞 Follow up with ${f.name}${f.site ? ` (${f.site})` : ''}${f.due < todayKey ? ` · due ${f.due}` : ''}`)
-  if (laptop && !laptop.online && laptop.at) lines.push(`💻 Laptop last checked in ${dur(now - Date.parse(laptop.at))} ago`)
-  if (lines.length) messages.push({ severity: 'info', title: `Morning check · ${lines.length}`, text: lines.join('\n') })
-
   if (remote?.vitalsHosts?.length) {
     try {
       const r = await fetch(`${API}/vitals`, {
@@ -174,11 +174,12 @@ if (digestDue) {
         signal: AbortSignal.timeout(180e3),
       })
       const { drops = [] } = r.ok ? await r.json() : {}
-      if (drops.length) messages.push({ severity: 'warning', title: 'PageSpeed dropped', text: drops.map((d) => `⚡ ${d.host}: performance ${d.from} → ${d.to}`).join('\n') })
+      for (const d of drops) lines.push(`⚡ ${d.host}: PageSpeed ${d.from} → ${d.to}`)
     } catch (e) {
       console.warn('PageSpeed run failed:', e.message)
     }
   }
+  if (lines.length) messages.push({ severity: 'info', title: `Morning check · ${lines.length}`, text: lines.join('\n') })
 }
 
 writeFileSync(STATE_FILE, JSON.stringify(state, null, 2))
@@ -186,30 +187,16 @@ console.log(`source: ${remote ? 'dashboard API' : 'projects.json'} · ${results.
 
 // ── send ───────────────────────────────────────────────
 
-const { NTFY_TOPIC: topic, TELEGRAM_BOT_TOKEN: bot, TELEGRAM_CHAT_ID: chat } = process.env
+const ICON = { critical: '🚨', info: '✅' }
 for (const m of messages) {
   console.log(`[${m.severity}] ${m.title}: ${m.text}`)
-  if (topic) {
-    const r = await fetch(`https://ntfy.sh/${encodeURIComponent(topic)}`, {
-      method: 'POST',
-      headers: {
-        Title: `VP Control - ${m.title}`,
-        Priority: m.severity === 'critical' ? 'urgent' : m.severity === 'warning' ? 'high' : 'default',
-        Tags: m.severity === 'critical' ? 'rotating_light' : m.severity === 'warning' ? 'warning' : 'white_check_mark',
-        Click: 'https://admin.vishalpanwar.in/#/alerts',
-      },
-      body: m.text,
-    }).catch((e) => ({ ok: false, status: e.message }))
-    if (!r.ok) { console.error('ntfy failed', r.status); process.exitCode = 1 }
-  }
-  if (bot && chat) {
-    const icon = m.severity === 'critical' ? '🚨' : m.severity === 'warning' ? '⚠️' : '✅'
-    const r = await fetch(`https://api.telegram.org/bot${bot}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chat, text: `${icon} ${m.title}\n${m.text}`, disable_web_page_preview: true }),
-    }).catch((e) => ({ ok: false, status: e.message }))
-    if (!r.ok) { console.error('telegram failed', r.status); process.exitCode = 1 }
-  }
+  if (!process.env.MONITOR_SECRET) continue
+  const r = await fetch(`${API}/notify`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${process.env.MONITOR_SECRET}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: `${m.title.startsWith('Morning') ? '☀️' : ICON[m.severity] || ''} ${m.title}`.trim(), message: m.text, url: 'https://admin.vishalpanwar.in/#/alerts' }),
+    signal: AbortSignal.timeout(20000),
+  }).catch((e) => ({ ok: false, status: e.message }))
+  if (!r.ok) { console.error('queueing message failed', r.status); process.exitCode = 1 }
 }
-if (messages.length && !topic && !(bot && chat)) console.log('No NTFY_TOPIC or Telegram secrets — alerts only logged.')
+if (messages.length && !process.env.MONITOR_SECRET) console.log('No MONITOR_SECRET — alerts only logged.')

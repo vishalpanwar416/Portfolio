@@ -1,6 +1,7 @@
 // Which integrations are configured, and how the uptime monitor (a GitHub
 // Actions workflow in this repo) last ran. Never returns secret values.
 const { requireOwner } = require('../_auth');
+const { listDocs } = require('../_firestore');
 
 const REPO = 'vishalpanwar416/Portfolio';
 const WORKFLOW = 'monitor.yml';
@@ -18,6 +19,11 @@ async function monitorRun() {
   }
 }
 
+/** WhatsApp messages queued for the laptop agent, or null if unreadable. */
+async function whatsappWaiting() {
+  try { return Object.keys(await listDocs('vp_outbox', ['at'])).length; } catch { return null; }
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   if (!(await requireOwner(req, res))) return;
@@ -29,8 +35,7 @@ module.exports = async (req, res) => {
     stacky: has('STACKY_MCP_TOKEN'),
     firebase: has('GCP_SA_KEY'),
     azure: Object.keys(process.env).filter((k) => /^AZURE_COST_[A-Z0-9_]+_SUBSCRIPTION$/.test(k)).map((k) => k.slice(11, -13).toLowerCase()),
-    ntfy: has('NTFY_TOPIC'),
-    telegram: has('TELEGRAM_BOT_TOKEN') && has('TELEGRAM_CHAT_ID'),
+    whatsappWaiting: await whatsappWaiting(),
     monitorSecret: has('MONITOR_SECRET'),
     razorpay: labels(/^RAZORPAY_([A-Z0-9_]+)_KEY_ID$/),
     supabase: labels(/^SUPABASE_([A-Z0-9_]+)_TOKEN$/),

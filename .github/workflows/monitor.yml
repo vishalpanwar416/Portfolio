@@ -35,9 +35,6 @@ jobs:
         run: node scripts/monitor.mjs
         env:
           MONITOR_SECRET: ${{ secrets.MONITOR_SECRET }}
-          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           MONITOR_EXTRA_HOSTS: ${{ vars.MONITOR_EXTRA_HOSTS }}
       - name: Save state
         if: always()

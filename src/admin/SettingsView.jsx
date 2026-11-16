@@ -6,7 +6,6 @@ import { monthKey, revenueIn, saveDoc, timeAgo } from './data'
 import { GoalCard } from './MoneyView'
 import { Badge, Button, Section, cx } from './ui'
 
-const REPO = 'vishalpanwar416/Portfolio'
 const CD = 'cd ~/Development/Projects/Portfolio && '
 
 function Cmd({ children }) {
@@ -83,11 +82,10 @@ export default function SettingsView({ data, install }) {
               Uses <code>VERCEL_TOKEN</code> and <code>VERCEL_TEAM_ID</code>. Traffic needs Web Analytics switched on per project in Vercel (Project → Analytics → Enable).
             </Integration>
 
-            <Integration name="Alerts & phone notifications" ok={st.monitorSecret && st.ntfy && monitorOk} detail={mon && <span className="text-xs text-zinc-500">monitor ran {timeAgo(mon.at)}</span>}>
-              One script sets up the Google service account (backend storage), the monitor secret, a private ntfy topic for your phone, and the laptop agent:
+            <Integration name="Alerts on WhatsApp" ok={st.monitorSecret && monitorOk && !!data.docs?.whatsapp?.deliveredAt} detail={mon && <span className="text-xs text-zinc-500">monitor ran {timeAgo(mon.at)}</span>}>
+              One script sets up the Google service account (backend storage), the monitor secret and the laptop agent, which delivers alerts to the WhatsApp ops group through hermes:
               <Cmd>{`bash ~/Development/Projects/Portfolio/scripts/setup.sh`}</Cmd>
-              Then install <b>ntfy</b> on your phone and subscribe to the topic it prints. Test it from the <a className="underline" href="#/alerts">Alerts</a> page. Telegram is optional:
-              <Cmd>{`export GH_TOKEN=$(gh auth token -u vishalpanwar416) && gh secret set TELEGRAM_BOT_TOKEN -R ${REPO} --body "PASTE_BOT_TOKEN" && gh secret set TELEGRAM_CHAT_ID -R ${REPO} --body "PASTE_CHAT_ID"`}</Cmd>
+              Test it from the <a className="underline" href="#/alerts">Alerts</a> page. Alerts go out while the laptop is on with hermes running; others wait until then.
             </Integration>
 
             <Integration name="Razorpay — automatic revenue (Table Tap, Aarambh)" ok={['tabletap', 'aarambh'].every((l) => (st.razorpay || []).includes(l))} detail={st.razorpay?.length > 0 && <span className="text-xs text-zinc-500">{st.razorpay.join(', ')}</span>}>

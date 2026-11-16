@@ -76,7 +76,7 @@ export const projects = [
     title: "VP Control",
     description: "My private ops dashboard for every project — uptime and SSL checks, Vercel deploys, cloud bills, Razorpay revenue, app-store ratings, marketing analytics and phone alerts, plus the editor that powers this site.",
     tech: ["React", "Vercel Functions", "Firebase", "GitHub Actions", "Tailwind CSS"],
-    features: ["Uptime monitor every 10 minutes", "Phone alerts via ntfy", "Traffic, SEO, campaigns and leads", "Live portfolio editor"],
+    features: ["Uptime monitor every 10 minutes", "WhatsApp alerts via hermes", "Traffic, SEO, campaigns and leads", "Live portfolio editor"],
     image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg",
     github: "https://github.com/vishalpanwar416/Portfolio",
     live: null

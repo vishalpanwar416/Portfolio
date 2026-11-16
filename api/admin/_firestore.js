@@ -171,4 +171,9 @@ async function mergeDocs(collection, writes) {
   }
 }
 
-module.exports = { readSites, mergedProjects, writeSite, getSite, deleteSite, getSecret, putSecret, listDocs, mergeDocs };
+async function deleteDoc(collection, id) {
+  const r = await docRequest(id, { method: 'DELETE' }, collection);
+  if (!r.ok && r.status !== 404) throw new Error(`Firestore ${r.status}`);
+}
+
+module.exports = { readSites, mergedProjects, writeSite, getSite, deleteSite, getSecret, putSecret, listDocs, mergeDocs, deleteDoc };
