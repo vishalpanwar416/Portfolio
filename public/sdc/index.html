@@ -314,6 +314,18 @@ try {
   state = tidy(raw ? JSON.parse(raw) : { done: JSON.parse(localStorage.getItem(KEY) || "{}") });
 } catch { state = blank() }
 try { const t = localStorage.getItem(TAB_KEY); if (t === "hld" || t === "lld") tab = t } catch {}
+
+// The checklist lives at learn.vishalpanwar.in. Its old homes (vishalpanwar.in/sdc, admin.vishalpanwar.in/sdc) forward
+// there, carrying this browser's ticks in the URL fragment, which never reaches a server, so nobody loses progress.
+const HOME = "learn.vishalpanwar.in";
+if (/(^|\.)vishalpanwar\.in$/.test(location.hostname) && location.hostname !== HOME) {
+  const has = Object.keys(state.done).length || Object.keys(state.notes).length || state.plan;
+  location.replace(`https://${HOME}/${has ? "#import=" + encodeURIComponent(JSON.stringify(state)) : ""}`);
+} else if (location.hash.startsWith("#import=")) {
+  try { state = merge(state, tidy(JSON.parse(decodeURIComponent(location.hash.slice(8))))) } catch {}
+  try { localStorage.setItem(STATE_KEY, JSON.stringify(state)); localStorage.setItem(KEY, JSON.stringify(state.done)) } catch {}
+  history.replaceState(null, "", location.pathname + location.search);
+}
 const isDone = (k) => !!state.done[k];
 const count = (list) => list.filter((l) => isDone(l.k)).length;
 const mins = (list) => list.reduce((t, l) => t + l.m, 0);
@@ -653,8 +665,8 @@ function downloadIcs() {
     `UID:sdc-${p.date}-${Date.now()}@vishalpanwar.in`, `DTSTAMP:${stamp}`,
     `DTSTART:${today().replace(/-/g, "")}T${hh}${mm}00`, `DURATION:PT${Math.max(30, Math.ceil(perDay / 15) * 15)}M`,
     `RRULE:FREQ=DAILY;UNTIL=${addDays(p.date, -1).replace(/-/g, "")}T235959`,
-    `SUMMARY:System design study (${target} lessons)`, "DESCRIPTION:Today's lessons: https://vishalpanwar.in/sdc",
-    "URL:https://vishalpanwar.in/sdc", "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+    `SUMMARY:System design study (${target} lessons)`, "DESCRIPTION:Today's lessons: https://learn.vishalpanwar.in",
+    "URL:https://learn.vishalpanwar.in", "END:VEVENT", "END:VCALENDAR"].join("\r\n");
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
   a.download = "system-design-study.ics";

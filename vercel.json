@@ -34,13 +34,18 @@
       "permanent": false
     },
     {
-      "source": "/",
+      "source": "/sdc/:path*",
       "has": [{ "type": "host", "value": "learn.vishalpanwar.in" }],
-      "destination": "/sdc",
-      "permanent": false
+      "destination": "/",
+      "permanent": true
     }
   ],
   "rewrites": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "learn.vishalpanwar.in" }],
+      "destination": "/sdc/index.html"
+    },
     { "source": "/sdc", "destination": "/sdc/index.html" }
   ],
   "headers": [
