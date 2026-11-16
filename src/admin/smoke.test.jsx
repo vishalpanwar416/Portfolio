@@ -45,7 +45,7 @@ const nowS = Math.round(Date.now() / 1000)
 const hist = { points: Array.from({ length: 50 }, (_, i) => ({ t: nowS - (50 - i) * 120, l: 0.3, m: 40 + i / 5, d: 70, b: 80, x: i % 5 ? [] : ['media-man@sanero.service'] })) }
 const data = {
   projects, vercel: [], docs: { [`laptop-h-${new Date().toISOString().slice(0, 10)}`]: hist, laptop: { at: new Date().toISOString(), host: 'lap', services: [{ unit: 'media-man@sanero.service', project: 'media-man', state: 'failed', result: 'exit-code', ok: false }, { unit: 'hermes-gateway.service', project: 'hermes', state: 'active', ok: true }], disk: { total: 5e11, free: 1e11 }, memory: { total: 16e9, available: 8e9 }, load: [1, 1, 1], docker: { state: 'active', ok: true, containers: [{ name: 'splink-postgres', image: 'postgres', status: 'Up 2h', running: true }] }, processes: [{ name: 'cursor', cpu: 60, mem: 1.4 }], cpus: 16, battery: { percent: 80, status: 'Charging' }, uptimeSec: 3600 } },
-  docsReady: true, checks: { 'cms.edition.tv': { host: 'cms.edition.tv', up: false, error: 'ENOTFOUND' }, 'sanero.in': { host: 'sanero.in', up: true, status: 200, ms: 100, certValidTo: new Date(Date.now() + 5 * 864e5).toISOString() } },
+  docsReady: true, checks: { 'edition.tv': { host: 'edition.tv', up: false, error: 'ENOTFOUND' }, 'sanero.in': { host: 'sanero.in', up: true, status: 200, ms: 100, certValidTo: new Date(Date.now() + 5 * 864e5).toISOString() } },
   checking: false, lastChecked: new Date(), refresh: () => {}, settings: { monthlyGoal: 100000, pinned: ['aarambh'] },
   domains: ok({ domains: [{ domain: 'sanero.in', expiresAt: new Date(Date.now() + 20 * 864e5).toISOString(), registrar: 'GoDaddy' }] }),
   integrations: ok({ vercel: true, monitor: { conclusion: 'success', at: new Date().toISOString() } }),
@@ -80,7 +80,7 @@ test('alerts are computed', () => {
   const titles = a.map((x) => `${x.severity}:${x.title}`)
   console.log(titles.join('\n'))
   expect(titles.some((t) => t.startsWith('critical:Supabase tt is paused'))).toBe(true)
-  expect(titles.some((t) => t.includes('cms.edition.tv is down'))).toBe(true)
+  expect(titles.some((t) => t.includes('edition.tv is down'))).toBe(true)
 })
 
 test('campaign spend counts as a cost, spread over its months', () => {
