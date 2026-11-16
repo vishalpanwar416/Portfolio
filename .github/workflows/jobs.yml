@@ -1,0 +1,24 @@
+name: Sync jobs
+
+# Every morning at 8:00 IST: pull FAANGPlus openings into the admin Jobs page
+# and send the message about new SDE roles that fit (api/admin/_routes/jobs.js).
+on:
+  schedule:
+    - cron: '30 2 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Sync and notify
+        env:
+          MONITOR_SECRET: ${{ secrets.MONITOR_SECRET }}
+        run: |
+          curl -fsS --max-time 300 -X POST \
+            -H "Authorization: Bearer $MONITOR_SECRET" \
+            https://admin.vishalpanwar.in/api/admin/jobs \
+            | jq '{listed, added, gone, seeded, matches: (.matches | length), notified}'

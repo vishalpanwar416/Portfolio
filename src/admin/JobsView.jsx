@@ -1,10 +1,11 @@
 // Jobs: openings at product companies and banks in India, pulled from
-// FAANGPlus (api/admin/_routes/jobs.js) and kept in vp_jobs, one doc per
-// opening. Sync merges the listing fields in and leaves the status, notes and
+// FAANGPlus and kept in vp_jobs, one doc per opening. The server does the sync
+// (api/admin/_routes/jobs.js), every morning on its own and from the Sync
+// button: it merges the listing fields in and leaves the status, notes and
 // applied date set here alone; openings FAANGPlus drops are marked `gone`.
 // Defaults to software engineering roles at multinationals.
 import { useEffect, useMemo, useState } from 'react'
-import { collection, doc, onSnapshot, setDoc, writeBatch } from 'firebase/firestore'
+import { collection, doc, onSnapshot, setDoc } from 'firebase/firestore'
 import { Briefcase, Building2, CheckCircle2, Download, ExternalLink, RefreshCw, Search, Send, X } from 'lucide-react'
 import { db, JOBS_COLLECTION } from './firebase'
 import { api, downloadCsv, timeAgo, today } from './data'
@@ -62,24 +63,8 @@ function useJobs() {
 
 const saveJob = (id, patch) => setDoc(doc(db, JOBS_COLLECTION, id), { ...patch, updatedAt: Date.now() }, { merge: true })
 
-/** Pull every opening from FAANGPlus and merge it into vp_jobs; mark the ones it no longer lists. */
-async function syncJobs(existing) {
-  const { jobs, at } = await api('/api/admin/jobs')
-  const ids = new Set()
-  const writes = jobs.map((j) => {
-    const id = `fp-${j.sourceId}`
-    ids.add(id)
-    return [id, { ...j, gone: false, syncedAt: at }]
-  })
-  for (const j of existing) if (j.source === 'faangplus' && !ids.has(j.id) && !j.gone) writes.push([j.id, { gone: true, goneAt: at }])
-  // A batch takes at most 500 writes.
-  for (let i = 0; i < writes.length; i += 400) {
-    const batch = writeBatch(db)
-    for (const [id, data] of writes.slice(i, i + 400)) batch.set(doc(db, JOBS_COLLECTION, id), data, { merge: true })
-    await batch.commit()
-  }
-  return { listed: jobs.length, gone: writes.length - jobs.length }
-}
+// First seen in the last two days: the daily sync's new arrivals.
+const isFresh = (j) => !j.gone && Date.now() - (Date.parse(j.firstSeenAt || '') || 0) < 2 * 864e5
 
 function StatusSelect({ job, className }) {
   return (
@@ -111,6 +96,7 @@ function JobRow({ j, onOpen }) {
             <span className="text-xs font-medium text-zinc-400">{j.company}</span>
             {s !== 'new' && <Badge tone={tone(s)}>{JOB_STATUSES.find((x) => x.key === s)?.label}</Badge>}
             {j.gone && <Badge tone="red">No longer listed</Badge>}
+            {isFresh(j) && <Badge tone="green">New</Badge>}
           </div>
           <div className="mt-0.5 text-sm font-medium text-zinc-100">{j.title}</div>
           <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-zinc-500">
@@ -242,8 +228,8 @@ export default function JobsView() {
   const runSync = async () => {
     setSync({ busy: true, msg: null, error: null })
     try {
-      const r = await syncJobs(all)
-      setSync({ busy: false, msg: `${r.listed} openings synced${r.gone ? `, ${r.gone} no longer listed` : ''}.`, error: null })
+      const r = await api('/api/admin/jobs', { method: 'POST' })
+      setSync({ busy: false, msg: `${r.listed} openings synced${r.added && !r.seeded ? `, ${r.added} new` : ''}${r.gone ? `, ${r.gone} no longer listed` : ''}.`, error: null })
     } catch (e) {
       setSync({ busy: false, msg: null, error: e.message })
     }
@@ -272,7 +258,7 @@ export default function JobsView() {
       <div className="flex flex-wrap items-center gap-2">
         <div className="text-xs text-zinc-500">
           From <a href="https://www.faangplus.com/browse/explore/openings" target="_blank" rel="noreferrer" className="text-zinc-300 hover:text-white">FAANGPlus openings</a>
-          {lastSync ? ` · synced ${timeAgo(lastSync)}` : ''}
+          {lastSync ? ` · synced ${timeAgo(lastSync)}, again every morning at 8` : ''}
           {sync.msg && <span className="text-emerald-300"> · {sync.msg}</span>}
           {sync.error && <span className="text-red-300"> · sync failed: {sync.error}</span>}
         </div>

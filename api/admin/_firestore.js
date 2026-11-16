@@ -121,4 +121,54 @@ async function putSecret(id, data) {
   if (!r.ok) throw new Error(`Firestore ${r.status}`);
 }
 
-module.exports = { readSites, mergedProjects, writeSite, getSite, deleteSite, getSecret, putSecret };
+const BASE = `projects/${PROJECT}/databases/(default)/documents`;
+
+async function datastoreToken() {
+  const sa = serviceAccount();
+  if (!sa) throw Object.assign(new Error('GCP_SA_KEY missing on the server'), { status: 503 });
+  return accessToken(sa, 'https://www.googleapis.com/auth/datastore');
+}
+
+/** Every doc in a collection as { id: data }, reading only `fields` (all when omitted). */
+async function listDocs(collection, fields) {
+  const token = await datastoreToken();
+  const mask = (fields || []).map((f) => `&mask.fieldPaths=${encodeURIComponent(f)}`).join('');
+  const docs = {};
+  let pageToken = '';
+  do {
+    const r = await fetch(`https://firestore.googleapis.com/v1/${BASE}/${collection}?pageSize=300${mask}${pageToken ? `&pageToken=${pageToken}` : ''}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!r.ok) throw new Error(`Firestore ${r.status}`);
+    const body = await r.json();
+    for (const d of body.documents || []) {
+      docs[d.name.split('/').pop()] = Object.fromEntries(Object.entries(d.fields || {}).map(([k, v]) => [k, value(v)]));
+    }
+    pageToken = body.nextPageToken || '';
+  } while (pageToken);
+  return docs;
+}
+
+/**
+ * Merge [{ id, data }] into a collection: only the keys in each `data` are
+ * written, so fields set elsewhere (the Jobs page's status and notes) stay.
+ * Commits 400 at a time; Firestore takes at most 500 writes per commit.
+ */
+async function mergeDocs(collection, writes) {
+  const token = await datastoreToken();
+  for (let i = 0; i < writes.length; i += 400) {
+    const r = await fetch(`https://firestore.googleapis.com/v1/${BASE}:commit`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        writes: writes.slice(i, i + 400).map(({ id, data }) => ({
+          update: { name: `${BASE}/${collection}/${id}`, fields: encode(data).mapValue.fields },
+          updateMask: { fieldPaths: Object.keys(data) },
+        })),
+      }),
+    });
+    if (!r.ok) throw new Error(r.status === 403 ? 'service account needs Cloud Datastore User on sanero-media' : `Firestore ${r.status}`);
+  }
+}
+
+module.exports = { readSites, mergedProjects, writeSite, getSite, deleteSite, getSecret, putSecret, listDocs, mergeDocs };
