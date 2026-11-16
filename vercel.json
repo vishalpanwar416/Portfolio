@@ -16,6 +16,24 @@
       "permanent": true
     },
     {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "blog.vishalpanwar.in" }],
+      "destination": "https://vishalpanwar.in/",
+      "permanent": false
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "status.vishalpanwar.in" }],
+      "destination": "https://vishalpanwar.in/",
+      "permanent": false
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "resume.vishalpanwar.in" }],
+      "destination": "https://vishalpanwar.in/",
+      "permanent": false
+    },
+    {
       "source": "/",
       "has": [{ "type": "host", "value": "learn.vishalpanwar.in" }],
       "destination": "/sdc",
