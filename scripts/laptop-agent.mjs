@@ -116,6 +116,7 @@ const snapshot = {
   docker: { state: dockerUnit.state, ok: dockerUnit.ok, containers },
   processes,
   services: [...services, ...failedOthers],
+  monitor: readJson(join(DIR, 'monitor-state.json'), {}).lastRun || null,
 }
 
 if (process.argv.includes('--dry-run')) {

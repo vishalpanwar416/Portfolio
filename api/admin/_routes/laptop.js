@@ -55,6 +55,7 @@ function clean(b, at) {
       ok: !!b.docker?.ok,
       containers: (b.docker?.containers || []).slice(0, 30).map((c) => ({ name: str(c.name, 80), image: str(c.image, 120), status: str(c.status, 60), running: !!c.running })),
     },
+    monitor: b.monitor?.at ? { at: str(b.monitor.at, 40), hosts: num(b.monitor.hosts), down: num(b.monitor.down), open: num(b.monitor.open) } : null,
     processes: (b.processes || []).slice(0, 8).map((p) => ({ name: str(p.name, 60), cpu: num(p.cpu), mem: num(p.mem) })),
     services: (b.services || []).slice(0, MAX_SERVICES).map((s) => ({
       unit: str(s.unit, 100), project: s.project ? str(s.project, 60) : null, description: str(s.description),

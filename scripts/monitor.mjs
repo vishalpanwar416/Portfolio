@@ -1,4 +1,8 @@
-// VP Control monitor — run by .github/workflows/monitor.yml every 10 minutes.
+// VP Control monitor. The laptop runs it every 10 minutes (vp-monitor.timer,
+// installed by scripts/install-laptop-agent.sh, secret from
+// ~/.config/vp-control/agent.json). .github/workflows/monitor.yml is the
+// backup: GitHub only gets round to it every few hours, and it skips its run
+// when the laptop has checked within the last 20 minutes.
 //
 // Gets the list of things to watch from the dashboard API (/api/admin/monitor,
 // with MONITOR_SECRET), falling back to src/admin/projects.json, then:
@@ -14,7 +18,12 @@
 // /api/admin/notify and the laptop agent delivers them to the WhatsApp ops
 // group, so they arrive while the laptop is on. State is cached between runs.
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { join } from 'node:path'
 import tls from 'node:tls'
+
+if (!process.env.MONITOR_SECRET && process.env.HOME) {
+  try { process.env.MONITOR_SECRET = JSON.parse(readFileSync(join(process.env.HOME, '.config', 'vp-control', 'agent.json'), 'utf8')).secret || '' } catch { /* logged-only mode */ }
+}
 
 const API = 'https://admin.vishalpanwar.in/api/admin'
 const STATE_FILE = process.env.MONITOR_STATE || '.monitor-state.json'
@@ -48,6 +57,12 @@ async function fromApi() {
 }
 
 const remote = await fromApi()
+// GitHub backup run: the laptop already did this recently, so don't double-send.
+const LAPTOP_FRESH_MS = 20 * 60e3
+if (process.env.GITHUB_ACTIONS && remote?.laptop?.monitor?.at && now - Date.parse(remote.laptop.monitor.at) < LAPTOP_FRESH_MS) {
+  console.log(`laptop ran the monitor at ${remote.laptop.monitor.at}; skipping this backup run`)
+  process.exit(0)
+}
 let hosts
 if (remote) {
   hosts = remote.hosts
@@ -182,6 +197,7 @@ if (digestDue) {
   if (lines.length) messages.push({ severity: 'info', title: `Morning check · ${lines.length}`, text: lines.join('\n') })
 }
 
+state.lastRun = { at: new Date(now).toISOString(), hosts: results.length, down: results.filter((r) => !r.up).length, open: Object.keys(state.open).length, source: remote ? 'api' : 'projects.json' }
 writeFileSync(STATE_FILE, JSON.stringify(state, null, 2))
 console.log(`source: ${remote ? 'dashboard API' : 'projects.json'} · ${results.length} hosts, ${results.filter((r) => !r.up).length} down · ${problems.length} open problems`)
 
