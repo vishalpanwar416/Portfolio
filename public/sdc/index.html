@@ -246,7 +246,7 @@ footer a { color: var(--muted) }
         <option value="notes">Topics with notes</option>
       </select>
       <span class="saved" id="saved"></span>
-      <button class="btn sm" id="sync">Sync across devices</button>
+      <button class="btn sm" id="sync">Sign in to sync</button>
     </div>
   </div>
 
@@ -255,7 +255,7 @@ footer a { color: var(--muted) }
   <div id="list"></div>
 
   <footer>
-    <span>330 HLD and 122 LLD lessons, copied from faangplus.com on 16 Nov 2026. Times are FAANGPlus's reading estimates. Ticks, notes and your plan save in this browser, and to your account once you sign in to sync.</span>
+    <span>330 HLD and 122 LLD lessons, copied from faangplus.com on 16 Nov 2026. Times are FAANGPlus's reading estimates. Ticks, notes and your plan save in this browser. Sign in with Google to keep them in sync across devices; only your account can read them.</span>
     <span><button class="reset" id="sheet">Open my revision sheet</button> · <button class="reset" id="reset">Clear my ticks</button></span>
   </footer>
 </div>
@@ -267,7 +267,8 @@ const KEY = "fp-checklist-done";        // ticks only, as the first version save
 const STATE_KEY = "fp-checklist-state"; // ticks, revisions, notes and plan
 const TAB_KEY = "fp-checklist-tab";
 const SYNC_KEY = "fp-checklist-sync";   // uid this browser last merged with, so later loads take the account's copy
-// Same sanero-media project as the admin dashboard; vp_sdc is owner-only in its firestore.rules.
+// Same sanero-media project as the admin dashboard. Each Google account syncs to vp_sdc_users/<uid>,
+// which only that account can read or write (sanero-next/firestore.rules).
 const FB = "https://www.gstatic.com/firebasejs/12.19.0/";
 const FB_CONFIG = { apiKey: "AIzaSyDYTLjp2sbNfxHHOjms-i0cMDceZz1Vug8", authDomain: "sanero-media.firebaseapp.com", projectId: "sanero-media" };
 // Days until a ticked lesson is due again, after 0, 1, 2 and 3+ revisions.
@@ -335,12 +336,12 @@ function status(msg) {
   $("#saved").textContent = msg || {
     off: Object.keys(state.done).length ? "Saved in this browser" : "Ticks save in this browser",
     connecting: "Connecting…",
-    on: sync.pending ? "Syncing…" : "Synced to your account",
+    on: sync.pending ? "Syncing…" : `Synced to ${sync.user?.email || "your account"}`,
     denied: "This account can't sync, so everything stays in this browser",
     error: "Sync failed; everything is still saved in this browser",
   }[sync.state];
   const b = $("#sync");
-  b.textContent = sync.user ? "Sign out" : "Sync across devices";
+  b.textContent = sync.user ? "Sign out" : "Sign in to sync";
   b.disabled = sync.state === "connecting";
 }
 
@@ -348,7 +349,7 @@ async function loadFirebase() {
   if (sync.fb) return sync.fb;
   const [app, au, fs] = await Promise.all(["app", "auth", "firestore"].map((n) => import(`${FB}firebase-${n}.js`)));
   const a = app.initializeApp(FB_CONFIG, "vp-sdc");
-  sync.fb = { au, fs, auth: au.getAuth(a), ref: fs.doc(fs.getFirestore(a), "vp_sdc", "progress") };
+  sync.fb = { au, fs, auth: au.getAuth(a), db: fs.getFirestore(a), ref: null };
   au.onAuthStateChanged(sync.fb.auth, onUser);
   return sync.fb;
 }
@@ -370,8 +371,9 @@ function onUser(user) {
   sync.unsub?.(); sync.unsub = null; sync.user = user;
   if (!user) { sync.state = "off"; status(); return }
   sync.state = "connecting"; sync.first = true; status();
-  const { fs, ref } = sync.fb;
-  sync.unsub = fs.onSnapshot(ref, (snap) => {
+  const { fs, db } = sync.fb;
+  const ref = sync.fb.ref = fs.doc(db, "vp_sdc_users", user.uid);
+  sync.unsub = fs.onSnapshot(ref, async (snap) => {
     // Our own write echoing back, or a change still queued here: this browser is ahead.
     if (snap.metadata.hasPendingWrites || sync.pending) return;
     const remote = snap.exists() ? tidy(snap.data()) : null;
@@ -379,7 +381,10 @@ function onUser(user) {
       sync.first = false;
       let mine = null; try { mine = localStorage.getItem(SYNC_KEY) } catch {}
       // First time on this browser: fold its ticks in. After that the account's copy wins, so an untick elsewhere sticks.
-      const next = mine === user.uid && remote ? remote : merge(remote || blank(), state);
+      let next = mine === user.uid && remote ? remote : merge(remote || blank(), state);
+      // The owner synced to a single shared doc before per-account sync; fold it in once. Anyone else is refused, which is fine.
+      if (!remote) { try { const old = await fs.getDoc(fs.doc(db, "vp_sdc", "progress")); if (old.exists()) next = merge(next, tidy(old.data())) } catch {} }
+      if (sync.user !== user) return;
       try { localStorage.setItem(SYNC_KEY, user.uid) } catch {}
       sync.state = "on";
       adopt(next);
@@ -739,7 +744,9 @@ $("#sync").addEventListener("click", async () => {
     await fb.au.signInWithPopup(fb.auth, new fb.au.GoogleAuthProvider());
   } catch (e) {
     sync.state = "off";
-    status(e.code === "auth/popup-closed-by-user" || e.code === "auth/cancelled-popup-request" ? "" : `Couldn't sign in (${e.code || e.message})`);
+    status(e.code === "auth/popup-closed-by-user" || e.code === "auth/cancelled-popup-request" ? ""
+      : e.code === "auth/popup-blocked" ? "Allow popups for this site to sign in"
+      : `Couldn't sign in (${e.code || e.message})`);
   }
 });
 
