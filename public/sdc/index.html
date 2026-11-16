@@ -21,6 +21,7 @@
   --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --serif: "Playfair Display", Georgia, "Times New Roman", serif;
   --mono: "Fira Code", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --gutter: clamp(16px, 3.5vw, 48px);
   color-scheme: dark;
 }
 * { box-sizing: border-box }
@@ -37,7 +38,7 @@ a { color: inherit }
 ::-webkit-scrollbar-track { background: #1a1a1a }
 ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #404040, #2a2a2a); border-radius: 5px; border: 2px solid #1a1a1a }
 
-.wrap { position: relative; z-index: 1; max-width: 920px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)) }
+.wrap { position: relative; z-index: 1; max-width: 1360px; margin: 0 auto; padding-left: max(var(--gutter), env(safe-area-inset-left, 0px)); padding-right: max(var(--gutter), env(safe-area-inset-right, 0px)) }
 
 /* nav, as on the site */
 nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 18px }
@@ -65,12 +66,18 @@ header { padding-block: 40px 8px }
 .eyebrow i { font-style: normal; color: #4b5563; margin: 0 -4px }
 h1 { font: 800 clamp(34px, 6.4vw, 60px)/1.05 var(--serif); letter-spacing: -0.02em; color: var(--ink); margin: 0; text-wrap: balance }
 h1 span { color: var(--orange) }
-.lede { margin: 18px 0 0; max-width: 62ch; color: var(--muted); border-left: 2px solid var(--line); padding-left: 16px }
+.lede { margin: 18px 0 0; max-width: 72ch; color: var(--muted); border-left: 2px solid var(--line); padding-left: 16px }
 .lede a { color: var(--text); text-decoration-color: var(--orange-line); text-underline-offset: 3px }
 
 /* summary row: overall progress + next lesson */
 .summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 32px }
 @media (max-width: 720px) { .summary { grid-template-columns: minmax(0, 1fr) } }
+/* Wide screens: progress and "continue" stack on the left, the plan and revision lists take the rest. */
+@media (min-width: 1100px) {
+  .summary { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.2fr); grid-template-areas: "overall plan revise" "next plan revise" }
+  #overall { grid-area: overall } #next { grid-area: next } #plan { grid-area: plan } #revise { grid-area: revise }
+  .topics { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start }
+}
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; transition: border-color .2s }
 .card:hover { border-color: rgba(255,255,255,0.2) }
 .label { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--faint) }
@@ -118,8 +125,8 @@ select.field { padding-right: 28px; cursor: pointer }
 /* sticky controls */
 .controls { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; margin-top: 28px; padding-block: 12px; display: grid; gap: 12px;
   background: rgba(10,10,10,0.92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid var(--line-soft);
-  margin-left: calc(-1 * max(20px, env(safe-area-inset-left, 0px))); margin-right: calc(-1 * max(20px, env(safe-area-inset-right, 0px)));
-  padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)) }
+  margin-left: calc(-1 * max(var(--gutter), env(safe-area-inset-left, 0px))); margin-right: calc(-1 * max(var(--gutter), env(safe-area-inset-right, 0px)));
+  padding-left: max(var(--gutter), env(safe-area-inset-left, 0px)); padding-right: max(var(--gutter), env(safe-area-inset-right, 0px)) }
 .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
 .chip { font: 500 12px var(--sans); letter-spacing: .06em; text-transform: uppercase; border: 1px solid var(--line); background: rgba(255,255,255,0.02); color: var(--muted); border-radius: 999px; padding: 7px 14px; cursor: pointer; display: inline-flex; gap: 8px; align-items: baseline; transition: all .2s }
 .chip:hover { color: var(--ink); border-color: rgba(255,255,255,0.22) }
