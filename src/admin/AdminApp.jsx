@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
+import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut } from 'firebase/auth'
 import {
   Bell, Briefcase, BriefcaseBusiness, ChevronRight, FolderKanban, IndianRupee, LayoutDashboard, Linkedin, LogOut, Megaphone, Menu, Plus, RefreshCw, Search, Server,
   Settings, ShieldAlert, Smartphone, X,
@@ -404,12 +404,81 @@ function Centered({ children }) {
   )
 }
 
+function GoogleMark() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z" />
+      <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" />
+      <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z" />
+      <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z" />
+    </svg>
+  )
+}
+
+// Readable text for a sign-in failure; null when the user just closed the popup.
+function signInMessage(e) {
+  switch (e?.code) {
+    case 'auth/popup-closed-by-user':
+    case 'auth/cancelled-popup-request':
+    case 'auth/user-cancelled':
+      return null
+    case 'auth/network-request-failed':
+      return "Couldn't reach Google. Check your connection and try again."
+    case 'auth/too-many-requests':
+      return 'Too many attempts. Wait a minute and try again.'
+    case 'auth/unauthorized-domain':
+      return "Sign-in isn't enabled for this address."
+    default:
+      return `Sign-in didn't work: ${e?.message || e}`
+  }
+}
+
+// Popup first; when the browser blocks it (some phones and in-app browsers),
+// a full-page redirect instead.
+async function googleSignIn() {
+  const provider = new GoogleAuthProvider()
+  provider.setCustomParameters({ prompt: 'select_account' })
+  try {
+    await signInWithPopup(auth, provider)
+  } catch (e) {
+    if (e?.code === 'auth/popup-blocked' || e?.code === 'auth/operation-not-supported-in-this-environment') {
+      await signInWithRedirect(auth, provider)
+    } else {
+      throw e
+    }
+  }
+}
+
+function GoogleButton({ busy, onClick, children }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={busy}
+      className="inline-flex w-full items-center justify-center gap-2.5 rounded-lg bg-white px-3 py-2.5 text-sm font-medium text-zinc-900 transition hover:bg-zinc-200 disabled:opacity-60"
+    >
+      {busy ? <RefreshCw size={16} className="animate-spin text-zinc-500" /> : <GoogleMark />}
+      {children}
+    </button>
+  )
+}
+
+function Brand() {
+  return (
+    <>
+      <Logo className="mx-auto h-20 w-20 drop-shadow-[0_0_22px_rgba(255,255,255,0.55)]" />
+      <h1 className="mt-5 text-lg font-semibold tracking-tight text-white">Vishal Panwar</h1>
+      <div className="mt-0.5 text-[11px] uppercase tracking-[0.2em] text-zinc-500">Admin</div>
+    </>
+  )
+}
+
 export default function AdminApp() {
   useAdminManifest()
   // undefined = still resolving, null = signed out
   const [user, setUser] = useState(undefined)
   const [allowed, setAllowed] = useState(false)
   const [error, setError] = useState(null)
+  const [busy, setBusy] = useState(false)
 
   useEffect(() => {
     document.title = 'Admin · Vishal Panwar'
@@ -420,23 +489,32 @@ export default function AdminApp() {
     })
   }, [])
 
-  const signIn = async () => {
+  const run = async (action) => {
     setError(null)
-    try { await signInWithPopup(auth, new GoogleAuthProvider()) } catch (e) { setError(e.message) }
+    setBusy(true)
+    try { await action() } catch (e) { setError(signInMessage(e)) } finally { setBusy(false) }
   }
+  const signIn = () => run(googleSignIn)
+  const switchAccount = () => run(async () => { await signOut(auth); await googleSignIn() })
 
   if (user === undefined) {
-    return <div className="grid min-h-screen place-items-center bg-black text-sm text-zinc-500">Loading…</div>
+    return (
+      <Centered>
+        <Brand />
+        <div className="mt-6 flex items-center justify-center gap-2 text-sm text-zinc-500">
+          <RefreshCw size={14} className="animate-spin" /> Checking sign-in…
+        </div>
+      </Centered>
+    )
   }
   if (!user) {
     return (
       <Centered>
-        <Logo className="mx-auto h-20 w-20 drop-shadow-[0_0_22px_rgba(255,255,255,0.55)]" />
-        <h1 className="mt-5 text-lg font-semibold tracking-tight text-white">Vishal Panwar</h1>
-        <div className="mt-0.5 text-[11px] uppercase tracking-[0.2em] text-zinc-500">Admin</div>
+        <Brand />
         <p className="mt-1 text-sm text-zinc-500">Projects, money, apps and alerts.</p>
-        <Button variant="primary" onClick={signIn} className="mt-6 w-full py-2">Sign in with Google</Button>
-        {error && <p className="mt-3 text-xs text-red-400">{error}</p>}
+        <div className="mt-6"><GoogleButton busy={busy} onClick={signIn}>Continue with Google</GoogleButton></div>
+        {error && <p role="alert" className="mt-3 text-xs text-red-400">{error}</p>}
+        <p className="mt-6 border-t border-white/10 pt-4 text-[11px] text-zinc-600">Only the owner's account can open this dashboard.</p>
       </Centered>
     )
   }
@@ -444,8 +522,18 @@ export default function AdminApp() {
     return (
       <Centered>
         <ShieldAlert className="mx-auto text-red-400" />
-        <p className="mt-3 text-sm text-zinc-300">{user.email} isn't allowed here.</p>
-        <Button onClick={() => signOut(auth)} className="mt-4">Sign out</Button>
+        <h1 className="mt-3 text-base font-semibold text-white">This account can't open Admin</h1>
+        <div className="mx-auto mt-4 inline-flex max-w-full items-center gap-2 rounded-full border border-white/10 py-1 pl-1 pr-3 text-sm text-zinc-300">
+          {user.photoURL
+            ? <img src={user.photoURL} alt="" referrerPolicy="no-referrer" className="h-6 w-6 rounded-full" />
+            : <span className="grid h-6 w-6 place-items-center rounded-full bg-white/10 text-xs font-semibold">{(user.email || '?')[0].toUpperCase()}</span>}
+          <span className="truncate">{user.email}</span>
+        </div>
+        <div className="mt-6 space-y-2">
+          <GoogleButton busy={busy} onClick={switchAccount}>Use another account</GoogleButton>
+          <Button onClick={() => signOut(auth)} className="w-full py-2">Sign out</Button>
+        </div>
+        {error && <p role="alert" className="mt-3 text-xs text-red-400">{error}</p>}
       </Centered>
     )
   }
