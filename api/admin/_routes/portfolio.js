@@ -54,10 +54,11 @@ function clean(d) {
  * replaces the project card titled `match` (or adds it at the top) in both the
  * draft and the published content, so scripts can keep a card current
  * without the editor. The card goes through the same whitelist as reads.
+ * Optional `position` moves the card to that index (0 = first).
  */
 async function upsertProject(req, res) {
   if (!(await requireOwnerOrMonitor(req, res))) return;
-  const { match, project } = req.body || {};
+  const { match, project, position } = req.body || {};
   const [card] = clean({ projects: [project] }).projects || [];
   if (!card) return res.status(400).json({ error: 'project needs at least a title' });
   const doc = (await getSite('portfolio')) || {};
@@ -66,6 +67,11 @@ async function upsertProject(req, res) {
     const list = Array.isArray(content.projects) ? [...content.projects] : [];
     const i = list.findIndex((p) => p?.title === (match || card.title));
     if (i >= 0) list[i] = { ...list[i], ...card }; else list.unshift(card);
+    if (Number.isInteger(position) && position >= 0) {
+      const from = list.findIndex((p) => p?.title === card.title);
+      const [moved] = list.splice(from, 1);
+      list.splice(Math.min(position, list.length), 0, moved);
+    }
     return { ...content, projects: list };
   };
   const data = { kind: 'portfolio', draft: apply(doc.draft || doc.published) };

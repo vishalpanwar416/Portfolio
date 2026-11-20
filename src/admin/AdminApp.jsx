@@ -523,7 +523,7 @@ function AboutMe({ profile }) {
   const { personalInfo: me, sectionContent: text, socialLinks, externalLinks, workExperience, projects } = profile
   const role = me.title.split('|').map((x) => x.trim()).filter(Boolean)
   const current = workExperience?.[0]
-  const shown = projects.filter((p) => p.featured).slice(0, 3)
+  const shown = projects.filter((p) => p.featured).slice(0, 4)
   return (
     <div className="max-w-2xl">
       <div className="flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-zinc-500">
