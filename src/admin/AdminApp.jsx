@@ -5,6 +5,7 @@ import {
   Settings, ShieldAlert, Smartphone, X,
 } from 'lucide-react'
 import { auth } from './firebase'
+import { mergeContent } from '../contexts/PortfolioContext'
 import { GROUPS, leadsFrom, projectDocId, projectStats, saveDoc, slugify, timeAgo, useAdminData } from './data'
 import { computeAlerts } from './alerts'
 import { Button, Glass, Input, StatusDot, cx } from './ui'
@@ -395,14 +396,6 @@ function useInstallPrompt() {
 
 // ── auth gate ──────────────────────────────────────────
 
-function Centered({ children }) {
-  return (
-    <div className="grid min-h-screen place-items-center px-4">
-      <Backdrop />
-      <Glass className="w-full max-w-sm p-8 text-center">{children}</Glass>
-    </div>
-  )
-}
 
 function GoogleMark() {
   return (
@@ -462,13 +455,211 @@ function GoogleButton({ busy, onClick, children }) {
   )
 }
 
-function Brand() {
+// ── welcome / sign-in ──────────────────────────────────
+
+// Remembered on this device after a successful sign-in, so the next visit
+// can greet you by name. Only name and photo; nothing secret.
+const LAST_USER_KEY = 'admin-last-user'
+const readLastUser = () => { try { return JSON.parse(localStorage.getItem(LAST_USER_KEY)) || null } catch { return null } }
+const rememberUser = (u) => {
+  try { localStorage.setItem(LAST_USER_KEY, JSON.stringify({ name: u.displayName || '', photo: u.photoURL || '' })) } catch { /* private mode */ }
+}
+
+const IST = 'Asia/Kolkata'
+function greeting(d) {
+  const h = Number(new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hour12: false, timeZone: IST }).format(d))
+  if (h < 5) return 'Working late'
+  if (h < 12) return 'Good morning'
+  if (h < 17) return 'Good afternoon'
+  return 'Good evening'
+}
+
+function useClock() {
+  const [now, setNow] = useState(() => new Date())
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(t)
+  }, [])
+  return now
+}
+
+const WELCOME_AREAS = ['Projects', 'Money', 'Marketing', 'Instagram', 'Alerts', 'Infrastructure', 'LinkedIn', 'Jobs']
+
+/** The public profile from vishalpanwar.in (published content over the built-in copy). */
+function usePublicProfile() {
+  const [content, setContent] = useState(() => mergeContent(null))
+  useEffect(() => {
+    let live = true
+    fetch('/api/admin/portfolio').then((r) => (r.ok ? r.json() : null)).then((c) => { if (live && c) setContent(mergeContent(c)) }).catch(() => {})
+    return () => { live = false }
+  }, [])
+  return content
+}
+
+/** Owner on a device they've signed in on before: a personal greeting. */
+function OwnerGreeting({ now, name }) {
+  const date = new Intl.DateTimeFormat('en-IN', { weekday: 'long', day: 'numeric', month: 'long', timeZone: IST }).format(now)
   return (
-    <>
-      <Logo className="mx-auto h-20 w-20 drop-shadow-[0_0_22px_rgba(255,255,255,0.55)]" />
-      <h1 className="mt-5 text-lg font-semibold tracking-tight text-white">Vishal Panwar</h1>
-      <div className="mt-0.5 text-[11px] uppercase tracking-[0.2em] text-zinc-500">Admin</div>
-    </>
+    <div className="max-w-2xl">
+      <div className="text-xs uppercase tracking-[0.25em] text-zinc-500">{date}</div>
+      <h1 className="mt-4 text-4xl font-semibold leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl">
+        {greeting(now)},<br />
+        <span className="bg-gradient-to-r from-white via-zinc-200 to-zinc-500 bg-clip-text text-transparent">{name}.</span>
+      </h1>
+      <p className="mt-5 max-w-lg text-base leading-relaxed text-zinc-400 sm:text-lg">
+        Welcome back to your control center. Everything you run, in one place.
+      </p>
+      <div className="mt-7 flex flex-wrap gap-2">
+        {WELCOME_AREAS.map((a) => (
+          <span key={a} className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-zinc-400">{a}</span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/** Anyone else: who Vishal is and how to reach him. */
+function AboutMe({ profile }) {
+  const { personalInfo: me, sectionContent: text, socialLinks, externalLinks, workExperience, projects } = profile
+  const role = me.title.split('|').map((x) => x.trim()).filter(Boolean)
+  const current = workExperience?.[0]
+  const shown = projects.filter((p) => p.featured).slice(0, 3)
+  return (
+    <div className="max-w-2xl">
+      <div className="flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-zinc-500">
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" /> {me.availability.badge}
+      </div>
+      <h1 className="mt-4 text-4xl font-semibold leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl">
+        Hi, I'm<br />
+        <span className="bg-gradient-to-r from-white via-zinc-200 to-zinc-500 bg-clip-text text-transparent">{me.name.full}.</span>
+      </h1>
+      <div className="mt-5 flex flex-wrap gap-2">
+        {role.map((r) => <span key={r} className="rounded-md border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs uppercase tracking-wider text-zinc-300">{r}</span>)}
+      </div>
+      <p className="mt-5 max-w-xl text-base leading-relaxed text-zinc-400">{text.hero.description}</p>
+      <div className="mt-5 grid max-w-xl grid-cols-1 gap-2 text-sm text-zinc-400 sm:grid-cols-2">
+        {current && <div><span className="text-zinc-600">Now · </span>{current.position} at {current.company}</div>}
+        <div><span className="text-zinc-600">Based in · </span>{me.location.display}</div>
+        <div className="sm:col-span-2"><span className="text-zinc-600">Open to · </span>{me.availability.status}</div>
+      </div>
+      {shown.length > 0 && (
+        <div className="mt-6 flex flex-wrap gap-2">
+          {shown.map((p) => (
+            <a key={p.title} href={p.live || p.github || 'https://vishalpanwar.in/#portfolio'} target="_blank" rel="noreferrer"
+              className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-zinc-300 transition hover:border-white/25 hover:text-white">
+              {p.title} ↗
+            </a>
+          ))}
+        </div>
+      )}
+      <div className="mt-8 flex flex-wrap items-center gap-3">
+        <a href="https://vishalpanwar.in" className="rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-zinc-900 transition hover:bg-zinc-200">View my portfolio</a>
+        <a href={externalLinks.calendarBooking} target="_blank" rel="noreferrer" className="rounded-lg border border-white/15 px-4 py-2.5 text-sm text-zinc-200 transition hover:border-white/30 hover:text-white">Book a call</a>
+        <a href={`mailto:${me.contact.email}`} className="rounded-lg border border-white/15 px-4 py-2.5 text-sm text-zinc-200 transition hover:border-white/30 hover:text-white">Email me</a>
+        <div className="flex items-center gap-1">
+          {socialLinks.slice(0, 5).map((l) => (
+            <a key={l.url} href={l.url} target="_blank" rel="noreferrer" aria-label={l.name} title={l.name}
+              className="grid h-9 w-9 place-items-center rounded-lg text-zinc-500 transition hover:bg-white/[0.06] hover:text-white">
+              <l.icon size={16} />
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Full-screen sign-in page. On a device the owner has used before it greets
+ * them; anyone else sees who Vishal is and how to reach him, with the private
+ * sign-in kept small on the side.
+ */
+function Welcome({ owner, children }) {
+  const now = useClock()
+  const profile = usePublicProfile()
+  const last = readLastUser()
+  const time = new Intl.DateTimeFormat('en-IN', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true, timeZone: IST }).format(now)
+  return (
+    <div className="relative flex min-h-[100dvh] flex-col overflow-hidden text-zinc-100 lg:flex-row">
+      <Backdrop />
+      <img src={logoMark} alt="" aria-hidden className="pointer-events-none absolute -left-24 top-1/2 h-[42rem] w-[42rem] -translate-y-1/2 select-none opacity-[0.06] lg:left-[8%]" />
+
+      <section className="relative flex flex-1 flex-col justify-between gap-10 px-6 pb-10 pt-[max(1.5rem,env(safe-area-inset-top))] sm:px-10 lg:px-16 lg:py-12">
+        <a href="https://vishalpanwar.in" className="flex w-fit items-center gap-3 text-sm text-zinc-400 transition hover:text-white">
+          <Logo className="h-9 w-9" />
+          <span>vishalpanwar.in</span>
+        </a>
+        {owner ? <OwnerGreeting now={now} name={(last?.name || profile.personalInfo.name.first).split(' ')[0]} /> : <AboutMe profile={profile} />}
+        <div className="hidden font-mono text-sm tabular-nums text-zinc-600 lg:block">{time} IST · {profile.personalInfo.location.display}</div>
+      </section>
+
+      <aside className="relative flex w-full items-center justify-center border-t border-white/[0.06] bg-black/40 px-6 py-10 backdrop-blur-2xl sm:px-10 lg:w-[28rem] lg:border-l lg:border-t-0 lg:py-12 xl:w-[32rem]">
+        <div className="w-full max-w-sm">{children}</div>
+      </aside>
+    </div>
+  )
+}
+
+function SignInPanel({ busy, error, onSignIn, checking }) {
+  const last = readLastUser()
+  const first = last?.name?.split(' ')[0]
+  return (
+    <div>
+      <div className="flex items-center gap-3">
+        {last?.photo
+          ? <img src={last.photo} alt="" referrerPolicy="no-referrer" className="h-12 w-12 rounded-full ring-1 ring-white/20" />
+          : <Logo className="h-12 w-12" />}
+        <div>
+          <div className="text-lg font-semibold tracking-tight text-white">{first ? `Welcome back, ${first}` : 'Private dashboard'}</div>
+          <div className="text-sm text-zinc-500">{first ? 'Vishal Panwar · Admin' : 'Where Vishal runs his projects'}</div>
+        </div>
+      </div>
+      {!first && (
+        <p className="mt-6 text-sm leading-relaxed text-zinc-400">
+          This is my private control center for projects, uptime and marketing. If you're here to work with me, the portfolio and links on this page are the way in.
+        </p>
+      )}
+      <div className="mt-8">
+        {checking ? (
+          <div className="flex h-11 items-center justify-center gap-2 rounded-lg border border-white/10 text-sm text-zinc-500">
+            <RefreshCw size={14} className="animate-spin" /> Checking sign-in…
+          </div>
+        ) : first ? (
+          <GoogleButton busy={busy} onClick={onSignIn}>Continue as {first}</GoogleButton>
+        ) : (
+          <button onClick={onSignIn} disabled={busy} className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/15 px-3 py-2.5 text-sm text-zinc-300 transition hover:border-white/30 hover:text-white disabled:opacity-60">
+            {busy ? <RefreshCw size={14} className="animate-spin" /> : <GoogleMark />} Owner sign-in
+          </button>
+        )}
+      </div>
+      {error && <p role="alert" className="mt-3 text-xs text-red-400">{error}</p>}
+      <p className="mt-8 border-t border-white/10 pt-4 text-xs leading-relaxed text-zinc-600">
+        Only Vishal's Google account can open this dashboard.
+      </p>
+    </div>
+  )
+}
+
+/** Signed in with someone else's account: say so, and offer to switch. */
+function NotOwnerPanel({ user, busy, error, onSwitch }) {
+  return (
+    <div>
+      <div className="flex items-center gap-2 text-sm font-medium text-white"><ShieldAlert size={16} className="text-red-400" /> This account can't open Admin</div>
+      <div className="mt-4 inline-flex max-w-full items-center gap-2 rounded-full border border-white/10 py-1 pl-1 pr-3 text-sm text-zinc-300">
+        {user.photoURL
+          ? <img src={user.photoURL} alt="" referrerPolicy="no-referrer" className="h-6 w-6 rounded-full" />
+          : <span className="grid h-6 w-6 place-items-center rounded-full bg-white/10 text-xs font-semibold">{(user.email || '?')[0].toUpperCase()}</span>}
+        <span className="truncate">{user.email}</span>
+      </div>
+      <p className="mt-5 text-sm leading-relaxed text-zinc-400">
+        Thanks for stopping by{user.displayName ? `, ${user.displayName.split(' ')[0]}` : ''}! This dashboard is private, but everything about my work is on the left and on my portfolio.
+      </p>
+      <div className="mt-6 space-y-2">
+        <Button onClick={() => signOut(auth)} className="w-full py-2">Sign out</Button>
+        <button onClick={onSwitch} disabled={busy} className="w-full py-2 text-xs text-zinc-500 hover:text-zinc-300">Use another account</button>
+      </div>
+      {error && <p role="alert" className="mt-3 text-xs text-red-400">{error}</p>}
+    </div>
   )
 }
 
@@ -484,7 +675,9 @@ export default function AdminApp() {
     document.title = 'Admin · Vishal Panwar'
     return onAuthStateChanged(auth, async (u) => {
       // Force a fresh token so a newly granted claim is picked up.
-      setAllowed(u ? (await u.getIdTokenResult(true)).claims.superAdmin === true : false)
+      const ok = u ? (await u.getIdTokenResult(true)).claims.superAdmin === true : false
+      if (ok) rememberUser(u)
+      setAllowed(ok)
       setUser(u)
     })
   }, [])
@@ -497,44 +690,18 @@ export default function AdminApp() {
   const signIn = () => run(googleSignIn)
   const switchAccount = () => run(async () => { await signOut(auth); await googleSignIn() })
 
-  if (user === undefined) {
+  if (user === undefined || !user) {
     return (
-      <Centered>
-        <Brand />
-        <div className="mt-6 flex items-center justify-center gap-2 text-sm text-zinc-500">
-          <RefreshCw size={14} className="animate-spin" /> Checking sign-in…
-        </div>
-      </Centered>
-    )
-  }
-  if (!user) {
-    return (
-      <Centered>
-        <Brand />
-        <p className="mt-1 text-sm text-zinc-500">Projects, money, apps and alerts.</p>
-        <div className="mt-6"><GoogleButton busy={busy} onClick={signIn}>Continue with Google</GoogleButton></div>
-        {error && <p role="alert" className="mt-3 text-xs text-red-400">{error}</p>}
-        <p className="mt-6 border-t border-white/10 pt-4 text-[11px] text-zinc-600">Only the owner's account can open this dashboard.</p>
-      </Centered>
+      <Welcome owner={!!readLastUser()}>
+        <SignInPanel checking={user === undefined} busy={busy} error={error} onSignIn={signIn} />
+      </Welcome>
     )
   }
   if (!allowed) {
     return (
-      <Centered>
-        <ShieldAlert className="mx-auto text-red-400" />
-        <h1 className="mt-3 text-base font-semibold text-white">This account can't open Admin</h1>
-        <div className="mx-auto mt-4 inline-flex max-w-full items-center gap-2 rounded-full border border-white/10 py-1 pl-1 pr-3 text-sm text-zinc-300">
-          {user.photoURL
-            ? <img src={user.photoURL} alt="" referrerPolicy="no-referrer" className="h-6 w-6 rounded-full" />
-            : <span className="grid h-6 w-6 place-items-center rounded-full bg-white/10 text-xs font-semibold">{(user.email || '?')[0].toUpperCase()}</span>}
-          <span className="truncate">{user.email}</span>
-        </div>
-        <div className="mt-6 space-y-2">
-          <GoogleButton busy={busy} onClick={switchAccount}>Use another account</GoogleButton>
-          <Button onClick={() => signOut(auth)} className="w-full py-2">Sign out</Button>
-        </div>
-        {error && <p role="alert" className="mt-3 text-xs text-red-400">{error}</p>}
-      </Centered>
+      <Welcome owner={false}>
+        <NotOwnerPanel user={user} busy={busy} error={error} onSwitch={switchAccount} />
+      </Welcome>
     )
   }
   return <Shell user={user} />
