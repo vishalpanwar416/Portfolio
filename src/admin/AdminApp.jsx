@@ -584,7 +584,7 @@ function Welcome({ owner, children }) {
       <Backdrop />
       <img src={logoMark} alt="" aria-hidden className="pointer-events-none absolute -left-24 top-1/2 h-[42rem] w-[42rem] -translate-y-1/2 select-none opacity-[0.06] lg:left-[8%]" />
 
-      <section className="relative flex flex-1 flex-col justify-between gap-10 px-6 pb-10 pt-[max(1.5rem,env(safe-area-inset-top))] sm:px-10 lg:px-16 lg:py-12">
+      <section className="relative flex flex-1 flex-col justify-between gap-10 px-6 pb-12 pt-[max(1.5rem,env(safe-area-inset-top))] sm:px-10 lg:px-16 lg:py-12">
         <a href="https://vishalpanwar.in" className="flex w-fit items-center gap-3 text-sm text-zinc-400 transition hover:text-white">
           <Logo className="h-9 w-9" />
           <span>vishalpanwar.in</span>
@@ -593,8 +593,9 @@ function Welcome({ owner, children }) {
         <div className="hidden font-mono text-sm tabular-nums text-zinc-600 lg:block">{time} IST · {profile.personalInfo.location.display}</div>
       </section>
 
-      <aside className="relative flex w-full items-center justify-center border-t border-white/[0.06] bg-black/40 px-6 py-10 lg:backdrop-blur-2xl sm:px-10 lg:w-[28rem] lg:border-l lg:border-t-0 lg:py-12 xl:w-[32rem]">
-        <div className="w-full max-w-sm">{children}</div>
+      {/* phones: the same page continues (no separate panel); desktop: a side panel */}
+      <aside className="relative flex w-full px-6 pb-10 sm:px-10 lg:w-[28rem] lg:items-center lg:justify-center lg:border-l lg:border-white/[0.06] lg:bg-black/40 lg:py-12 lg:backdrop-blur-2xl xl:w-[32rem]">
+        <div className="w-full max-w-xl lg:max-w-sm">{children}</div>
       </aside>
     </div>
   )
