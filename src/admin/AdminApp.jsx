@@ -580,7 +580,7 @@ function Welcome({ owner, children }) {
   const last = readLastUser()
   const time = new Intl.DateTimeFormat('en-IN', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true, timeZone: IST }).format(now)
   return (
-    <div className="relative flex min-h-[100dvh] flex-col overflow-hidden text-zinc-100 lg:flex-row">
+    <div className="relative flex min-h-[100dvh] flex-col overflow-hidden pb-24 text-zinc-100 lg:flex-row lg:pb-0">
       <Backdrop />
       <img src={logoMark} alt="" aria-hidden className="pointer-events-none absolute -left-24 top-1/2 h-[42rem] w-[42rem] -translate-y-1/2 select-none opacity-[0.06] lg:left-[8%]" />
 
@@ -593,7 +593,7 @@ function Welcome({ owner, children }) {
         <div className="hidden font-mono text-sm tabular-nums text-zinc-600 lg:block">{time} IST · {profile.personalInfo.location.display}</div>
       </section>
 
-      <aside className="relative flex w-full items-center justify-center border-t border-white/[0.06] bg-black/40 px-6 py-10 backdrop-blur-2xl sm:px-10 lg:w-[28rem] lg:border-l lg:border-t-0 lg:py-12 xl:w-[32rem]">
+      <aside className="relative flex w-full items-center justify-center border-t border-white/[0.06] bg-black/40 px-6 py-10 lg:backdrop-blur-2xl sm:px-10 lg:w-[28rem] lg:border-l lg:border-t-0 lg:py-12 xl:w-[32rem]">
         <div className="w-full max-w-sm">{children}</div>
       </aside>
     </div>
@@ -603,6 +603,17 @@ function Welcome({ owner, children }) {
 function SignInPanel({ busy, error, onSignIn, checking }) {
   const last = readLastUser()
   const first = last?.name?.split(' ')[0]
+  const button = checking ? (
+    <div className="flex h-11 items-center justify-center gap-2 rounded-lg border border-white/10 text-sm text-zinc-500">
+      <RefreshCw size={14} className="animate-spin" /> Checking sign-in…
+    </div>
+  ) : first ? (
+    <GoogleButton busy={busy} onClick={onSignIn}>Continue as {first}</GoogleButton>
+  ) : (
+    <button onClick={onSignIn} disabled={busy} className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-200 transition hover:border-white/30 hover:text-white disabled:opacity-60">
+      {busy ? <RefreshCw size={14} className="animate-spin" /> : <GoogleMark />} Owner sign-in
+    </button>
+  )
   return (
     <div>
       <div className="flex items-center gap-3">
@@ -619,20 +630,14 @@ function SignInPanel({ busy, error, onSignIn, checking }) {
           This is my private control center for projects, uptime and marketing. If you're here to work with me, the portfolio and links on this page are the way in.
         </p>
       )}
-      <div className="mt-8">
-        {checking ? (
-          <div className="flex h-11 items-center justify-center gap-2 rounded-lg border border-white/10 text-sm text-zinc-500">
-            <RefreshCw size={14} className="animate-spin" /> Checking sign-in…
-          </div>
-        ) : first ? (
-          <GoogleButton busy={busy} onClick={onSignIn}>Continue as {first}</GoogleButton>
-        ) : (
-          <button onClick={onSignIn} disabled={busy} className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/15 px-3 py-2.5 text-sm text-zinc-300 transition hover:border-white/30 hover:text-white disabled:opacity-60">
-            {busy ? <RefreshCw size={14} className="animate-spin" /> : <GoogleMark />} Owner sign-in
-          </button>
-        )}
+      {/* desktop: in the panel */}
+      <div className="mt-8 hidden lg:block">{button}</div>
+      {error && <p role="alert" className="mt-3 hidden text-xs text-red-400 lg:block">{error}</p>}
+      {/* phones: floating at the bottom, so it's there without scrolling */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-black/75 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl lg:hidden">
+        {error && <p role="alert" className="mb-2 text-center text-xs text-red-400">{error}</p>}
+        {button}
       </div>
-      {error && <p role="alert" className="mt-3 text-xs text-red-400">{error}</p>}
       <p className="mt-8 border-t border-white/10 pt-4 text-xs leading-relaxed text-zinc-600">
         Only Vishal's Google account can open this dashboard.
       </p>
