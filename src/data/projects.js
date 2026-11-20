@@ -73,10 +73,10 @@ export const projects = [
     live: "https://aarambh.app"
   },
   {
-    title: "VP Control",
-    description: "My private ops dashboard for every project — uptime and SSL checks, Vercel deploys, cloud bills, Razorpay revenue, app-store ratings, marketing analytics and phone alerts, plus the editor that powers this site.",
-    tech: ["React", "Vercel Functions", "Firebase", "GitHub Actions", "Tailwind CSS"],
-    features: ["Uptime monitor every 10 minutes", "WhatsApp alerts via hermes", "Traffic, SEO, campaigns and leads", "Live portfolio editor"],
+    title: "Admin Dashboard",
+    description: "My private control center for every project — uptime, SSL and PageSpeed checks with WhatsApp alerts, Vercel deploys, cloud bills, Razorpay revenue and app-store ratings; a marketing hub with traffic, Search Console, campaigns, leads and Instagram insights (best time to post, follower trend, content calendar); LinkedIn outreach and a job tracker. Projects and this site's content live in Firestore and are edited from the dashboard.",
+    tech: ["React", "Vercel Functions", "Firestore", "Google Cloud APIs", "Instagram Graph API", "Tailwind CSS"],
+    features: ["Uptime, SSL and PageSpeed with WhatsApp alerts", "Marketing: traffic, Search Console, campaigns, leads", "Instagram insights and content calendar", "LinkedIn outreach and job tracker", "Projects and site content in Firestore", "Laptop agent for services and containers"],
     image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg",
     github: "https://github.com/vishalpanwar416/Portfolio",
     live: null
