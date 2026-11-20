@@ -18,6 +18,7 @@ import { trafficFor } from './IntegrationSections'
 import CalendarView from './CalendarView'
 import { BestTime, CombinedBestTime, FollowerTrend } from './InstagramInsights'
 import PostsView from './PostsView'
+import LogsView from './LogsView'
 import {
   Badge, Button, ConnectHint, Empty, FIELD_MAIN, Input, Progress, Section, Select, ShareBars, Sparkline, Stat, Textarea,
   cx, formRow,
@@ -27,6 +28,7 @@ export const MARKETING_TABS = [
   { key: 'traffic', label: 'Traffic' },
   { key: 'instagram', label: 'Instagram' },
   { key: 'posts', label: 'Posts' },
+  { key: 'logs', label: 'Logs' },
   { key: 'calendar', label: 'Calendar' },
   { key: 'seo', label: 'SEO' },
   { key: 'search', label: 'Search' },
@@ -962,6 +964,7 @@ export default function MarketingView({ data, go, tab }) {
       {current === 'traffic' && <Traffic data={data} go={go} leads={leads} />}
       {current === 'instagram' && <Instagram data={data} go={go} />}
       {current === 'posts' && <PostsView />}
+      {current === 'logs' && <LogsView />}
       {current === 'calendar' && <CalendarView docs={data.docs} />}
       {current === 'seo' && <Seo data={data} />}
       {current === 'search' && <Search data={data} go={go} />}

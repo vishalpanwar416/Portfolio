@@ -32,7 +32,7 @@ const when = (p) => ms(p.publishedAt) || ms(p.createdAt)
 const day = (t) => (t ? new Date(t).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—')
 
 /** Live snapshot of one collection; error is the Firestore code (permission-denied when the rule isn't deployed). */
-function useCollection(name, order, max) {
+export function useCollection(name, order, max) {
   const [state, setState] = useState({ rows: null, error: null })
   useEffect(() => onSnapshot(
     query(collection(db, name), orderBy(order, 'desc'), ...(max ? [limit(max)] : [])),

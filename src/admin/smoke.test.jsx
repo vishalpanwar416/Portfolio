@@ -28,9 +28,14 @@ const FEED = [
 ]
 const JOBS = () => FEED.map((j) => require('../../api/admin/_routes/jobs').clean(j)).map((j, i) => ({ id: `fp-${j.sourceId}`, data: () => ({ ...j, ...(i === 3 ? { status: 'applied', appliedOn: '2026-11-14', notes: 'Referral from Riya' } : {}) }) }))
 const POST = (brand) => ({ id: `${brand}-1`, data: () => ({ postId: `${brand}-1`, title: `${brand} sample post`, caption: 'caption', pillar: 'product', state: 'published', createdAt: '2026-11-13T10:00:00.000Z', publishedAt: '2026-11-13T12:00:00.000Z', permalink: 'https://instagram.com/p/x', metrics: { likes: 12, comments: 3, reach: 400 } }) })
+// Pipeline run records (LogsView): one full slot-run log and one failed prepare per brand.
+const RUNS = (name) => [
+  { id: `${name}-r1`, data: () => ({ step: 'run', ok: true, postId: `${name}-reel`, summary: `✅ ${name} posted`, log: `brand: ${name}\nPublished! IG media id: 1`, durationS: 12.4, at: '2026-11-20T06:01:00.000Z' }) },
+  { id: `${name}-r2`, data: () => ({ step: 'prepare', ok: false, error: 'all image hosts failed', summary: `Prepare failed: ${name} hosts down`, log: '[imagehost] uguu failed, trying next: fetch failed', at: '2026-11-20T05:00:00.000Z' }) },
+]
 jest.mock('firebase/firestore', () => ({
   collection: (_, name) => ({ name }), doc: () => ({}), query: (c) => c, orderBy: () => ({}), limit: () => ({}),
-  onSnapshot: (ref, ok) => { if (ref?.name?.endsWith('_posts')) ok({ docs: [POST(ref.name)] }); if (ref?.name === 'vp_jobs') ok({ docs: JOBS() }); return () => {} },
+  onSnapshot: (ref, ok) => { if (ref?.name?.endsWith('_posts')) ok({ docs: [POST(ref.name)] }); if (ref?.name?.endsWith('_runs')) ok({ docs: RUNS(ref.name) }); if (ref?.name === 'vp_jobs') ok({ docs: JOBS() }); return () => {} },
   setDoc: async () => {}, deleteDoc: async () => {},
 }))
 global.fetch = jest.fn(async () => ({ ok: true, json: async () => ({}) }))
@@ -213,6 +218,16 @@ test('posts tab lists pipeline posts from both brands', () => {
   render(<MarketingView data={data} go={go} tab="posts" />)
   expect(screen.getByText('tabletap_posts sample post')).toBeTruthy()
   expect(screen.getByText('media_posts sample post')).toBeTruthy()
+})
+
+test('logs tab lists run records from both brands and opens a full log', () => {
+  render(<MarketingView data={data} go={go} tab="logs" />)
+  expect(screen.getByText('✅ tabletap_runs posted')).toBeTruthy()
+  expect(screen.getByText('Prepare failed: media_runs hosts down')).toBeTruthy()
+  fireEvent.click(screen.getByText('Failures only'))
+  expect(screen.queryByText('✅ tabletap_runs posted')).toBeNull()
+  fireEvent.click(screen.getByText('Prepare failed: media_runs hosts down'))
+  expect(screen.getByText('[imagehost] uguu failed, trying next: fetch failed')).toBeTruthy()
 })
 
 test('best time groups posts by IST day and 3-hour block, and needs two posts to pick a winner', () => {
