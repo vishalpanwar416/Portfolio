@@ -351,3 +351,14 @@ test('footer links my apps, from published content or the built-in list', () => 
   }
   expect(mergeContent({ apps: [{ label: 'X', url: 'https://x.test', note: '' }] }).appLinks).toHaveLength(1)
 })
+
+test('Apps section invites visitors to use each app', () => {
+  // framer-motion's whileInView needs IntersectionObserver, which jsdom lacks
+  global.IntersectionObserver ||= class { observe() {} unobserve() {} disconnect() {} }
+  const Apps = require('../Sections/Apps').default
+  render(<Apps />)
+  expect(document.getElementById('apps').textContent).toMatch(/Try\s*My\s*Apps/)
+  expect(screen.getByText('Start learning').closest('a').getAttribute('href')).toBe('https://learn.vishalpanwar.in')
+  expect(screen.getByText('Open Docs').closest('a').getAttribute('href')).toBe('https://docs.vishalpanwar.in')
+  expect(screen.getByText('Try Stacky').closest('a').getAttribute('href')).toBe('https://stacky.vishalpanwar.in')
+})

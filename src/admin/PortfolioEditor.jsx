@@ -358,11 +358,11 @@ function LinksTab({ c, set }) {
           <Field label="Notice period">{input('noticePeriod', 'Immediate to 30 days')}</Field>
         </div>
       </Section>
-      <Section title="My apps (footer)">
+      <Section title="My apps (Apps section and footer)">
         <ListEditor
           items={c.apps || []}
           onChange={(apps) => set({ apps })}
-          blank={() => ({ label: '', url: 'https://', note: '' })}
+          blank={() => ({ label: '', url: 'https://', note: '', description: '', cta: '', icon: 'app' })}
           addLabel="Add app"
           title={(a) => a.label}
           summary={(a) => [a.url, a.note].filter(Boolean).join(' · ')}
@@ -370,7 +370,14 @@ function LinksTab({ c, set }) {
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Field label="Name"><Input value={a.label} onChange={(e) => upA({ label: e.target.value })} className="w-full" /></Field>
               <Field label="URL"><Input value={a.url} onChange={(e) => upA({ url: e.target.value.trim() })} className="w-full" /></Field>
-              <Field label="One-line description" className="sm:col-span-2"><Input value={a.note} onChange={(e) => upA({ note: e.target.value })} className="w-full" /></Field>
+              <Field label="One-line description (footer)" className="sm:col-span-2"><Input value={a.note} onChange={(e) => upA({ note: e.target.value })} className="w-full" /></Field>
+              <Field label="What it does (Apps section)" className="sm:col-span-2"><Textarea rows={3} value={a.description || ''} onChange={(e) => upA({ description: e.target.value })} /></Field>
+              <Field label="Button text"><Input value={a.cta || ''} onChange={(e) => upA({ cta: e.target.value })} placeholder={`Open ${a.label || 'app'}`} className="w-full" /></Field>
+              <Field label="Icon">
+                <Select value={a.icon || 'app'} onChange={(e) => upA({ icon: e.target.value })} className="w-full">
+                  <option value="learn">Learning</option><option value="docs">Documents</option><option value="tasks">Tasks</option><option value="app">App</option>
+                </Select>
+              </Field>
             </div>
           )}
         />

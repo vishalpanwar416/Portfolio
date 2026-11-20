@@ -52,6 +52,11 @@ export const sectionContent = {
     viewDemo: "Live Demo"
   },
 
+  apps: {
+    title: "Try My Apps",
+    subtitle: "Free tools I built and run. Sign in with Google and start using them."
+  },
+
   contact: {
     title: "Let's Connect",
     subtitle: "Open to Backend, Full Stack, SRE/DevOps, and Go roles. Remote (India), US, or Gulf region.",

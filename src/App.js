@@ -6,6 +6,7 @@ import About from './Sections/About'
 import Skills from './Sections/Skills'
 import Certifications from './Sections/Certifications'
 import Portfolio from './Sections/Portfolio'
+import Apps from './Sections/Apps'
 import Contact from './Sections/Contacts'
 import Footer from './Sections/Footer'
 import LoadingScreen from './components/LoadingScreen'
@@ -48,6 +49,7 @@ export default function App() {
             <Skills />
             <Certifications />
             <Portfolio />
+            <Apps />
             <Contact />
             <Footer />
           </div>

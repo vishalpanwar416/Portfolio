@@ -56,7 +56,7 @@ export default function Contact() {
   return (
     <SectionShell id="contact" className="pb-20">
       <SectionHeader
-        label="05 / Contact"
+        label="06 / Contact"
         title={sectionContent.contact.title}
         subtitle={sectionContent.contact.subtitle}
       />

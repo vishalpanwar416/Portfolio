@@ -42,7 +42,7 @@ function clean(d) {
       kind: LINK_KINDS.includes(x.kind) ? x.kind : 'link', label: str(x.label, 60), url: link(x.url),
       handle: str(x.handle, 120), social: !!x.social, contact: !!x.contact,
     }, 20),
-    apps: list(d.apps, (x) => x && str(x.label, 40) && url(x.url) && /^https?:/i.test(x.url) && { label: str(x.label, 40), url: url(x.url), note: str(x.note, 80) }, 12),
+    apps: list(d.apps, (x) => x && str(x.label, 40) && url(x.url) && /^https?:/i.test(x.url) && { label: str(x.label, 40), url: url(x.url), note: str(x.note, 80), description: str(x.description, 400), cta: str(x.cta, 30), icon: ['learn', 'docs', 'tasks', 'app'].includes(x.icon) ? x.icon : 'app' }, 12),
     text: Object.fromEntries(TEXT_KEYS.map((k) => [k, k === 'about' ? list(d.text?.about, (x) => str(x, 1200) || null, 6) || [] : str(d.text?.[k], 600)])),
     certifications: list(d.certifications, (x) => x && str(x.title, 160) && {
       title: str(x.title, 160), issuer: str(x.issuer, 120), date: str(x.date, 40), icon: ['award', 'trophy', 'star'].includes(x.icon) ? x.icon : 'award', link: url(x.link),
