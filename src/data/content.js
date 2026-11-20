@@ -81,6 +81,7 @@ export const sectionContent = {
   footer: {
     tagline: "Software Development Engineer | Gen AI Products · Backend · Cloud",
     quickLinks: "Quick Links",
+    apps: "My Apps",
     connectWithMe: "Connect With Me",
     copyright: "© 2026 Vishal Panwar. All rights reserved.",
     links: {

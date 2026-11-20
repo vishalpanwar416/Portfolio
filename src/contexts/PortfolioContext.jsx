@@ -11,7 +11,7 @@ import {
   certifications as defaultCertifications, education as defaultEducation, personalInfo as defaultPersonal,
   projects as defaultProjects, skillCategories as defaultSkills, typingAnimationTexts as defaultTyping,
   workExperience as defaultExperience, sectionContent as defaultText, socialLinks as defaultSocial,
-  contactLinks as defaultContactLinks, externalLinks as defaultExternal,
+  contactLinks as defaultContactLinks, externalLinks as defaultExternal, appLinks as defaultApps,
 } from '../data'
 
 const CACHE_KEY = 'portfolio_content_v1'
@@ -76,6 +76,7 @@ export function mergeContent(c) {
     workExperience: pick(c?.experience, defaultExperience),
     education: pick(c?.education, defaultEducation),
     sectionContent: mergeText(c?.text),
+    appLinks: pick(c?.apps, defaultApps),
     socialLinks: links
       ? links.filter((l) => l.social && l.url).map((l) => ({ name: l.label, icon: linkIcon(l.kind), url: l.url, username: l.handle || bare(l.url) }))
       : defaultSocial,

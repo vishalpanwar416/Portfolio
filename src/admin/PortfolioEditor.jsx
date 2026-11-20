@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { ArrowDown, ArrowUp, Award, ChevronRight, ExternalLink, Plus, RotateCcw, Star, Trash2, Trophy, X } from 'lucide-react'
 import {
   certifications, contactLinks, education, externalLinks, personalInfo, projects, sectionContent, skillCategories,
-  socialLinks, typingAnimationTexts, workExperience,
+  socialLinks, typingAnimationTexts, workExperience, appLinks,
 } from '../data'
 import { LINK_ICONS } from '../contexts/PortfolioContext'
 import { saveDoc, timeAgo } from './data'
@@ -85,6 +85,7 @@ export function builtInExtras() {
       workPreference: personalInfo.availability.workPreference, noticePeriod: personalInfo.availability.noticePeriod,
     },
     links: builtInLinks(),
+    apps: appLinks.map((a) => ({ ...a })),
     text: builtInText(),
   }
 }
@@ -356,6 +357,23 @@ function LinksTab({ c, set }) {
           <Field label="Work preference">{input('workPreference', 'Remote (India), US…')}</Field>
           <Field label="Notice period">{input('noticePeriod', 'Immediate to 30 days')}</Field>
         </div>
+      </Section>
+      <Section title="My apps (footer)">
+        <ListEditor
+          items={c.apps || []}
+          onChange={(apps) => set({ apps })}
+          blank={() => ({ label: '', url: 'https://', note: '' })}
+          addLabel="Add app"
+          title={(a) => a.label}
+          summary={(a) => [a.url, a.note].filter(Boolean).join(' · ')}
+          render={(a, upA) => (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <Field label="Name"><Input value={a.label} onChange={(e) => upA({ label: e.target.value })} className="w-full" /></Field>
+              <Field label="URL"><Input value={a.url} onChange={(e) => upA({ url: e.target.value.trim() })} className="w-full" /></Field>
+              <Field label="One-line description" className="sm:col-span-2"><Input value={a.note} onChange={(e) => upA({ note: e.target.value })} className="w-full" /></Field>
+            </div>
+          )}
+        />
       </Section>
       <Section title="Links">
         <p className="mb-3 text-xs text-zinc-500">“Social” links show in the hero (first four) and footer; “Contact” links show in the contact section.</p>

@@ -4,13 +4,13 @@ import { footerLinks } from '../data'
 import { usePortfolio } from '../contexts/PortfolioContext'
 
 export default function Footer() {
-  const { personalInfo, socialLinks, sectionContent, externalLinks } = usePortfolio()
+  const { personalInfo, socialLinks, sectionContent, externalLinks, appLinks } = usePortfolio()
   return (
     <footer className="bg-black border-t border-white/[0.06] text-gray-300 py-12 relative overflow-hidden">
       <div className="absolute inset-0 noise-texture opacity-[0.01] pointer-events-none" />
 
       <div className="container mx-auto px-5 sm:px-8 relative z-10">
-        <div className="grid md:grid-cols-3 gap-10 items-start mb-10">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10 items-start mb-10">
           <div className="text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start mb-4">
               <img src={logo} alt="Vishal Panwar Logo" className="h-10 w-auto opacity-90" />
@@ -35,6 +35,26 @@ export default function Footer() {
               ))}
             </div>
           </div>
+
+          {appLinks.length > 0 && (
+            <div className="text-center">
+              <h4 className="text-sm font-semibold mb-4 text-gray-300 uppercase tracking-wider">
+                {sectionContent.footer.apps || 'My Apps'}
+              </h4>
+              <ul className="space-y-2.5">
+                {appLinks.map((app) => (
+                  <li key={app.url}>
+                    <a href={app.url} target="_blank" rel="noopener noreferrer" className="group inline-flex flex-col items-center">
+                      <span className="flex items-center gap-1 text-sm text-gray-300 group-hover:text-white transition-colors">
+                        {app.label} <ExternalLink size={11} className="text-gray-600 group-hover:text-gray-300" />
+                      </span>
+                      {app.note && <span className="text-xs text-gray-600">{app.note}</span>}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className="text-center md:text-right">
             <h4 className="text-sm font-semibold mb-4 text-gray-300 uppercase tracking-wider">

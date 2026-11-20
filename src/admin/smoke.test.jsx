@@ -342,3 +342,12 @@ test('contact details, links and page text round-trip through published content'
   expect(edited.sectionContent.about.content).toEqual(['One', 'Two'])
   expect(edited.sectionContent.skills.title).toBe(sectionContent.skills.title)
 })
+
+test('footer links my apps, from published content or the built-in list', () => {
+  const Footer = require('../Sections/Footer').default
+  render(<Footer />)
+  for (const [name, url] of [['Learn', 'https://learn.vishalpanwar.in'], ['Docs', 'https://docs.vishalpanwar.in'], ['Stacky', 'https://stacky.vishalpanwar.in']]) {
+    expect(screen.getByText(name).closest('a').getAttribute('href')).toBe(url)
+  }
+  expect(mergeContent({ apps: [{ label: 'X', url: 'https://x.test', note: '' }] }).appLinks).toHaveLength(1)
+})

@@ -88,7 +88,7 @@ export const projects = [
     features: ["Workspaces and priorities", "Task queue for focus", "Shared tasks with comments", "MCP server for AI agents"],
     image: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg",
     github: "https://github.com/vishalpanwar416/Stacky",
-    live: "https://stackyy.vercel.app"
+    live: "https://stacky.vishalpanwar.in"
   },
   {
     title: "Sarai",
