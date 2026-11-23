@@ -1,6 +1,16 @@
 
 export const projects = [
   {
+    title: "Table Tap",
+    description: "Contactless QR food ordering for restaurants: guests order from the table, and operators get GPT-4 RAG analytics and event-driven notifications, with 80% faster order processing for 10K+ customers. It now runs on its own private AI stack: Ollama models behind an OpenAI-compatible /v1 API, a chat UI and a job harness, reached through Cloudflare Tunnel.",
+    tech: ["React","Node.js","MongoDB","OpenAI","Ollama","GCP","Twilio","Cloudflare Tunnel"],
+    features: ["Contactless QR ordering","GPT-4 RAG analytics","Event-driven notifications","Private OpenAI-compatible AI API","Cloud Run deployment"],
+    image: "/logos/table-tap.png",
+    github: "https://github.com/vishalpanwar416/table-tap",
+    live: "https://table-tap.in",
+    featured: true
+  },
+  {
     title: "EditionTV",
     description: "News platform for independent, investigative journalism — Flutter reader app for Android, iOS and web, Node.js backend and CMS, a reel audio service, and GCP infrastructure in Terraform.",
     tech: ["Flutter", "Node.js", "GCP", "Cloud SQL", "Terraform"],
@@ -28,26 +38,6 @@ export const projects = [
     image: "/logos/sanero.png",
     github: null,
     live: "https://sanero.in",
-    featured: true
-  },
-  {
-    title: "Table-Tap",
-    description: "Contactless QR food ordering platform with GPT-4 RAG analytics for restaurant operators — 80% faster order processing for 10K+ customers.",
-    tech: ["React", "Node.js", "MongoDB", "OpenAI", "GCP", "Twilio"],
-    features: ["Contactless QR ordering", "GPT-4 RAG analytics", "Event-driven notifications", "Cloud Run deployment"],
-    image: "/logos/table-tap.png",
-        github: "https://github.com/vishalpanwar416/table-tap",
-    live: "https://table-tap-qr.vercel.app",
-    featured: true
-  },
-  {
-    title: "Table-Tap AI",
-    description: "Local OpenAI-compatible AI stack for Table Tap — Ollama models, chat UI, queue harness, and Cloudflare Tunnel so restaurant apps can call a private /v1 API like OpenAI.",
-    tech: ["Node.js", "React", "Ollama", "Express", "Vite", "Cloudflare Tunnel"],
-    features: ["OpenAI-compatible /v1 API", "Custom table-tap-AI models", "Chat UI + job harness", "Tunnel for remote Table Tap apps"],
-    image: "/logos/table-tap.png",
-        github: null,
-    live: "https://table-tap.in",
     featured: true
   },
   {
