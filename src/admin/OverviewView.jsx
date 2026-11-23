@@ -2,7 +2,7 @@ import { Activity, AlertTriangle, ArrowRight, Briefcase, IndianRupee, Repeat, Tr
 import {
   STATUSES, invoiceState, lastMonths, money, moneyShort, monthLabel, projectStats, revenueByMonth, revenueIn, timeAgo,
 } from './data'
-import { Badge, BarChart, Empty, Glass, Section, ShareBars, Sparkline, Stat, StatusDot, cx } from './ui'
+import { Badge, BarChart, Empty, Glass, Section, ShareBars, Sparkline, Stat, cx, ProjectLogo } from './ui'
 import { GoalCard } from './MoneyView'
 import { SEVERITY, computeAlerts } from './alerts'
 import { trafficFor } from './IntegrationSections'
@@ -20,7 +20,7 @@ export function ProjectTile({ p, checks, go, traffic }) {
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
-          <StatusDot status={p.status} />
+          <ProjectLogo project={p} size="md" status={false} />
           <span className="truncate font-medium text-zinc-100">{p.name}</span>
         </div>
         <span className={cx('shrink-0 text-[11px]', STATUSES[p.status]?.text)}>{STATUSES[p.status]?.label}</span>
@@ -145,7 +145,7 @@ export default function OverviewView({ data, go }) {
             <ul className="divide-y divide-white/[0.05]">
               {activity.map((a) => (
                 <li key={a.key} className="flex items-center gap-2.5 py-2 text-sm">
-                  <StatusDot status={a.project.status} />
+                  <ProjectLogo project={a.project} />
                   <button onClick={() => go(`/p/${a.project.slug}`)} className="w-24 shrink-0 truncate text-left text-zinc-300 hover:text-white">{a.project.name}</button>
                   <span className="min-w-0 flex-1 truncate text-xs text-zinc-500">{a.kind === 'deploy' && '▲ '}{a.text}</span>
                   {a.state === 'ERROR' && <span className="text-xs text-red-400">failed</span>}

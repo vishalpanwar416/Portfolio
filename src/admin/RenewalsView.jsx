@@ -2,7 +2,7 @@
 // certificates (from uptime checks) and client contracts.
 import { RefreshCw } from 'lucide-react'
 import { RENEWAL_WARN_DAYS, SSL_WARN_DAYS, apexDomain, clientRenewals, daysUntil, money } from './data'
-import { Badge, Button, Empty, Section, StatusDot } from './ui'
+import { Badge, Button, Empty, Section, ProjectLogo } from './ui'
 
 const dayTone = (d, warn) => (d === null ? 'zinc' : d < 0 ? 'red' : d <= warn ? 'amber' : 'green')
 const dayText = (d) => (d === null ? 'unknown' : d < 0 ? `expired ${-d}d ago` : `${d}d left`)
@@ -53,7 +53,7 @@ export default function RenewalsView({ data, go }) {
                       <td className="py-2 pr-3">
                         <div className="flex flex-wrap gap-x-2 gap-y-0.5">
                           {[...(usedBy[d.domain] || [])].map((p) => (
-                            <button key={p.slug} onClick={() => go(`/p/${p.slug}`)} className="inline-flex items-center gap-1 text-xs text-zinc-400 hover:text-white"><StatusDot status={p.status} /> {p.name}</button>
+                            <button key={p.slug} onClick={() => go(`/p/${p.slug}`)} className="inline-flex items-center gap-1 text-xs text-zinc-400 hover:text-white"><ProjectLogo project={p} size="xs" /> {p.name}</button>
                           ))}
                           {!usedBy[d.domain] && <span className="text-xs text-zinc-600">Vercel only</span>}
                         </div>

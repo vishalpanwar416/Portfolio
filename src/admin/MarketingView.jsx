@@ -21,7 +21,7 @@ import PostsView from './PostsView'
 import LogsView from './LogsView'
 import {
   Badge, Button, ConnectHint, Empty, FIELD_MAIN, Input, Progress, Section, Select, ShareBars, Sparkline, Stat, Textarea,
-  cx, formRow,
+  cx, formRow, ProjectLogo,
 } from './ui'
 
 export const MARKETING_TABS = [
@@ -123,7 +123,7 @@ function Traffic({ data, go, leads }) {
               {rows.length === 0 ? <Empty>No page views yet. Turn on Web Analytics in a Vercel project to see it here.</Empty> : rows.map((r) => (
                 <Section
                   key={r.p.slug}
-                  title={<button onClick={() => go(`/p/${r.p.slug}`)} className="hover:text-white">{r.p.name}</button>}
+                  title={<button onClick={() => go(`/p/${r.p.slug}`)} className="inline-flex items-center gap-2 hover:text-white"><ProjectLogo project={r.p} status={false} /> {r.p.name}</button>}
                   action={days === 30 && <Sparkline values={trafficFor(r.p, data.traffic).daily} width={100} height={22} />}
                 >
                   <div className="mb-4 flex flex-wrap gap-x-6 gap-y-1 text-sm">
@@ -710,7 +710,7 @@ function Campaigns({ data, go, leads }) {
                     <button onClick={() => remove(c)} className="text-zinc-600 opacity-0 hover:text-red-400 group-hover:opacity-100 [@media(hover:none)]:opacity-100" aria-label="Remove campaign"><Trash2 size={13} /></button>
                   </div>
                   <div className="mt-0.5 text-xs text-zinc-500">
-                    <button onClick={() => go(`/p/${c.p.slug}`)} className="hover:text-zinc-200">{c.p.name}</button>
+                    <button onClick={() => go(`/p/${c.p.slug}`)} className="inline-flex items-center gap-1.5 hover:text-zinc-200"><ProjectLogo project={c.p} size="xs" status={false} /> {c.p.name}</button>
                     {' · '}{c.channel} · {c.start || '—'}{c.end ? ` → ${c.end}` : ' → ongoing'}{c.utm && ` · utm ${c.utm}`}
                   </div>
                   <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">

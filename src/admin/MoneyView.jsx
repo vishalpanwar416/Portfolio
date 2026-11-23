@@ -6,7 +6,7 @@ import {
   costIn, downloadCsv, invoiceState, lastMonths, money, moneyShort, monthKey, monthLabel, projectStats,
   revenueByMonth, revenueIn, saveDoc, today,
 } from './data'
-import { Badge, BarChart, Button, Empty, Input, Progress, Section, Stat, StatusDot, cx } from './ui'
+import { Badge, BarChart, Button, Empty, Input, Progress, Section, Stat, cx, ProjectLogo } from './ui'
 import { cloudMoney, providerName, useCloud } from './IntegrationSections'
 
 export function GoalCard({ settings, thisMonth, compact }) {
@@ -170,7 +170,7 @@ export default function MoneyView({ data, go }) {
                 const st = invoiceState(i)
                 return (
                   <li key={i.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2 text-sm">
-                    <StatusDot status={i.project.status} />
+                    <ProjectLogo project={i.project} />
                     <button onClick={() => go(`/p/${i.project.slug}`)} className="w-28 shrink-0 truncate text-left text-zinc-400 hover:text-white">{i.project.name}</button>
                     <span className="min-w-0 flex-1 truncate text-zinc-200">{i.client || '—'} <span className="font-mono text-xs text-zinc-600">{i.number}</span></span>
                     <span className="tabular-nums text-zinc-100">{money(i.amount)}</span>

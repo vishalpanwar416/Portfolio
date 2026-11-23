@@ -50,7 +50,7 @@ const nowS = Math.round(Date.now() / 1000)
 const hist = { points: Array.from({ length: 50 }, (_, i) => ({ t: nowS - (50 - i) * 120, l: 0.3, m: 40 + i / 5, d: 70, b: 80, x: i % 5 ? [] : ['media-man@sanero.service'] })) }
 const data = {
   projects, vercel: [], docs: { [`laptop-h-${new Date().toISOString().slice(0, 10)}`]: hist, laptop: { at: new Date().toISOString(), host: 'lap', services: [{ unit: 'media-man@sanero.service', project: 'media-man', state: 'failed', result: 'exit-code', ok: false }, { unit: 'hermes-gateway.service', project: 'hermes', state: 'active', ok: true }], disk: { total: 5e11, free: 1e11 }, memory: { total: 16e9, available: 8e9 }, load: [1, 1, 1], docker: { state: 'active', ok: true, containers: [{ name: 'splink-postgres', image: 'postgres', status: 'Up 2h', running: true }] }, processes: [{ name: 'cursor', cpu: 60, mem: 1.4 }], cpus: 16, battery: { percent: 80, status: 'Charging' }, uptimeSec: 3600 } },
-  docsReady: true, checks: { 'edition.tv': { host: 'edition.tv', up: false, error: 'ENOTFOUND' }, 'sanero.in': { host: 'sanero.in', up: true, status: 200, ms: 100, certValidTo: new Date(Date.now() + 5 * 864e5).toISOString() } },
+  docsReady: true, checks: { 'editiontv.com': { host: 'editiontv.com', up: false, error: 'ENOTFOUND' }, 'sanero.in': { host: 'sanero.in', up: true, status: 200, ms: 100, certValidTo: new Date(Date.now() + 5 * 864e5).toISOString() } },
   checking: false, lastChecked: new Date(), refresh: () => {}, settings: { monthlyGoal: 100000, pinned: ['aarambh'] },
   domains: ok({ domains: [{ domain: 'sanero.in', expiresAt: new Date(Date.now() + 20 * 864e5).toISOString(), registrar: 'GoDaddy' }] }),
   integrations: ok({ vercel: true, monitor: { conclusion: 'success', at: new Date().toISOString() } }),
@@ -85,7 +85,7 @@ test('alerts are computed', () => {
   const titles = a.map((x) => `${x.severity}:${x.title}`)
   console.log(titles.join('\n'))
   expect(titles.some((t) => t.startsWith('critical:Supabase tt is paused'))).toBe(true)
-  expect(titles.some((t) => t.includes('edition.tv is down'))).toBe(true)
+  expect(titles.some((t) => t.includes('editiontv.com is down'))).toBe(true)
 })
 
 test('campaign spend counts as a cost, spread over its months', () => {
@@ -376,4 +376,15 @@ test('Apps section invites visitors to use each app', () => {
   expect(screen.getByText('Start learning').closest('a').getAttribute('href')).toBe('https://learn.vishalpanwar.in')
   expect(screen.getByText('Open Docs').closest('a').getAttribute('href')).toBe('https://docs.vishalpanwar.in')
   expect(screen.getByText('Try Stacky').closest('a').getAttribute('href')).toBe('https://stacky.vishalpanwar.in')
+})
+
+test('project logos: own URL, built-in file, or initials', () => {
+  const { ProjectLogo } = require('./ui')
+  const { container: a } = render(<ProjectLogo project={{ slug: 'table-tap', name: 'Table Tap', status: 'live' }} />)
+  expect(a.querySelector('img').getAttribute('src')).toBe('/logos/table-tap.png')
+  const { container: b } = render(<ProjectLogo project={{ slug: 'x', name: 'X', logo: 'https://x.test/l.png' }} />)
+  expect(b.querySelector('img').getAttribute('src')).toBe('https://x.test/l.png')
+  const { container: c } = render(<ProjectLogo project={{ slug: 'media-man', name: 'Media man' }} />)
+  expect(c.querySelector('img')).toBeNull()
+  expect(c.textContent).toBe('MM')
 })

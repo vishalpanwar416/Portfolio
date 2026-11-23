@@ -49,6 +49,15 @@ const EMPTY = {
 }
 
 export const projectDocId = (slug) => `proj-${slug}`
+
+// Logos shipped with the site (public/logos), used when a project has no
+// `logo` URL of its own (Edit details → Logo).
+const BUILTIN_LOGOS = {
+  aarambh: '/logos/aarambh.png', 'edition-tv': '/logos/edition-tv.png', 'tsp-certification': '/logos/tsp.png',
+  splinkpro: '/logos/splinkpro.png', sarai: '/logos/sarai.png', sanero: '/logos/sanero.png', 'table-tap': '/logos/table-tap.png',
+  stacky: '/logos/stacky.png', portfolio: '/logos/portfolio.png', 'panwar-travels': '/logos/panwar-travels.svg',
+}
+export const projectLogo = (p) => (p?.logo || BUILTIN_LOGOS[p?.slug] || null)
 export const slugify = (s) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
 // ── formatting ─────────────────────────────────────────

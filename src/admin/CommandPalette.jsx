@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { CornerDownLeft, Search } from 'lucide-react'
 import { STATUSES } from './data'
-import { StatusDot, cx } from './ui'
+import { StatusDot, cx, ProjectLogo } from './ui'
 
 export function useHotkey(onOpen) {
   useEffect(() => {
@@ -24,7 +24,7 @@ export default function CommandPalette({ open, onClose, pages, projects, go, act
   const items = useMemo(() => {
     const all = [
       ...pages.map((p) => ({ key: `page-${p.to}`, label: p.label, hint: 'Page', icon: p.icon, run: () => go(p.to) })),
-      ...projects.map((p) => ({ key: `p-${p.slug}`, label: p.name, hint: STATUSES[p.status]?.label, status: p.status, terms: `${p.category} ${(p.domains || []).join(' ')}`, run: () => go(`/p/${p.slug}`) })),
+      ...projects.map((p) => ({ key: `p-${p.slug}`, label: p.name, hint: STATUSES[p.status]?.label, status: p.status, project: p, terms: `${p.category} ${(p.domains || []).join(' ')}`, run: () => go(`/p/${p.slug}`) })),
       ...projects.flatMap((p) => (p.clients || []).map((c) => ({ key: `c-${p.slug}-${c.id}`, label: c.name, hint: `Client · ${p.name}`, terms: `${c.company || ''} ${c.email || ''}`, run: () => go(`/p/${p.slug}`) }))),
       ...actions.map((a) => ({ key: `a-${a.label}`, label: a.label, hint: 'Action', icon: a.icon, run: a.run })),
     ]
@@ -79,7 +79,7 @@ export default function CommandPalette({ open, onClose, pages, projects, go, act
                   onClick={() => choose(it)}
                   className={cx('flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm', n === i ? 'bg-white/[0.08] text-white' : 'text-zinc-300')}
                 >
-                  {it.status ? <StatusDot status={it.status} /> : Icon ? <Icon size={14} className="text-zinc-500" /> : <span className="h-2 w-2" />}
+                  {it.project ? <ProjectLogo project={it.project} /> : it.status ? <StatusDot status={it.status} /> : Icon ? <Icon size={14} className="text-zinc-500" /> : <span className="h-2 w-2" />}
                   <span className="min-w-0 flex-1 truncate">{it.label}</span>
                   <span className="shrink-0 text-xs text-zinc-500">{it.hint}</span>
                   {n === i && <CornerDownLeft size={12} className="text-zinc-500" />}

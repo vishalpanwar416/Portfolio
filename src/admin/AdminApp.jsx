@@ -8,7 +8,7 @@ import { auth } from './firebase'
 import { mergeContent } from '../contexts/PortfolioContext'
 import { GROUPS, leadsFrom, projectDocId, projectStats, saveDoc, slugify, timeAgo, useAdminData } from './data'
 import { computeAlerts } from './alerts'
-import { Button, Glass, Input, StatusDot, cx } from './ui'
+import { Button, Glass, Input, cx, ProjectLogo } from './ui'
 import OverviewView from './OverviewView'
 import ProjectView from './ProjectView'
 import ProjectsView from './ProjectsView'
@@ -130,7 +130,7 @@ function Sidebar({ projects, route, go, onNavigate, badges, pinned }) {
   const current = route.startsWith('/p/') ? projects.find((p) => p.slug === route.slice(3)) : null
   const projectLink = (p) => (
     <NavItem key={p.slug} active={route === `/p/${p.slug}`} onClick={() => nav(`/p/${p.slug}`)}>
-      <StatusDot status={p.status} /> <span className={cx('truncate', p.status === 'decommissioned' && 'text-zinc-600 line-through decoration-zinc-700')}>{p.name}</span>
+      <ProjectLogo project={p} /> <span className={cx('truncate', p.status === 'decommissioned' && 'text-zinc-600 line-through decoration-zinc-700')}>{p.name}</span>
     </NavItem>
   )
 

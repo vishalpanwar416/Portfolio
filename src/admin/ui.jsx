@@ -1,6 +1,7 @@
 // Glass building blocks: black base, translucent white panels, grey text,
 // colour only for status.
-import { STATUSES } from './data'
+import { useEffect, useState } from 'react'
+import { STATUSES, projectLogo } from './data'
 
 export const cx = (...c) => c.filter(Boolean).join(' ')
 
@@ -43,6 +44,40 @@ export function Stat({ label, value, sub, tone = 'text-zinc-50', icon: Icon }) {
       <div className={cx('mt-2 text-[1.7rem] font-semibold leading-tight tabular-nums tracking-tight', tone)}>{value}</div>
       {sub && <div className="mt-1 text-xs text-zinc-500">{sub}</div>}
     </Glass>
+  )
+}
+
+const LOGO_SIZES = {
+  xs: 'h-4 w-4 rounded text-[8px]', sm: 'h-5 w-5 rounded-md text-[9px]', md: 'h-8 w-8 rounded-lg text-xs', lg: 'h-14 w-14 rounded-2xl text-lg',
+}
+const LOGO_DOT = { xs: 'h-1.5 w-1.5', sm: 'h-2 w-2', md: 'h-2.5 w-2.5', lg: 'h-3.5 w-3.5' }
+
+/**
+ * A project's logo (its `logo` URL or the built-in one), or its initials on a
+ * tint derived from the name. With `status`, a status dot sits on the corner.
+ */
+export function ProjectLogo({ project: p, size = 'sm', status = true, className }) {
+  const src = projectLogo(p)
+  const [broken, setBroken] = useState(false)
+  useEffect(() => setBroken(false), [src])
+  const name = p?.name || '?'
+  const initials = name.split(/[\s-]+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase()
+  const hue = [...(p?.slug || name)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7)
+  return (
+    <span className={cx('relative inline-flex shrink-0', className)}>
+      {src && !broken ? (
+        <img src={src} alt="" loading="lazy" onError={() => setBroken(true)}
+          className={cx('object-cover ring-1 ring-white/10', LOGO_SIZES[size], p?.status === 'decommissioned' && 'grayscale opacity-60')} />
+      ) : (
+        <span aria-hidden className={cx('grid place-items-center font-semibold text-white/90 ring-1 ring-white/10', LOGO_SIZES[size])}
+          style={{ background: `linear-gradient(135deg, hsl(${hue} 45% 32%), hsl(${(hue + 40) % 360} 45% 20%))` }}>
+          {initials}
+        </span>
+      )}
+      {status && p?.status && (
+        <span className={cx('absolute -bottom-0.5 -right-0.5 rounded-full ring-2 ring-black', LOGO_DOT[size], STATUSES[p.status]?.dot || 'bg-zinc-600')} />
+      )}
+    </span>
   )
 }
 

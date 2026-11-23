@@ -7,7 +7,7 @@ import {
   monthLabel, newId, projectStats, removeDoc, revenueByMonth, saveDoc, SSL_WARN_DAYS, timeAgo, today,
 } from './data'
 import {
-  BarChart, Button, Empty, FIELD_MAIN, Input, Section, Select, Stat, StatusPill, Tag, Textarea, UpDot, cx, formRow,
+  BarChart, Button, Empty, FIELD_MAIN, Input, Section, Select, Stat, StatusPill, Tag, Textarea, UpDot, cx, formRow, ProjectLogo,
 } from './ui'
 import { Clients, Expenses, Invoices } from './MoneySections'
 import { CloudCosts, GitHubActivity, StackyTasks, Usage } from './IntegrationSections'
@@ -201,7 +201,7 @@ function Infra({ p, checks }) {
 
 function EditDetails({ p, save, onClose, go }) {
   const [f, setF] = useState({
-    name: p.name, category: p.category, summary: p.summary || '', alerts: alertLevel(p), hidden: !!p.hidden, stack: (p.stack || []).join(', '),
+    name: p.name, category: p.category, summary: p.summary || '', alerts: alertLevel(p), hidden: !!p.hidden, logo: p.logo || '', stack: (p.stack || []).join(', '),
     domains: (p.domains || []).join('\n'), repos: (p.repos || []).join('\n'), vercel: (p.vercel || []).join('\n'),
     firebase: (p.firebase || []).join('\n'), stacky: (p.stacky || []).join('\n'), cloud: (p.cloud || []).join('\n'),
     apps: (p.apps || []).join('\n'), payments: (p.payments || []).join('\n'), supabase: (p.supabase || []).join('\n'), services: (p.services || []).join('\n'),
@@ -210,7 +210,7 @@ function EditDetails({ p, save, onClose, go }) {
 
   const submit = async () => {
     await save({
-      name: f.name.trim() || p.name, category: f.category, summary: f.summary.trim(), alerts: f.alerts, hidden: f.hidden, stack: list(f.stack),
+      name: f.name.trim() || p.name, category: f.category, summary: f.summary.trim(), alerts: f.alerts, hidden: f.hidden, logo: f.logo.trim(), stack: list(f.stack),
       domains: list(f.domains).map((d) => d.toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '')),
       repos: list(f.repos).map((r) => r.replace(/^https?:\/\/github\.com\//, '').replace(/\.git$/, '')),
       vercel: list(f.vercel), firebase: list(f.firebase), stacky: list(f.stacky), cloud: list(f.cloud),
@@ -246,6 +246,12 @@ function EditDetails({ p, save, onClose, go }) {
             <option value="shown">Shown everywhere</option>
             <option value="hidden">Hidden (left out of pages, totals and alerts)</option>
           </Select>
+        </label>
+        <label className="sm:col-span-2"><span className={label}>Logo (image URL or /logos/… path; blank = built-in or initials)</span>
+          <span className="flex items-center gap-3">
+            <ProjectLogo project={{ ...p, logo: f.logo.trim() }} size="md" status={false} />
+            <Input value={f.logo} onChange={set('logo')} placeholder="https://…/logo.png" className="w-full" />
+          </span>
         </label>
         <label className="sm:col-span-2"><span className={label}>Summary</span><Input value={f.summary} onChange={set('summary')} className="w-full" /></label>
         <label className="sm:col-span-2"><span className={label}>Stack (comma separated)</span><Input value={f.stack} onChange={set('stack')} className="w-full" /></label>
@@ -289,6 +295,7 @@ export default function ProjectView({ project: p, data, go }) {
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-3">
+            <ProjectLogo project={p} size="lg" status={false} />
             <h1 className="text-2xl font-semibold tracking-tight text-white">{p.name}</h1>
             <StatusPill status={p.status} />
             <Tag>{p.category}</Tag>

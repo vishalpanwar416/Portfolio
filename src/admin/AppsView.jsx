@@ -1,7 +1,7 @@
 // Mobile apps across projects: store listing, rating, downloads, version,
 // and (with Play Console access) crash / ANR rates.
 import { ExternalLink, Smartphone, Star } from 'lucide-react'
-import { Badge, ConnectHint, Empty, Section, StatusDot, cx } from './ui'
+import { Badge, ConnectHint, Empty, Section, cx, ProjectLogo } from './ui'
 
 const PLATFORM = { android: 'Google Play', ios: 'App Store' }
 const pct = (v) => (v === null || v === undefined ? '—' : `${(v * 100).toFixed(2)}%`)
@@ -35,7 +35,7 @@ export function AppCard({ a, project, go }) {
           <div className="truncate font-medium text-zinc-100">{a.name}</div>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-zinc-500">
             <span>{PLATFORM[a.platform]}</span>
-            {project && go && <button onClick={() => go(`/p/${project.slug}`)} className="inline-flex items-center gap-1 hover:text-white"><StatusDot status={project.status} /> {project.name}</button>}
+            {project && go && <button onClick={() => go(`/p/${project.slug}`)} className="inline-flex items-center gap-1 hover:text-white"><ProjectLogo project={project} size="xs" /> {project.name}</button>}
           </div>
         </div>
         <a href={a.url} target="_blank" rel="noreferrer" className="text-zinc-500 hover:text-white" aria-label="Open store page"><ExternalLink size={14} /></a>
