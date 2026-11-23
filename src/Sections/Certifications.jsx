@@ -1,8 +1,8 @@
-import { motion } from 'framer-motion'
 import { CheckCircle2 } from 'lucide-react'
 import SectionShell from '../components/SectionShell'
 import SectionHeader from '../components/SectionHeader'
 import { usePortfolio } from '../contexts/PortfolioContext'
+import { TiltPanel } from '../components/Interactive'
 
 export default function Certifications() {
   const { certifications, sectionContent } = usePortfolio()
@@ -20,17 +20,17 @@ export default function Certifications() {
 
       <div className="grid md:grid-cols-2 gap-6">
         {certifications.map((cert, index) => (
-          <motion.div
+          <TiltPanel
             key={cert.title}
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: index * 0.06 }}
-            className="p-6 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all group"
+            className="p-6 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-colors"
             whileHover={{ y: -4 }}
           >
             <div className="flex items-start gap-4">
-              <div className="p-3 rounded-xl bg-black/40 border border-white/10">
+              <div className="p-3 rounded-xl bg-black/40 border border-white/10 transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110">
                 <cert.icon className="w-5 h-5 text-gray-400" />
               </div>
               <div className="flex-1">
@@ -44,7 +44,7 @@ export default function Certifications() {
                 <p className="text-gray-500 text-xs mt-1">{cert.date}</p>
               </div>
             </div>
-          </motion.div>
+          </TiltPanel>
         ))}
       </div>
     </SectionShell>

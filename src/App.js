@@ -12,6 +12,7 @@ import Footer from './Sections/Footer'
 import LoadingScreen from './components/LoadingScreen'
 import ScrollProgress from './components/ScrollProgress'
 import BackToTop from './components/BackToTop'
+import { PointerGlow } from './components/Interactive'
 import { PortfolioProvider } from './contexts/PortfolioContext'
 
 const LOADER_KEY = 'portfolio_loader_seen'
@@ -43,6 +44,7 @@ export default function App() {
           <LoadingScreen key="loading" onComplete={handleLoadComplete} />
         ) : (
           <div key="content" className="min-h-screen bg-black relative">
+            <PointerGlow />
             <Navbar />
             <Hero />
             <About />

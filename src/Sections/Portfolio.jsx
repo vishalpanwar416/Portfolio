@@ -3,9 +3,11 @@ import { ExternalLink, Github, Lock } from 'lucide-react'
 import SectionShell from '../components/SectionShell'
 import SectionHeader from '../components/SectionHeader'
 import { usePortfolio } from '../contexts/PortfolioContext'
+import { Spotlight, useTilt } from '../components/Interactive'
 
 function ProjectCard({ project, className = '', index = 0 }) {
   const { sectionContent } = usePortfolio()
+  const tilt = useTilt(5)
   const hasLive = project.live && !project.private
   const hasGithub = Boolean(project.github)
 
@@ -15,11 +17,13 @@ function ProjectCard({ project, className = '', index = 0 }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.05 }}
-      className={`flex flex-col p-6 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all ${className}`}
+      className={`group relative overflow-hidden flex flex-col p-6 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-colors ${className}`}
       whileHover={{ y: -4 }}
+      {...tilt}
     >
+      <Spotlight />
       <div className="flex items-start justify-between gap-3 mb-4">
-        <div className={`${project.wideImage ? 'h-14 w-28 bg-white' : 'h-14 w-14 bg-black/50'} rounded-xl border border-white/10 flex items-center justify-center p-1 overflow-hidden`}>
+        <div className={`${project.wideImage ? 'h-14 w-28 bg-white' : 'h-14 w-14 bg-black/50'} rounded-xl border border-white/10 flex items-center justify-center p-1 overflow-hidden transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-3`}>
           {project.image && (
             <img src={project.image} alt={`${project.title} logo`} className="max-h-full max-w-full object-contain" />
           )}

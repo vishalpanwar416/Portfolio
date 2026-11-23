@@ -6,6 +6,7 @@ import { AppWindow, ArrowUpRight, FileText, GraduationCap, ListTodo } from 'luci
 import SectionShell from '../components/SectionShell'
 import SectionHeader from '../components/SectionHeader'
 import { usePortfolio } from '../contexts/PortfolioContext'
+import { Spotlight, useTilt } from '../components/Interactive'
 
 const ICONS = { learn: GraduationCap, docs: FileText, tasks: ListTodo, app: AppWindow }
 const host = (url) => url.replace(/^https?:\/\//, '').replace(/\/$/, '')
@@ -18,11 +19,17 @@ export default function Apps() {
     <SectionShell id="apps">
       <SectionHeader label="05 / Apps" title={text.title} subtitle={text.subtitle} />
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {appLinks.map((app, index) => {
-          const Icon = ICONS[app.icon] || AppWindow
-          return (
+        {appLinks.map((app, index) => <AppCard key={app.url} app={app} index={index} />)}
+      </div>
+    </SectionShell>
+  )
+}
+
+function AppCard({ app, index }) {
+  const tilt = useTilt(6)
+  const Icon = ICONS[app.icon] || AppWindow
+  return (
             <motion.a
-              key={app.url}
               href={app.url}
               target="_blank"
               rel="noopener noreferrer"
@@ -31,10 +38,12 @@ export default function Apps() {
               viewport={{ once: true }}
               transition={{ delay: index * 0.08 }}
               whileHover={{ y: -4 }}
-              className="group flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-colors hover:border-white/25"
+              className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-colors hover:border-white/25"
+              {...tilt}
             >
+              <Spotlight />
               <div className="flex items-start justify-between gap-4">
-                <div className="rounded-xl border border-white/10 bg-black/40 p-3">
+                <div className="rounded-xl border border-white/10 bg-black/40 p-3 transition-transform duration-500 group-hover:-translate-y-0.5 group-hover:rotate-6 group-hover:scale-110">
                   <Icon className="h-5 w-5 text-gray-300" />
                 </div>
                 <span className="rounded-full border border-emerald-400/20 bg-emerald-400/[0.06] px-2.5 py-0.5 text-[11px] uppercase tracking-wider text-emerald-300/90">Free</span>
@@ -49,9 +58,5 @@ export default function Apps() {
                 </span>
               </div>
             </motion.a>
-          )
-        })}
-      </div>
-    </SectionShell>
   )
 }

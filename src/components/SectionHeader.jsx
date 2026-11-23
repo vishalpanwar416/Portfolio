@@ -2,8 +2,6 @@ import { motion } from 'framer-motion'
 
 export default function SectionHeader({ label, title, subtitle, className = '' }) {
   const words = title ? title.split(' ') : []
-  const lastWord = words.length > 0 ? words[words.length - 1] : ''
-  const otherWords = words.length > 1 ? words.slice(0, -1).join(' ') : ''
 
   return (
     <motion.div
@@ -14,7 +12,13 @@ export default function SectionHeader({ label, title, subtitle, className = '' }
     >
       {label && (
         <div className="flex items-center gap-3 mb-4">
-          <span className="h-px w-10 bg-orange-500/50" />
+          <motion.span
+            className="h-px w-10 bg-orange-500/50 origin-left"
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          />
           <p className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-[0.32em]">
             {label.includes('/') ? (
               <>
@@ -32,12 +36,23 @@ export default function SectionHeader({ label, title, subtitle, className = '' }
         className="font-serif-display text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white"
         style={{ fontFamily: "'Playfair Display', serif" }}
       >
-        {otherWords ? `${otherWords} ` : ''}
-        {lastWord && (
-          <span className="text-orange-500">
-            {lastWord}
-          </span>
-        )}
+        <span className="sr-only">{title}</span>
+        <span aria-hidden>
+          {words.map((w, i) => (
+            <span key={`${w}-${i}`} className="inline-block overflow-hidden align-bottom pb-[0.08em]">
+              <motion.span
+                className={`inline-block ${i === words.length - 1 ? 'text-orange-500' : ''}`}
+                initial={{ y: '105%' }}
+                whileInView={{ y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.1 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+              >
+                {w}
+              </motion.span>
+              {i < words.length - 1 && '\u00a0'}
+            </span>
+          ))}
+        </span>
       </h2>
       {subtitle && (
         <p className="mt-4 text-sm sm:text-base text-gray-400 max-w-2xl leading-relaxed border-l-2 border-white/10 pl-4">

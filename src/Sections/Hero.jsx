@@ -1,5 +1,6 @@
 import { Download, ArrowDown, ArrowUpRight, MapPin, Calendar } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
+import { Magnetic, useTilt } from '../components/Interactive'
 import { smoothScrollTo } from '../lib/utils.js'
 import profilePhoto from '../assets/vishal-panwar-profile.jpeg'
 import TypingAnimation from '../components/TypingAnimation'
@@ -17,6 +18,29 @@ export default function Hero() {
   const { personalInfo, typingAnimationTexts, workExperience, socialLinks, externalLinks, sectionContent } = usePortfolio()
   const titleParts = personalInfo.title.split('|').map((s) => s.trim())
   const currentRole = workExperience[0]
+  const reduced = useReducedMotion()
+  const photoTilt = useTilt(7)
+  // As you scroll away, the intro drifts up and fades; the photo lags behind.
+  const { scrollY } = useScroll()
+  const textY = useTransform(scrollY, [0, 600], [0, reduced ? 0 : -60])
+  const textFade = useTransform(scrollY, [0, 500], [1, reduced ? 1 : 0.35])
+  const photoY = useTransform(scrollY, [0, 600], [0, reduced ? 0 : 40])
+  const letters = (word, delay, cls) => (
+    <span className={`block ${cls}`} aria-hidden>
+      {[...word].map((ch, i) => (
+        <motion.span
+          key={`${ch}-${i}`}
+          className="inline-block"
+          initial={reduced ? false : { opacity: 0, y: '0.5em', rotateX: -70 }}
+          animate={{ opacity: 1, y: 0, rotateX: 0 }}
+          transition={{ duration: 0.6, delay: delay + i * 0.045, ease }}
+          whileHover={reduced ? undefined : { y: -6, color: '#f97316', transition: { duration: 0.15 } }}
+        >
+          {ch}
+        </motion.span>
+      ))}
+    </span>
+  )
 
   return (
     <section id="hero" className="relative min-h-screen bg-black overflow-hidden">
@@ -34,7 +58,7 @@ export default function Hero() {
       </motion.div>
 
       <div className="relative z-10 container mx-auto px-5 sm:px-8 pt-32 md:pt-36 pb-24 lg:pb-16 min-h-screen flex flex-col lg:flex-row lg:items-stretch gap-10 lg:gap-6">
-        <div className="flex-1 flex flex-col justify-center lg:max-w-[54%] xl:max-w-[52%]">
+        <motion.div style={{ y: textY, opacity: textFade }} className="flex-1 flex flex-col justify-center lg:max-w-[54%] xl:max-w-[52%]">
           <motion.div {...reveal(0.2)} className="flex items-center gap-3 mb-6 md:mb-8">
             <span className="h-px w-10 bg-gray-600" />
             <p className="text-xs sm:text-sm text-gray-400 uppercase tracking-[0.28em]">
@@ -47,10 +71,9 @@ export default function Hero() {
             className="font-serif-display text-[2.75rem] sm:text-6xl md:text-7xl xl:text-[5.25rem] leading-[0.92] font-bold tracking-tight"
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
-            <span className="block text-white">{personalInfo.name.first}</span>
-            <span className="block text-orange-500 mt-1">
-              {personalInfo.name.last}
-            </span>
+            <span className="sr-only">{personalInfo.name.full}</span>
+            {letters(personalInfo.name.first, 0.3, 'text-white')}
+            {letters(personalInfo.name.last, 0.55, 'text-orange-500 mt-1')}
           </motion.h1>
 
           <motion.div {...reveal(0.36)} className="mt-6 flex flex-wrap gap-2">
@@ -91,6 +114,7 @@ export default function Hero() {
           </motion.p>
 
           <motion.div {...reveal(0.6)} className="mt-8 flex flex-wrap gap-3">
+            <Magnetic>
             <motion.button
               onClick={() => smoothScrollTo('portfolio')}
               className="group inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-white text-black text-sm font-semibold hover:bg-gray-200 transition-colors"
@@ -100,6 +124,8 @@ export default function Hero() {
               {sectionContent.hero.cta.primary}
               <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </motion.button>
+            </Magnetic>
+            <Magnetic>
             <motion.a
               href={externalLinks.calendarBooking}
               target="_blank"
@@ -111,6 +137,8 @@ export default function Hero() {
               <Calendar className="w-4 h-4" />
               {sectionContent.hero.cta.bookMeeting}
             </motion.a>
+            </Magnetic>
+            <Magnetic>
             <motion.button
               onClick={() => smoothScrollTo('contact')}
               className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full border border-white/10 text-sm font-semibold text-gray-400 hover:text-white hover:border-white/25 transition-all"
@@ -119,6 +147,8 @@ export default function Hero() {
             >
               {sectionContent.hero.cta.secondary}
             </motion.button>
+            </Magnetic>
+            <Magnetic>
             <motion.a
               href={externalLinks.resume}
               download={`${personalInfo.name.full}_Resume.pdf`}
@@ -128,6 +158,7 @@ export default function Hero() {
               <Download className="w-4 h-4" />
               {sectionContent.hero.downloadResume}
             </motion.a>
+            </Magnetic>
           </motion.div>
 
           <motion.div {...reveal(0.68)} className="mt-8 flex items-center gap-3">
@@ -144,7 +175,7 @@ export default function Hero() {
               </a>
             ))}
           </motion.div>
-        </div>
+        </motion.div>
 
         <motion.div
           {...reveal(0.35, 24)}
@@ -153,10 +184,10 @@ export default function Hero() {
           <div className="absolute top-8 right-4 lg:right-8 w-32 h-32 border border-white/[0.06] rounded-full" />
           <div className="absolute bottom-16 left-4 lg:left-auto lg:right-24 w-20 h-20 border border-white/[0.08] rounded-full" />
 
-          <div className="relative w-full max-w-[320px] sm:max-w-[380px] lg:max-w-[420px] xl:max-w-[460px]">
+          <motion.div style={{ y: photoY }} className="relative w-full max-w-[320px] sm:max-w-[380px] lg:max-w-[420px] xl:max-w-[460px]">
             <div className="absolute inset-y-0 -left-16 w-32 bg-gradient-to-r from-black to-transparent z-10 hidden lg:block pointer-events-none" />
 
-            <div className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#0a0a0a] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)]">
+            <motion.div {...photoTilt} className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#0a0a0a] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)]">
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 z-10 pointer-events-none" />
               <img
                 src={profilePhoto}
@@ -177,7 +208,7 @@ export default function Hero() {
                   <p className="text-sm sm:text-base font-medium text-white">{personalInfo.experienceYears} Years</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             <motion.div
               {...reveal(0.75)}
@@ -186,7 +217,7 @@ export default function Hero() {
               <MapPin className="w-3.5 h-3.5 text-gray-400" />
               {personalInfo.location.display}
             </motion.div>
-          </div>
+          </motion.div>
         </motion.div>
       </div>
 
