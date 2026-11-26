@@ -199,6 +199,10 @@ function WorkspaceCard({ w, docs, act }) {
       <div className="space-y-3">
         {w.paused && <p className="rounded-lg border border-amber-400/20 bg-amber-400/[0.06] p-2 text-xs text-amber-200">Paused: its members can't open its documents or see it. Public documents in it stay public.</p>}
         <p className="flex items-center gap-1.5 text-xs text-zinc-500"><HardDrive size={12} /> {w.size ? sizeLine(w.size) : 'Working out storage…'}</p>
+        <div className="flex items-center gap-2 rounded-lg border border-white/[0.06] bg-black/30 px-2.5 py-1.5 text-xs">
+          <a href={w.link} target="_blank" rel="noreferrer" className="min-w-0 flex-1 truncate font-mono text-zinc-300 hover:text-white">{w.link?.replace('https://', '')}</a>
+          <button onClick={() => { navigator.clipboard?.writeText(w.link); setMsg('Link copied') }} className="shrink-0 text-zinc-500 hover:text-white" title="Copy link"><Copy size={13} /></button>
+        </div>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           <Input value={name} onChange={(e) => setName(e.target.value)} aria-label="Name" />
           <Input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="What it's for (members see this)" aria-label="Description" />
@@ -231,7 +235,7 @@ function WorkspaceCard({ w, docs, act }) {
           <span>Updated {timeAgo(w.updatedAt)}</span>
           <Button variant="danger" onClick={remove} disabled={busy}><Trash2 size={13} /> Delete workspace</Button>
         </div>
-        {msg && <p className="text-xs text-red-300">{msg}</p>}
+        {msg && <p className={cx('text-xs', msg === 'Link copied' ? 'text-emerald-300' : 'text-red-300')}>{msg}</p>}
       </div>
     </Section>
   )

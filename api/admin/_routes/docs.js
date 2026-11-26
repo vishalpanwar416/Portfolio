@@ -74,6 +74,7 @@ const workspaceSummary = (w) => ({
   description: w.description || '',
   members: [...(w.memberEmails || []), ...(w.memberDomains || []).map((x) => '@' + x)],
   paused: !!w.paused,
+  link: `${SITE}/#${w.id}`,
   createdAt: w.createdAt || null,
   updatedAt: w.updatedAt || null,
 });
@@ -317,7 +318,7 @@ async function updateWorkspace(b) {
   if (removes.length) writes.push(fs.patch(WORKSPACES, w.id, [], {}, { transforms: removes }));
   await fs.commit(writes);
   return { saved: w.id, invite: add.emails.length || add.domains.length
-    ? `Hi! I've added you to the "${values.name || w.name}" workspace on my docs site. Open ${SITE} and sign in with your Google account to see its documents.`
+    ? `Hi! I've added you to the "${values.name || w.name}" workspace on my docs site. Open ${SITE}/#${w.id} and sign in with your Google account to see its documents.`
     : null };
 }
 

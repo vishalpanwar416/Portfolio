@@ -397,7 +397,7 @@ test('docs admin: people with access, and the Docs page renders', async () => {
     site: 'https://docs.vishalpanwar.in',
     docs: [{ slug: 'plan', title: 'Plan', visibility: 'protected', workspace: 'team', sharedWith: ['c@x.com'], url: 'https://docs.vishalpanwar.in/plan', photos: 1, files: 0, bytes: 0 },
       { slug: 'faq', title: 'FAQ', visibility: 'public', workspace: '', sharedWith: [], url: 'https://docs.vishalpanwar.in/faq', photos: 0, files: 0, bytes: 0 }],
-    workspaces: [{ id: 'team', name: 'Team', description: '', members: ['a@b.com', '@acme.io'], docs: ['plan'] }],
+    workspaces: [{ id: 'team', name: 'Team', description: '', members: ['a@b.com', '@acme.io'], docs: ['plan'], link: 'https://docs.vishalpanwar.in/#team' }],
     storage: { photos: 1, files: 0, fileBytes: 0 },
     access: { locked: false, blocked: ['z@q.com'] },
     users: { total: 2, owners: [{ email: 'me@x.com', name: 'Me Owner', role: 'owner', createdAt: 1, lastLoginAt: Date.now() }], withoutAccess: [{ email: 'v@x.com', name: 'Visitor', photo: '', createdAt: 1, lastLoginAt: Date.now(), blocked: false, role: 'admin', apps: ['Sanero admin', 'Learn'], learn: { done: 12 } }] },
