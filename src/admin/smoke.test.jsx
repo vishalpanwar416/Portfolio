@@ -400,7 +400,7 @@ test('docs admin: people with access, and the Docs page renders', async () => {
     workspaces: [{ id: 'team', name: 'Team', description: '', members: ['a@b.com', '@acme.io'], docs: ['plan'] }],
     storage: { photos: 1, files: 0, fileBytes: 0 },
     access: { locked: false, blocked: ['z@q.com'] },
-    users: { total: 2, owners: [{ email: 'me@x.com', name: 'Me Owner', role: 'owner', createdAt: 1, lastLoginAt: Date.now() }], withoutAccess: [{ email: 'v@x.com', name: 'Visitor', photo: '', createdAt: 1, lastLoginAt: Date.now(), blocked: false }] },
+    users: { total: 2, owners: [{ email: 'me@x.com', name: 'Me Owner', role: 'owner', createdAt: 1, lastLoginAt: Date.now() }], withoutAccess: [{ email: 'v@x.com', name: 'Visitor', photo: '', createdAt: 1, lastLoginAt: Date.now(), blocked: false, role: 'admin', apps: ['Sanero admin', 'Learn'], learn: { done: 12 } }] },
   }
   docsData.people = people(docsData.docs, docsData.workspaces)
   expect(docsData.people.map((p) => p.who)).toEqual(['@acme.io', 'a@b.com', 'c@x.com'])
@@ -415,6 +415,8 @@ test('docs admin: people with access, and the Docs page renders', async () => {
   expect(screen.getByText('Visitor')).toBeTruthy()
   expect(screen.getByText('Me Owner')).toBeTruthy()
   expect(screen.getByText('Owner · full access')).toBeTruthy()
-  expect(screen.getAllByText('Block').length).toBeGreaterThan(0)
+  expect(screen.getAllByText('Block from Docs').length).toBeGreaterThan(0)
+  expect(screen.getByText('Sanero admin')).toBeTruthy()
+  expect(screen.getByText('Learn · 12 done')).toBeTruthy()
   spy.mockRestore()
 })

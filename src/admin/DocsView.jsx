@@ -278,15 +278,15 @@ function PeopleTab({ data, act }) {
   }
   const shown = data.people.filter((p) => !q || p.who.includes(q.toLowerCase()))
   return (
-    <Section title={`People with access · ${data.people.length}`}>
-      <p className="mb-3 text-xs text-zinc-500">Everyone who can open protected documents: workspace members and people a document is shared with directly. @domain means everyone signing in with that company's Google account.</p>
+    <Section title={`People with docs access · ${data.people.length}`}>
+      <p className="mb-3 text-xs text-zinc-500">Everyone who can open protected documents: workspace members and people a document is shared with directly. @domain means everyone signing in with that company's Google account. Sign-in is shared with Sanero and Learn (same Firebase project), so badges show which apps each account uses; <b className="text-zinc-400">Block and Remove access only affect Docs</b>, never Sanero or Learn.</p>
       <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search" className="mb-3 w-full sm:w-64" />
       {(data.users?.owners || []).map((u) => (
         <div key={u.email} className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5">
           <span className="flex min-w-[16rem] flex-1 items-center gap-2.5">
             <Avatar user={u} who={u.email} />
             <span>
-              <span className="flex items-center gap-1.5 text-sm text-zinc-100">{u.name || u.email} <Badge tone="green">Owner · full access</Badge></span>
+              <span className="flex flex-wrap items-center gap-1.5 text-sm text-zinc-100">{u.name || u.email} <Badge tone="green">Owner · full access</Badge>{(u.apps || []).filter((a) => a !== 'Owner').map((a) => <Badge key={a} tone={APP_TONE[a] || 'zinc'}>{a}{a === 'Learn' && u.learn ? ` · ${u.learn.done} done` : ''}</Badge>)}</span>
               <span className="block text-[11px] text-zinc-500">{u.email} · <UserFacts user={u} /></span>
             </span>
           </span>
@@ -303,7 +303,8 @@ function PeopleTab({ data, act }) {
                   <span className="flex flex-wrap items-center gap-1.5 text-sm text-zinc-100">
                     {p.user?.name || p.who}
                     {p.kind === 'domain' && <Badge tone="sky">whole company</Badge>}
-                    {p.blocked && <Badge tone="red">blocked</Badge>}
+                    {p.kind === 'person' && <AppBadges user={p.user} />}
+                    {p.blocked && <Badge tone="red">blocked from Docs</Badge>}
                   </span>
                   {p.kind === 'person' ? (
                     <span className="block">{p.user?.name && <span className="mr-1 text-[11px] text-zinc-400">{p.who} ·</span>}{data.users?.error ? null : <UserFacts user={p.user} />}</span>
@@ -317,8 +318,8 @@ function PeopleTab({ data, act }) {
                 {p.docs.map((slug) => <Badge key={slug} tone="amber">{docTitle(slug)}</Badge>)}
               </span>
               <span className="flex gap-1.5">
-                <Button className="px-2 py-1 text-xs" onClick={() => block(p.who, !p.blocked)} disabled={busy === p.who}>{p.blocked ? 'Unblock' : <><Ban size={12} /> Block</>}</Button>
-                <Button variant="danger" className="px-2 py-1 text-xs" onClick={() => revoke(p)} disabled={busy === p.who}>Remove access</Button>
+                <Button className="px-2 py-1 text-xs" onClick={() => block(p.who, !p.blocked)} disabled={busy === p.who}>{p.blocked ? 'Unblock' : <><Ban size={12} /> Block from Docs</>}</Button>
+                <Button variant="danger" className="px-2 py-1 text-xs" onClick={() => revoke(p)} disabled={busy === p.who}>Remove docs access</Button>
               </span>
             </li>
           ))}
@@ -331,16 +332,16 @@ function PeopleTab({ data, act }) {
         </div>
       ) : data.users?.withoutAccess?.length > 0 && (
         <div className="mt-5 border-t border-white/[0.06] pt-4">
-          <h3 className="mb-1 text-xs font-medium uppercase tracking-wider text-zinc-500">Signed in, no docs access · {data.users.withoutAccess.length}</h3>
-          <p className="mb-2 text-[11px] text-zinc-600">Google accounts that have signed in on your sites (docs, learn and others share sign-in) but aren't in any workspace or share.</p>
+          <h3 className="mb-1 text-xs font-medium uppercase tracking-wider text-zinc-500">Other accounts on sanero-media · {data.users.withoutAccess.length}</h3>
+          <p className="mb-2 text-[11px] text-zinc-600">Google accounts that signed in to Sanero or Learn but have no docs access. Blocking here only keeps them out of Docs if someone shares with them later.</p>
           <ul className="divide-y divide-white/[0.05]">
             {data.users.withoutAccess.map((u) => (
               <li key={u.email} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2">
                 <span className="flex min-w-[16rem] flex-1 items-center gap-2.5">
                   <Avatar user={u} who={u.email} />
-                  <span><span className="block text-sm text-zinc-200">{u.name || u.email} {u.role === 'admin' && <Badge tone="sky">admin on your sites</Badge>} {u.blocked && <Badge tone="red">blocked</Badge>}</span><span className="block text-[11px] text-zinc-500">{u.name && `${u.email} · `}<UserFacts user={u} /></span></span>
+                  <span><span className="flex flex-wrap items-center gap-1.5 text-sm text-zinc-200">{u.name || u.email} <AppBadges user={u} />{!(u.apps || []).length && <Badge>signed in only</Badge>}{u.blocked && <Badge tone="red">blocked from Docs</Badge>}</span><span className="block text-[11px] text-zinc-500">{u.name && `${u.email} · `}<UserFacts user={u} /></span></span>
                 </span>
-                <Button className="px-2 py-1 text-xs" onClick={() => block(u.email, !u.blocked)} disabled={busy === u.email}>{u.blocked ? 'Unblock' : <><Ban size={12} /> Block</>}</Button>
+                <Button className="px-2 py-1 text-xs" onClick={() => block(u.email, !u.blocked)} disabled={busy === u.email}>{u.blocked ? 'Unblock' : <><Ban size={12} /> Block from Docs</>}</Button>
               </li>
             ))}
           </ul>
@@ -392,6 +393,12 @@ function AccessPanel({ data, act }) {
 function Avatar({ user, who }) {
   if (user?.photo) return <img src={user.photo} alt="" referrerPolicy="no-referrer" className="h-8 w-8 rounded-full ring-1 ring-white/10" />
   return <span className="grid h-8 w-8 place-items-center rounded-full bg-white/10 text-xs font-semibold text-zinc-200">{(user?.name || who.replace('@', ''))[0]?.toUpperCase()}</span>
+}
+
+const APP_TONE = { Owner: 'green', 'Sanero admin': 'sky', Learn: 'amber' }
+function AppBadges({ user, docs }) {
+  const apps = [...(user?.apps || []), ...(docs ? ['Docs'] : [])]
+  return apps.map((a) => <Badge key={a} tone={APP_TONE[a] || 'zinc'}>{a}{a === 'Learn' && user?.learn ? ` · ${user.learn.done} done` : ''}</Badge>)
 }
 
 function UserFacts({ user }) {

@@ -96,8 +96,11 @@ async function accessSettings() {
   };
 }
 
-// Who has signed in with Google on the sanero-media Firebase project (docs,
-// learn and the other sites share it): name, photo, joined, last sign-in.
+// Who has signed in with Google on the sanero-media Firebase project. Sanero,
+// docs.vishalpanwar.in and Learn (/sdc) share it, so each account is tagged
+// with the apps it uses: Sanero admin (the `admin` claim), owner
+// (`superAdmin`), Learn (a vp_sdc_users/<uid> progress doc) and Docs (on a
+// workspace or share list). Name, photo, joined, last sign-in.
 // Needs roles/firebaseauth.viewer for the service account; without it the
 // page says how to grant it and works without the details.
 let userCache = { at: 0, value: null };
@@ -120,6 +123,7 @@ async function authUsers() {
       let claims = {};
       try { claims = JSON.parse(u.customAttributes || '{}') } catch { claims = {} }
       users.push({
+        uid: u.localId,
         role: claims.superAdmin ? 'owner' : claims.admin ? 'admin' : null,
         email: u.email.toLowerCase(), name: u.displayName || '', photo: u.photoUrl || '',
         createdAt: u.createdAt ? Number(u.createdAt) : null, lastLoginAt: u.lastLoginAt ? Number(u.lastLoginAt) : null,
@@ -128,6 +132,21 @@ async function authUsers() {
     }
     next = j.nextPageToken || '';
   } while (next);
+  // Learn: who syncs study progress, and how far along they are.
+  try {
+    const learn = await fs.list('vp_sdc_users', ['done', 'updatedAt']);
+    const byUid = new Map(learn.map((l) => [l.id, l]));
+    for (const u of users) {
+      const l = byUid.get(u.uid);
+      if (l) u.learn = { done: Object.keys(l.done || {}).length, updatedAt: l.updatedAt || null };
+    }
+  } catch { /* Learn tags are a bonus; keep the rest */ }
+  for (const u of users) {
+    u.apps = [
+      ...(u.role === 'owner' ? ['Owner'] : u.role === 'admin' ? ['Sanero admin'] : []),
+      ...(u.learn ? ['Learn'] : []),
+    ];
+  }
   userCache = { at: Date.now(), value: { users } };
   return userCache.value;
 }
@@ -193,7 +212,7 @@ async function overview({ sizes = false } = {}) {
       total: auth.users.length,
       // The owner opens everything through the superAdmin claim, not a share.
       owners: auth.users.filter((u) => u.role === 'owner'),
-      // Signed in on the project but not given any docs access (other sites share sign-in).
+      // Signed in on the project (Sanero, Learn…) but not given any docs access.
       withoutAccess: auth.users.filter((u) => u.role !== 'owner' && !covered(u.email)).map((u) => ({ ...u, blocked: isBlocked(u) })),
     },
     ...(bytes ? { unassignedSize: total(docs.filter((d) => !d.workspace)) } : {}),
