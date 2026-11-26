@@ -7,6 +7,8 @@
 //   POST { title, message }   queue one (the monitor, or a test from Alerts)
 //   GET                       agent: messages waiting, oldest first
 //   POST { ack: [ids] }       agent: these were delivered
+//   POST { ack: [ids], discard: true }  drop them unsent (stale alerts), without
+//                             marking WhatsApp as delivered
 const crypto = require('node:crypto');
 const { requireOwnerOrMonitor } = require('../_auth');
 const { listDocs, mergeDocs, deleteDoc, writeSite } = require('../_firestore');
@@ -48,8 +50,8 @@ module.exports = async (req, res) => {
       if (who !== 'monitor') return res.status(403).json({ error: 'agent only' });
       const ids = body.ack.map(String).filter((id) => /^[a-z0-9]{6,40}$/.test(id)).slice(0, 100);
       await Promise.all(ids.map((id) => deleteDoc(OUTBOX, id)));
-      if (ids.length) await writeSite('whatsapp', { kind: 'whatsapp', deliveredAt: Date.now(), delivered: ids.length });
-      return res.status(200).json({ removed: ids.length });
+      if (ids.length && !body.discard) await writeSite('whatsapp', { kind: 'whatsapp', deliveredAt: Date.now(), delivered: ids.length });
+      return res.status(200).json({ removed: ids.length, discarded: !!body.discard });
     }
     const { title = 'VP Control', message = 'Test message: alerts will look like this.' } = body;
     const r = await sendNotification({ title, message });
