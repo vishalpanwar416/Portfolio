@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut } from 'firebase/auth'
 import {
   Bell, Briefcase, BriefcaseBusiness, ChevronRight, FolderKanban, IndianRupee, LayoutDashboard, Linkedin, LogOut, Megaphone, Menu, Plus, RefreshCw, Search, Server,
-  Settings, ShieldAlert, Smartphone, X,
+  Settings, ShieldAlert, Smartphone, X, FileText,
 } from 'lucide-react'
 import { auth } from './firebase'
 import { mergeContent } from '../contexts/PortfolioContext'
@@ -18,6 +18,7 @@ import InfraView, { INFRA_TABS } from './InfraView'
 import MarketingView, { MARKETING_TABS, followUpDue } from './MarketingView'
 import LinkedInView, { linkedinReplies } from './LinkedInView'
 import JobsView from './JobsView'
+import DocsView, { DOCS_TABS } from './DocsView'
 import PortfolioEditor, { PORTFOLIO_TABS } from './PortfolioEditor'
 import AlertsView from './AlertsView'
 import SettingsView from './SettingsView'
@@ -61,6 +62,7 @@ export const PAGES = [
   { to: '/money', label: 'Money', icon: IndianRupee },
   { to: '/marketing/traffic', label: 'Marketing', icon: Megaphone, match: '/marketing' },
   { to: '/portfolio/profile', label: 'Portfolio', icon: Briefcase, match: '/portfolio' },
+  { to: '/docs/documents', label: 'Docs', icon: FileText, match: '/docs' },
   { to: '/apps', label: 'Apps', icon: Smartphone },
   { to: '/infra/uptime', label: 'Infrastructure', icon: Server, match: '/infra' },
   { to: '/linkedin', label: 'LinkedIn', icon: Linkedin },
@@ -253,6 +255,11 @@ function Shell({ user }) {
     title = 'Marketing'
     sub = MARKETING_TABS.find((t) => t.key === tab)?.label
     view = <MarketingView data={data} go={go} tab={tab} />
+  } else if (route.startsWith('/docs')) {
+    const tab = route.split('/')[2] || 'documents'
+    title = 'Docs'
+    sub = DOCS_TABS.find((t) => t.key === tab)?.label
+    view = <DocsView go={go} tab={tab} />
   } else if (route === '/apps') { title = 'Apps'; view = <AppsView data={data} go={go} /> }
   else if (route.startsWith('/infra')) {
     const tab = route.split('/')[2] || 'uptime'
@@ -343,7 +350,7 @@ function Shell({ user }) {
       <CommandPalette
         open={palette}
         onClose={() => setPalette(false)}
-        pages={[...PAGES, ...MARKETING_TABS.map((t) => ({ to: `/marketing/${t.key}`, label: `Marketing · ${t.label}`, icon: Megaphone })), ...PORTFOLIO_TABS.map((t) => ({ to: `/portfolio/${t.key}`, label: `Portfolio · ${t.label}`, icon: Briefcase })), ...INFRA_TABS.map((t) => ({ to: `/infra/${t.key}`, label: `Infrastructure · ${t.label}`, icon: Server })), SETTINGS]}
+        pages={[...PAGES, ...MARKETING_TABS.map((t) => ({ to: `/marketing/${t.key}`, label: `Marketing · ${t.label}`, icon: Megaphone })), ...PORTFOLIO_TABS.map((t) => ({ to: `/portfolio/${t.key}`, label: `Portfolio · ${t.label}`, icon: Briefcase })), ...INFRA_TABS.map((t) => ({ to: `/infra/${t.key}`, label: `Infrastructure · ${t.label}`, icon: Server })), ...DOCS_TABS.map((t) => ({ to: `/docs/${t.key}`, label: `Docs · ${t.label}`, icon: FileText })), SETTINGS]}
         projects={data.projects}
         go={go}
         actions={[{ label: 'Refresh everything', icon: RefreshCw, run: data.refresh }, { label: 'Sign out', icon: LogOut, run: () => signOut(auth) }]}

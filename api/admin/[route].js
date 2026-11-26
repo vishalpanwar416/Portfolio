@@ -6,6 +6,7 @@ const routes = {
   check: require('./_routes/check'),
   cloud: require('./_routes/cloud'),
   deploys: require('./_routes/deploys'),
+  docs: require('./_routes/docs'),
   domains: require('./_routes/domains'),
   firebase: require('./_routes/firebase'),
   github: require('./_routes/github'),

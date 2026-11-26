@@ -388,3 +388,25 @@ test('project logos: own URL, built-in file, or initials', () => {
   expect(c.querySelector('img')).toBeNull()
   expect(c.textContent).toBe('MM')
 })
+
+test('docs admin: people with access, and the Docs page renders', async () => {
+  const { splitPeople, people } = require('../../api/admin/_routes/docs')
+  expect(splitPeople(['A@B.com', '@acme.io', 'x.org'])).toEqual({ emails: ['a@b.com'], domains: ['acme.io', 'x.org'] })
+  expect(() => splitPeople(['nope'])).toThrow()
+  const docsData = {
+    site: 'https://docs.vishalpanwar.in',
+    docs: [{ slug: 'plan', title: 'Plan', visibility: 'protected', workspace: 'team', sharedWith: ['c@x.com'], url: 'https://docs.vishalpanwar.in/plan', photos: 1, files: 0, bytes: 0 },
+      { slug: 'faq', title: 'FAQ', visibility: 'public', workspace: '', sharedWith: [], url: 'https://docs.vishalpanwar.in/faq', photos: 0, files: 0, bytes: 0 }],
+    workspaces: [{ id: 'team', name: 'Team', description: '', members: ['a@b.com', '@acme.io'], docs: ['plan'] }],
+    storage: { photos: 1, files: 0, fileBytes: 0 },
+  }
+  docsData.people = people(docsData.docs, docsData.workspaces)
+  expect(docsData.people.map((p) => p.who)).toEqual(['@acme.io', 'a@b.com', 'c@x.com'])
+  const dataModule = require('./data')
+  const spy = jest.spyOn(dataModule, 'api').mockResolvedValue(docsData)
+  const DocsView = require('./DocsView').default
+  render(<DocsView go={() => {}} tab="people" />)
+  expect(await screen.findByText('c@x.com')).toBeTruthy()
+  expect(screen.getByText('whole company')).toBeTruthy()
+  spy.mockRestore()
+})
