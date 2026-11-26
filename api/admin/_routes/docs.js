@@ -117,7 +117,10 @@ async function authUsers() {
     }
     for (const u of j.users || []) {
       if (!u.email) continue;
+      let claims = {};
+      try { claims = JSON.parse(u.customAttributes || '{}') } catch { claims = {} }
       users.push({
+        role: claims.superAdmin ? 'owner' : claims.admin ? 'admin' : null,
         email: u.email.toLowerCase(), name: u.displayName || '', photo: u.photoUrl || '',
         createdAt: u.createdAt ? Number(u.createdAt) : null, lastLoginAt: u.lastLoginAt ? Number(u.lastLoginAt) : null,
         lastActiveAt: u.lastRefreshAt ? Date.parse(u.lastRefreshAt) : null, disabled: !!u.disabled, verified: !!u.emailVerified,
@@ -182,13 +185,16 @@ async function overview({ sizes = false } = {}) {
     else p.signedIn = (auth.users || []).filter((u) => u.email.endsWith(p.who)).map(({ email, name, photo, lastLoginAt }) => ({ email, name, photo, lastLoginAt }));
   }
   const covered = (email) => everyone.some((p) => (p.kind === 'person' ? p.who === email : email.endsWith(p.who)));
+  const isBlocked = (u) => blocked.has(u.email) || blocked.has('@' + u.email.split('@')[1]);
   return {
     site: SITE,
     access,
     users: auth.error ? { error: auth.error, account: auth.account } : {
       total: auth.users.length,
+      // The owner opens everything through the superAdmin claim, not a share.
+      owners: auth.users.filter((u) => u.role === 'owner'),
       // Signed in on the project but not given any docs access (other sites share sign-in).
-      withoutAccess: auth.users.filter((u) => !covered(u.email)).map((u) => ({ ...u, blocked: blocked.has(u.email) || blocked.has('@' + u.email.split('@')[1]) })),
+      withoutAccess: auth.users.filter((u) => u.role !== 'owner' && !covered(u.email)).map((u) => ({ ...u, blocked: isBlocked(u) })),
     },
     ...(bytes ? { unassignedSize: total(docs.filter((d) => !d.workspace)) } : {}),
     docs,

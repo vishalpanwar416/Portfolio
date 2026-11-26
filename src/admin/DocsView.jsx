@@ -281,6 +281,18 @@ function PeopleTab({ data, act }) {
     <Section title={`People with access · ${data.people.length}`}>
       <p className="mb-3 text-xs text-zinc-500">Everyone who can open protected documents: workspace members and people a document is shared with directly. @domain means everyone signing in with that company's Google account.</p>
       <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search" className="mb-3 w-full sm:w-64" />
+      {(data.users?.owners || []).map((u) => (
+        <div key={u.email} className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5">
+          <span className="flex min-w-[16rem] flex-1 items-center gap-2.5">
+            <Avatar user={u} who={u.email} />
+            <span>
+              <span className="flex items-center gap-1.5 text-sm text-zinc-100">{u.name || u.email} <Badge tone="green">Owner · full access</Badge></span>
+              <span className="block text-[11px] text-zinc-500">{u.email} · <UserFacts user={u} /></span>
+            </span>
+          </span>
+          <span className="text-[11px] text-zinc-500">Opens every document and workspace, even when sharing is locked</span>
+        </div>
+      ))}
       {shown.length === 0 ? <Empty>No one yet. Add members to a workspace or share a document.</Empty> : (
         <ul className="divide-y divide-white/[0.05]">
           {shown.map((p) => (
@@ -326,7 +338,7 @@ function PeopleTab({ data, act }) {
               <li key={u.email} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2">
                 <span className="flex min-w-[16rem] flex-1 items-center gap-2.5">
                   <Avatar user={u} who={u.email} />
-                  <span><span className="block text-sm text-zinc-200">{u.name || u.email} {u.blocked && <Badge tone="red">blocked</Badge>}</span><span className="block text-[11px] text-zinc-500">{u.name && `${u.email} · `}<UserFacts user={u} /></span></span>
+                  <span><span className="block text-sm text-zinc-200">{u.name || u.email} {u.role === 'admin' && <Badge tone="sky">admin on your sites</Badge>} {u.blocked && <Badge tone="red">blocked</Badge>}</span><span className="block text-[11px] text-zinc-500">{u.name && `${u.email} · `}<UserFacts user={u} /></span></span>
                 </span>
                 <Button className="px-2 py-1 text-xs" onClick={() => block(u.email, !u.blocked)} disabled={busy === u.email}>{u.blocked ? 'Unblock' : <><Ban size={12} /> Block</>}</Button>
               </li>
