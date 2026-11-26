@@ -49,7 +49,7 @@ function decode(v) {
   if ('integerValue' in v) return Number(v.integerValue);
   if ('doubleValue' in v) return v.doubleValue;
   if ('timestampValue' in v) return v.timestampValue;
-  if ('bytesValue' in v) return null;
+  if ('bytesValue' in v) return { $bytes: Math.round((v.bytesValue.length * 3) / 4) };
   if ('nullValue' in v) return null;
   if ('arrayValue' in v) return (v.arrayValue.values || []).map(decode);
   if ('mapValue' in v) return decodeFields(v.mapValue.fields || {});
@@ -111,6 +111,14 @@ const create = (collection, id, fields, serverTime = []) => ({
   ...(serverTime.length ? { updateTransforms: serverTimes(serverTime) } : {}),
 });
 const remove = (collection, id) => ({ delete: name(collection, id) });
+/** Set `paths` on a doc that may not exist yet (creates it). */
+function upsert(collection, id, paths, values = {}, serverTime = [], transforms = []) {
+  return {
+    update: { name: name(collection, id), fields: encodeFields(values) },
+    updateMask: { fieldPaths: paths },
+    updateTransforms: [...serverTimes(serverTime), ...transforms],
+  };
+}
 const arrayUnion = (path, values) => ({ fieldPath: path, appendMissingElements: { values: values.map(encode) } });
 const arrayRemove = (path, values) => ({ fieldPath: path, removeAllFromArray: { values: values.map(encode) } });
 
@@ -118,4 +126,4 @@ async function commit(writes) {
   for (let i = 0; i < writes.length; i += 450) await call('POST', `${BASE}:commit`, { writes: writes.slice(i, i + 450) });
 }
 
-module.exports = { get, list, patch, create, remove, arrayUnion, arrayRemove, commit, fieldPath };
+module.exports = { get, list, patch, create, remove, upsert, arrayUnion, arrayRemove, commit, fieldPath };

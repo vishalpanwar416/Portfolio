@@ -1,10 +1,12 @@
 // Docs: run docs.vishalpanwar.in from here — who can open what, documents'
 // visibility, workspace and share lists, workspaces and their members, and
-// everyone with access. Reads and writes go through /api/admin/docs (the
+// everyone with access (with their Google sign-in details), plus the lock
+// switch, block list and paused workspaces that firestore.rules enforce.
+// Reads and writes go through /api/admin/docs (the
 // docs site's own Firestore collections in sanero-media). Writing the
 // documents themselves stays in the docs site's dashboard.
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Copy, ExternalLink, FileText, Globe, Lock, Plus, RefreshCw, Search, Trash2, Users, X } from 'lucide-react'
+import { Ban, Copy, ExternalLink, FileText, Globe, HardDrive, Lock, Pause, Play, Plus, RefreshCw, Search, ShieldCheck, ShieldOff, Trash2, Users, X } from 'lucide-react'
 import { api, timeAgo } from './data'
 import { Badge, Button, Empty, Input, Section, Select, Stat, cx } from './ui'
 
@@ -17,12 +19,16 @@ export const DOCS_TABS = [
 const size = (n) => (n >= 1e6 ? `${(n / 1e6).toFixed(1)} MB` : n >= 1e3 ? `${Math.round(n / 1e3)} KB` : `${n || 0} B`)
 const splitList = (text) => text.split(/[\s,;]+/).map((s) => s.trim()).filter(Boolean)
 
-function useDocs() {
+const sum = (z) => (z ? z.text + z.photos + z.files : 0)
+const sizeLine = (z) => (z ? `${size(sum(z))} · text ${size(z.text)} · photos ${size(z.photos)} · files ${size(z.files)}` : '')
+const day = (ms) => (ms ? new Date(ms).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—')
+
+function useDocs(withSizes) {
   const [state, setState] = useState({ data: null, error: null, loading: true })
   const load = useCallback(async () => {
     setState((s) => ({ ...s, loading: true }))
-    try { setState({ data: await api('/api/admin/docs'), error: null, loading: false }) } catch (e) { setState({ data: null, error: e.message, loading: false }) }
-  }, [])
+    try { setState({ data: await api(`/api/admin/docs${withSizes ? '?sizes=1' : ''}`), error: null, loading: false }) } catch (e) { setState((s) => ({ data: s.data, error: e.message, loading: false })) }
+  }, [withSizes])
   useEffect(() => { load() }, [load])
   const act = useCallback(async (body) => {
     const r = await api('/api/admin/docs', { method: 'POST', body: JSON.stringify(body) })
@@ -79,7 +85,7 @@ function DocRow({ d, workspaces, act, site }) {
           <FileText size={15} className="shrink-0 text-zinc-500" />
           <span className="min-w-0">
             <span className="block truncate text-sm text-zinc-100">{d.title}</span>
-            <span className="block truncate font-mono text-[11px] text-zinc-600">/{d.slug}{(d.photos || d.files) ? ` · ${d.photos} photos · ${d.files} files${d.bytes ? ` (${size(d.bytes)})` : ''}` : ''}</span>
+            <span className="block truncate font-mono text-[11px] text-zinc-600">/{d.slug}{(d.photos || d.files) ? ` · ${d.photos} photos · ${d.files} files` : ''}{d.size ? ` · ${size(sum(d.size))}` : ''}</span>
           </span>
         </button>
         <button
@@ -176,8 +182,23 @@ function WorkspaceCard({ w, docs, act }) {
   }
   const changed = name !== w.name || desc !== w.description
   return (
-    <Section title={w.name} action={<span className="font-mono text-[11px] text-zinc-600">{w.id}</span>}>
+    <Section
+      title={w.name}
+      className={w.paused ? 'opacity-80' : ''}
+      action={(
+        <span className="flex items-center gap-2">
+          {w.paused && <Badge tone="amber">Paused</Badge>}
+          <Button className="px-2 py-1 text-xs" onClick={() => run({ action: 'pauseWorkspace', paused: !w.paused })} disabled={busy}
+            title={w.paused ? 'Members get their access back' : 'Members lose access until you resume; nothing is deleted'}>
+            {w.paused ? <><Play size={12} /> Resume</> : <><Pause size={12} /> Pause</>}
+          </Button>
+          <span className="font-mono text-[11px] text-zinc-600">{w.id}</span>
+        </span>
+      )}
+    >
       <div className="space-y-3">
+        {w.paused && <p className="rounded-lg border border-amber-400/20 bg-amber-400/[0.06] p-2 text-xs text-amber-200">Paused: its members can't open its documents or see it. Public documents in it stay public.</p>}
+        <p className="flex items-center gap-1.5 text-xs text-zinc-500"><HardDrive size={12} /> {w.size ? sizeLine(w.size) : 'Working out storage…'}</p>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           <Input value={name} onChange={(e) => setName(e.target.value)} aria-label="Name" />
           <Input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="What it's for (members see this)" aria-label="Description" />
@@ -244,6 +265,11 @@ function PeopleTab({ data, act }) {
   const [busy, setBusy] = useState(null)
   const wsName = (id) => data.workspaces.find((w) => w.id === id)?.name || id
   const docTitle = (slug) => data.docs.find((d) => d.slug === slug)?.title || slug
+  const block = async (who, on) => {
+    if (on && !window.confirm(`Block ${who}? They lose access to every protected document now and if added later, until you unblock. Their workspace memberships and shares are kept.`)) return
+    setBusy(who)
+    try { await act({ action: on ? 'block' : 'unblock', who }) } finally { setBusy(null) }
+  }
   const revoke = async (p) => {
     const what = [p.workspaces.length && `${p.workspaces.length} workspace(s)`, p.docs.length && `${p.docs.length} document share(s)`].filter(Boolean).join(' and ')
     if (!window.confirm(`Remove ${p.who} from ${what}? They lose access straight away (public documents stay open to anyone).`)) return
@@ -258,28 +284,117 @@ function PeopleTab({ data, act }) {
       {shown.length === 0 ? <Empty>No one yet. Add members to a workspace or share a document.</Empty> : (
         <ul className="divide-y divide-white/[0.05]">
           {shown.map((p) => (
-            <li key={p.who} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 py-2.5">
-              <span className="flex min-w-[14rem] flex-1 items-center gap-2 text-sm text-zinc-100">
-                {p.kind === 'domain' ? <Users size={14} className="text-zinc-500" /> : <span className="grid h-5 w-5 place-items-center rounded-full bg-white/10 text-[10px] font-semibold">{p.who[0].toUpperCase()}</span>}
-                {p.who}
-                {p.kind === 'domain' && <Badge tone="sky">whole company</Badge>}
+            <li key={p.who} className={cx('flex flex-wrap items-center gap-x-3 gap-y-1.5 py-2.5', p.blocked && 'opacity-70')}>
+              <span className="flex min-w-[16rem] flex-1 items-center gap-2.5">
+                {p.kind === 'domain' ? <span className="grid h-8 w-8 place-items-center rounded-full bg-sky-400/10 text-sky-300"><Users size={14} /></span> : <Avatar user={p.user} who={p.who} />}
+                <span className="min-w-0">
+                  <span className="flex flex-wrap items-center gap-1.5 text-sm text-zinc-100">
+                    {p.user?.name || p.who}
+                    {p.kind === 'domain' && <Badge tone="sky">whole company</Badge>}
+                    {p.blocked && <Badge tone="red">blocked</Badge>}
+                  </span>
+                  {p.kind === 'person' ? (
+                    <span className="block">{p.user?.name && <span className="mr-1 text-[11px] text-zinc-400">{p.who} ·</span>}{data.users?.error ? null : <UserFacts user={p.user} />}</span>
+                  ) : (
+                    <span className="block text-[11px] text-zinc-500">{p.signedIn?.length ? `${p.signedIn.length} signed in: ${p.signedIn.map((u) => u.name || u.email).join(', ')}` : 'No one from this company has signed in yet'}</span>
+                  )}
+                </span>
               </span>
               <span className="flex min-w-0 flex-[2] flex-wrap gap-1">
                 {p.workspaces.map((id) => <Badge key={id}>{wsName(id)}</Badge>)}
                 {p.docs.map((slug) => <Badge key={slug} tone="amber">{docTitle(slug)}</Badge>)}
               </span>
-              <Button variant="danger" className="px-2 py-1 text-xs" onClick={() => revoke(p)} disabled={busy === p.who}>Remove access</Button>
+              <span className="flex gap-1.5">
+                <Button className="px-2 py-1 text-xs" onClick={() => block(p.who, !p.blocked)} disabled={busy === p.who}>{p.blocked ? 'Unblock' : <><Ban size={12} /> Block</>}</Button>
+                <Button variant="danger" className="px-2 py-1 text-xs" onClick={() => revoke(p)} disabled={busy === p.who}>Remove access</Button>
+              </span>
             </li>
           ))}
         </ul>
+      )}
+      {data.users?.error ? (
+        <div className="mt-4 rounded-xl border border-white/[0.06] bg-black/30 p-3 text-xs text-zinc-400">
+          Sign-in details (name, photo, joined, last sign-in) need one permission: {data.users.error}. Run once:
+          <pre className="mt-1.5 overflow-x-auto rounded-lg bg-black/50 px-2 py-1.5 font-mono text-[11px] text-zinc-300">{`gcloud projects add-iam-policy-binding sanero-media --member serviceAccount:${data.users.account || 'vp-control@sanero-media.iam.gserviceaccount.com'} --role roles/firebaseauth.viewer --condition=None`}</pre>
+        </div>
+      ) : data.users?.withoutAccess?.length > 0 && (
+        <div className="mt-5 border-t border-white/[0.06] pt-4">
+          <h3 className="mb-1 text-xs font-medium uppercase tracking-wider text-zinc-500">Signed in, no docs access · {data.users.withoutAccess.length}</h3>
+          <p className="mb-2 text-[11px] text-zinc-600">Google accounts that have signed in on your sites (docs, learn and others share sign-in) but aren't in any workspace or share.</p>
+          <ul className="divide-y divide-white/[0.05]">
+            {data.users.withoutAccess.map((u) => (
+              <li key={u.email} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2">
+                <span className="flex min-w-[16rem] flex-1 items-center gap-2.5">
+                  <Avatar user={u} who={u.email} />
+                  <span><span className="block text-sm text-zinc-200">{u.name || u.email} {u.blocked && <Badge tone="red">blocked</Badge>}</span><span className="block text-[11px] text-zinc-500">{u.name && `${u.email} · `}<UserFacts user={u} /></span></span>
+                </span>
+                <Button className="px-2 py-1 text-xs" onClick={() => block(u.email, !u.blocked)} disabled={busy === u.email}>{u.blocked ? 'Unblock' : <><Ban size={12} /> Block</>}</Button>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </Section>
   )
 }
 
+/** Lock switch and block list, enforced by firestore.rules on the docs site. */
+function AccessPanel({ data, act }) {
+  const [busy, setBusy] = useState(false)
+  const [msg, setMsg] = useState(null)
+  const run = async (body) => { setBusy(true); setMsg(null); try { await act(body) } catch (e) { setMsg(e.message) } finally { setBusy(false) } }
+  const { locked, blocked } = data.access
+  const toggleLock = () => {
+    if (!locked && !window.confirm('Lock all sharing? Until you unlock, only you can open protected documents: every workspace member and shared person is paused (nothing is deleted). Public documents stay public.')) return
+    run({ action: 'setLock', locked: !locked })
+  }
+  return (
+    <Section title="Access" className={locked ? 'border-red-500/30' : ''}>
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <div>
+          <div className="flex items-start gap-3">
+            {locked ? <ShieldOff size={20} className="mt-0.5 text-red-400" /> : <ShieldCheck size={20} className="mt-0.5 text-emerald-400" />}
+            <div className="flex-1">
+              <div className="text-sm text-zinc-100">{locked ? 'Sharing is locked' : 'Sharing is on'}</div>
+              <p className="mt-0.5 text-xs text-zinc-500">{locked ? 'Only you can open protected documents. Members and shares are kept and come back when you unlock.' : 'Workspace members and shared people can open their protected documents.'}</p>
+            </div>
+            <Button variant={locked ? 'primary' : 'danger'} onClick={toggleLock} disabled={busy}>{locked ? 'Unlock' : <><Lock size={13} /> Lock all sharing</>}</Button>
+          </div>
+        </div>
+        <div>
+          <span className="mb-1 flex items-center gap-1.5 text-xs text-zinc-500"><Ban size={12} /> Blocked · can't open any protected document, even if added later</span>
+          <People
+            value={blocked}
+            busy={busy}
+            placeholder="block an email or @company.com"
+            onAdd={(list) => Promise.all(list.map((who) => run({ action: 'block', who })))}
+            onRemove={(who) => run({ action: 'unblock', who })}
+          />
+        </div>
+      </div>
+      {msg && <p className="mt-2 text-xs text-red-300">{msg}</p>}
+    </Section>
+  )
+}
+
+function Avatar({ user, who }) {
+  if (user?.photo) return <img src={user.photo} alt="" referrerPolicy="no-referrer" className="h-8 w-8 rounded-full ring-1 ring-white/10" />
+  return <span className="grid h-8 w-8 place-items-center rounded-full bg-white/10 text-xs font-semibold text-zinc-200">{(user?.name || who.replace('@', ''))[0]?.toUpperCase()}</span>
+}
+
+function UserFacts({ user }) {
+  if (!user) return <span className="text-[11px] text-zinc-600">Hasn't signed in yet</span>
+  return (
+    <span className="text-[11px] text-zinc-500">
+      Joined {day(user.createdAt)} · last sign-in {user.lastLoginAt ? timeAgo(user.lastLoginAt) : '—'}{user.lastActiveAt ? ` · active ${timeAgo(user.lastActiveAt)}` : ''}
+      {user.disabled && <span className="ml-1 text-red-300">· account disabled</span>}
+    </span>
+  )
+}
+
 export default function DocsView({ go, tab }) {
   const current = DOCS_TABS.some((t) => t.key === tab) ? tab : 'documents'
-  const { data, error, loading, reload, act } = useDocs()
+  const { data, error, loading, reload, act } = useDocs(current === 'workspaces')
   const stats = useMemo(() => data && ({
     pub: data.docs.filter((d) => d.visibility === 'public').length,
     members: data.people.filter((p) => p.kind === 'person').length,
@@ -301,18 +416,20 @@ export default function DocsView({ go, tab }) {
         <a href="https://docs.vishalpanwar.in" target="_blank" rel="noreferrer"><Button variant="glass"><ExternalLink size={13} /> Open docs</Button></a>
       </div>
 
-      {error ? <Empty>Couldn't load docs: {error}</Empty> : !data ? <div className="text-sm text-zinc-500">Loading docs…</div> : (
+      {error && !data ? <Empty>Couldn't load docs: {error}</Empty> : !data ? <div className="text-sm text-zinc-500">Loading docs…</div> : (
         <>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <Stat label="Documents" value={data.docs.length} sub={`${stats.pub} public · ${data.docs.length - stats.pub} protected`} icon={FileText} />
-            <Stat label="Workspaces" value={data.workspaces.length} sub={`${data.docs.filter((d) => !d.workspace).length} docs outside any`} icon={Users} />
-            <Stat label="People with access" value={data.people.length} sub={`${stats.members} people · ${stats.domains} companies`} icon={Users} />
+            <Stat label="Workspaces" value={data.workspaces.length} sub={`${data.workspaces.filter((w) => w.paused).length} paused · ${data.docs.filter((d) => !d.workspace).length} docs outside any`} icon={Users} />
+            <Stat label="People with access" value={data.access.locked ? 'Locked' : data.people.length} tone={data.access.locked ? 'text-red-400' : undefined} sub={`${stats.members} people · ${stats.domains} companies · ${data.access.blocked.length} blocked`} icon={Users} />
             <Stat label="Stored" value={size(data.storage.fileBytes)} sub={`${data.storage.photos} photos · ${data.storage.files} files`} icon={FileText} />
           </div>
+          <AccessPanel data={data} act={act} />
           {current === 'documents' && <Documents data={data} act={act} />}
           {current === 'workspaces' && (
             <div className="space-y-5">
               <NewWorkspace act={act} />
+              {data.unassignedSize && <p className="flex items-center gap-1.5 text-xs text-zinc-500"><HardDrive size={12} /> Documents outside any workspace: {sizeLine(data.unassignedSize)}</p>}
               {data.workspaces.length === 0 ? <Empty>No workspaces yet.</Empty> : (
                 <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
                   {data.workspaces.map((w) => <WorkspaceCard key={w.id} w={w} docs={data.docs} act={act} />)}

@@ -24,7 +24,7 @@ export const appLinks = [
   },
   {
     label: "Docs", url: "https://docs.vishalpanwar.in", note: "Shared docs and workspaces", icon: "docs", cta: "Open Docs",
-    description: "Write documents, keep them in workspaces and share them with the people you work with. Sign in with Google to start your own."
+    description: "Documents, notes and files I share with clients and teams, grouped into workspaces. Sign in with Google to open the ones shared with you."
   },
   {
     label: "Stacky", url: "https://stacky.vishalpanwar.in", note: "Task queue and workspaces", icon: "tasks", cta: "Try Stacky",

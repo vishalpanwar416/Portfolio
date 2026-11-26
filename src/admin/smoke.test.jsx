@@ -399,6 +399,8 @@ test('docs admin: people with access, and the Docs page renders', async () => {
       { slug: 'faq', title: 'FAQ', visibility: 'public', workspace: '', sharedWith: [], url: 'https://docs.vishalpanwar.in/faq', photos: 0, files: 0, bytes: 0 }],
     workspaces: [{ id: 'team', name: 'Team', description: '', members: ['a@b.com', '@acme.io'], docs: ['plan'] }],
     storage: { photos: 1, files: 0, fileBytes: 0 },
+    access: { locked: false, blocked: ['z@q.com'] },
+    users: { total: 1, withoutAccess: [{ email: 'v@x.com', name: 'Visitor', photo: '', createdAt: 1, lastLoginAt: Date.now(), blocked: false }] },
   }
   docsData.people = people(docsData.docs, docsData.workspaces)
   expect(docsData.people.map((p) => p.who)).toEqual(['@acme.io', 'a@b.com', 'c@x.com'])
@@ -408,5 +410,9 @@ test('docs admin: people with access, and the Docs page renders', async () => {
   render(<DocsView go={() => {}} tab="people" />)
   expect(await screen.findByText('c@x.com')).toBeTruthy()
   expect(screen.getByText('whole company')).toBeTruthy()
+  expect(screen.getByText('Lock all sharing')).toBeTruthy()
+  expect(screen.getByText('z@q.com')).toBeTruthy()
+  expect(screen.getByText('Visitor')).toBeTruthy()
+  expect(screen.getAllByText('Block').length).toBeGreaterThan(0)
   spy.mockRestore()
 })
