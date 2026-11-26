@@ -107,6 +107,19 @@ async function check(h) {
 // Current problems as { key, severity, text }.
 const problems = []
 const results = await Promise.all(hosts.map(check))
+
+// When (nearly) every site fails at once, it's this machine's connection,
+// not the sites: say nothing and keep the previous state, so a dropped Wi-Fi
+// doesn't page "21 sites down" and then "21 back up" an hour later.
+const downCount = results.filter((r) => !r.up).length
+if (results.length >= 4 && downCount / results.length >= 0.8) {
+  const reachable = await fetch('https://www.google.com/generate_204', { signal: AbortSignal.timeout(8000) }).then((r) => r.ok || r.status === 204).catch(() => false)
+  if (!reachable || !remote) {
+    console.log(`${downCount}/${results.length} sites unreachable and ${remote ? 'the internet check failed' : 'the dashboard API is unreachable'}: this machine looks offline, skipping this run`)
+    process.exit(0)
+  }
+}
+
 for (const r of results) {
   if (!r.up) problems.push({ key: `site:${r.host}`, severity: r.critical ? 'critical' : 'warning', text: `${r.host} (${r.project}) is DOWN — ${r.detail}`, back: `${r.host} is back up` })
   if (r.cert && days(r.cert) < 7) problems.push({ key: `ssl:${r.host}`, severity: 'critical', text: `SSL for ${r.host} expires in ${days(r.cert)}d`, back: `SSL for ${r.host} renewed` })
