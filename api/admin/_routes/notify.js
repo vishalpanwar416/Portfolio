@@ -25,10 +25,16 @@
 //   POST { action: 'createKey', source, label } → the key, shown once
 //   POST { action: 'revokeKey', id }
 // Routing rules live in vp_sites/alert_routes, edited on the Alerts page:
-//   { defaultChat, rules: [{ source, kind, chatId }] } — first match wins.
+//   { defaultChat, rules: [{ source, kind, chatId }], quiet: { enabled, start, end } }
+//   — first matching rule wins.
+// Before queuing: the same alert from the same sender within 10 minutes is
+// merged (logged, not resent); during quiet hours anything but critical is
+// held until they end; and a critical alert also goes by email when the
+// laptop (the only WhatsApp sender) has been offline 10+ minutes and
+// RESEND_API_KEY + ALERT_EMAIL_TO are set.
 const crypto = require('node:crypto');
 const { requireOwnerOrMonitor } = require('../_auth');
-const { listDocs, mergeDocs, deleteDoc, writeSite, getSite, getSecret, putSecret } = require('../_firestore');
+const { listDocs, mergeDocs, deleteDoc, writeSite, getSite, getSecret, putSecret, getDoc } = require('../_firestore');
 
 const OUTBOX = 'vp_outbox';
 const MAX_WAITING = 200;
@@ -82,6 +88,60 @@ async function routeFor(source, kind) {
   return rule?.chatId || (CHAT_RE.test(r.defaultChat || '') ? r.defaultChat : FALLBACK_CHAT);
 }
 
+// ── merge, quiet hours, email ──────────────────────────
+
+const RECENT = 'vp_alert_recent';
+const MERGE_MS = 10 * 60e3;
+const IST_MS = 5.5 * 3600e3;
+
+/** Same sender, headline and details within 10 minutes → true (and remember this one). */
+async function seenRecently(source, head, body, at) {
+  const id = crypto.createHash('sha1').update(`${source}|${head}|${body}`).digest('hex').slice(0, 32);
+  const prev = await getDoc(RECENT, id).catch(() => null);
+  if (prev && at - (prev.at || 0) < MERGE_MS) return true;
+  await mergeDocs(RECENT, [{ id, data: { at } }]).catch(() => {});
+  // Now and then, forget entries older than a day.
+  if (Math.random() < 0.05) {
+    listDocs(RECENT).then((d) => Promise.all(Object.entries(d).filter(([, v]) => at - (v.at || 0) > 86400e3).slice(0, 100).map(([k]) => deleteDoc(RECENT, k)))).catch(() => {});
+  }
+  return false;
+}
+
+/** "HH:MM" → minutes after midnight, IST. */
+const minutes = (hhmm) => { const m = /^(\d{1,2}):(\d{2})$/.exec(String(hhmm || '')); return m ? Number(m[1]) * 60 + Number(m[2]) : null; };
+
+/** When quiet hours are on and `at` falls inside them, the time they end; else 0. */
+function quietUntil(quiet, at) {
+  if (!quiet?.enabled) return 0;
+  const start = minutes(quiet.start); const end = minutes(quiet.end);
+  if (start === null || end === null || start === end) return 0;
+  const ist = new Date(at + IST_MS);
+  const now = ist.getUTCHours() * 60 + ist.getUTCMinutes();
+  const inside = start < end ? now >= start && now < end : now >= start || now < end;
+  if (!inside) return 0;
+  const minsLeft = ((end - now) + 1440) % 1440 || 1440;
+  return at + minsLeft * 60e3 - ist.getUTCSeconds() * 1000;
+}
+
+/** Email a critical alert when the laptop can't deliver WhatsApp. Best-effort. */
+async function emailIfLaptopOff(head, body, url) {
+  const key = process.env.RESEND_API_KEY; const to = process.env.ALERT_EMAIL_TO;
+  if (!key || !to) return null;
+  const laptop = await getSite('laptop').catch(() => null);
+  if (laptop?.at && Date.now() - Date.parse(laptop.at) < 10 * 60e3) return null; // WhatsApp will get it
+  const esc = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const r = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from: process.env.ALERT_EMAIL_FROM || 'Alerts <onboarding@resend.dev>', to: to.split(',').map((x) => x.trim()),
+      subject: `🔴 ${head}`,
+      html: `<div style="font:15px/1.5 -apple-system,Segoe UI,sans-serif"><h2 style="margin:0 0 8px">${esc(head)}</h2><p style="white-space:pre-line;margin:0 0 12px">${esc(body)}</p>${url ? `<a href="${esc(url)}">Open the Alerts page</a>` : ''}<p style="color:#888;font-size:12px">Sent by email because the laptop that delivers WhatsApp alerts is offline.</p></div>`,
+    }),
+  }).catch((e) => ({ ok: false, status: e.message }));
+  return r.ok ? { emailedAt: Date.now() } : { emailError: String(r.status).slice(0, 120) };
+}
+
 /**
  * Queue a WhatsApp message through the gateway. Never throws: an alert must
  * not break its caller. `lines` (array) or `message` (text) carry the details.
@@ -97,13 +157,17 @@ async function sendNotification({ title, message, lines, url, kind, icon, source
   const src = SOURCE_RE.test(source) ? source : 'admin';
   try {
     const chatId = await routeFor(src, severity);
-    await mergeDocs(OUTBOX, [{ id, data: { text, at, chatId, source: src } }]);
+    const entry = { title: head, message: body.slice(0, 3000), url: url || '', severity, site: siteOf(`${head} ${body}`), source: src, chatId, at };
+    if (severity !== 'test' && await seenRecently(src, head, body, at)) {
+      await mergeDocs(LOG, [{ id, data: { ...entry, status: 'merged' } }]).catch(() => {});
+      return { merged: true, id };
+    }
+    const holdUntil = severity === 'critical' ? 0 : quietUntil((await routes()).quiet, at);
+    await mergeDocs(OUTBOX, [{ id, data: { text, at, chatId, source: src, ...(holdUntil ? { holdUntil } : {}) } }]);
+    const email = severity === 'critical' ? await emailIfLaptopOff(head, body, url).catch(() => null) : null;
     // The history entry is best-effort: losing it must not lose the alert.
-    await mergeDocs(LOG, [{ id, data: {
-      title: head, message: body.slice(0, 3000), url: url || '',
-      severity, site: siteOf(`${head} ${body}`), source: src, chatId, at, status: 'queued',
-    } }]).catch(() => {});
-    return { queued: id, chatId };
+    await mergeDocs(LOG, [{ id, data: { ...entry, status: holdUntil ? 'held' : 'queued', ...(holdUntil ? { holdUntil } : {}), ...(email || {}) } }]).catch(() => {});
+    return { queued: id, chatId, ...(holdUntil ? { holdUntil } : {}), ...(email?.emailedAt ? { emailed: true } : {}) };
   } catch (e) {
     return { error: e.message };
   }
@@ -144,7 +208,10 @@ async function history() {
 
 async function waiting() {
   const docs = await listDocs(OUTBOX);
-  return Object.entries(docs).map(([id, d]) => ({ id, text: d.text, at: d.at, chatId: d.chatId || FALLBACK_CHAT })).sort((a, b) => a.at - b.at);
+  const now = Date.now();
+  // Held for quiet hours: not due yet.
+  return Object.entries(docs).filter(([, d]) => !d.holdUntil || d.holdUntil <= now)
+    .map(([id, d]) => ({ id, text: d.text, at: d.at, chatId: d.chatId || FALLBACK_CHAT, ...(d.holdUntil ? { holdUntil: d.holdUntil } : {}) })).sort((a, b) => a.at - b.at);
 }
 
 // ── handler ────────────────────────────────────────────
@@ -236,3 +303,4 @@ module.exports = async (req, res) => {
 module.exports.sendNotification = sendNotification;
 module.exports.routeFor = routeFor;
 module.exports.sourceMatches = sourceMatches;
+module.exports.quietUntil = quietUntil;

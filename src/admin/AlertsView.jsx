@@ -4,7 +4,7 @@ import { BellRing, Check, ChevronRight, History, RefreshCw, Search, Send } from 
 import { SEVERITY, computeAlerts } from './alerts'
 import { api, timeAgo } from './data'
 import { Badge, Button, Empty, Input, Section, Select, cx } from './ui'
-import { AlertRouting, SenderKeys, groupsFrom } from './AlertRouting'
+import { AlertRouting, JobHealth, SenderKeys, groupsFrom } from './AlertRouting'
 
 const KIND = { site: 'Site', ssl: 'SSL', domain: 'Domain', database: 'Database', laptop: 'Laptop', deploy: 'Deploy', money: 'Money', client: 'Client', app: 'App' }
 
@@ -97,7 +97,9 @@ function AlertHistory({ docs }) {
                     <span className={cx('block text-sm text-zinc-100', open !== i.id && 'truncate')}>{i.message || i.title}</span>
                     <span className="block text-[11px] text-zinc-600">
                       {i.source ? `${i.source} · ` : ''}{i.chatId ? `${groupName(i.chatId) || 'WhatsApp'} · ` : ''}
-                      {i.status === 'delivered' && i.deliveredAt ? `delivered ${mins(i.deliveredAt - i.at)} later` : i.status === 'discarded' ? 'discarded unsent' : 'waiting for the laptop'}
+                      {i.status === 'delivered' && i.deliveredAt ? `delivered ${mins(i.deliveredAt - i.at)} later` : i.status === 'discarded' ? 'discarded unsent'
+                        : i.status === 'merged' ? 'merged: same alert sent in the last 10 minutes' : i.status === 'held' ? `held for quiet hours until ${new Date(i.holdUntil).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })}` : 'waiting for the laptop'}
+                      {i.emailedAt ? ' · also emailed' : i.emailError ? ` · email failed (${i.emailError})` : ''}
                     </span>
                   </span>
                 </button>
@@ -158,6 +160,7 @@ export default function AlertsView({ data, go }) {
             </ul>
           )}
         </Section>
+        <JobHealth laptop={data.docs?.laptop} />
         <AlertHistory docs={data.docs} />
       </div>
 
@@ -178,6 +181,10 @@ export default function AlertsView({ data, go }) {
           <div className="mt-3 flex items-center gap-3">
             <Button variant="glass" onClick={sendTest} disabled={test === 'sending' || !st.monitorSecret}><Send size={13} /> Send test</Button>
             {test && test !== 'sending' && <span className="text-xs text-zinc-400">{test}</span>}
+          </div>
+          <div className="mt-2 text-xs text-zinc-500">
+            {st.alertEmail ? 'Email fallback is on: critical alerts are also emailed when the laptop is offline.'
+              : <>Email fallback is off. To get critical alerts by email while the laptop is offline, add <code>RESEND_API_KEY</code> and <code>ALERT_EMAIL_TO</code> on Vercel.</>}
           </div>
           {!st.monitorSecret && (
             <div className="mt-4 rounded-xl border border-white/[0.06] bg-black/30 p-3 text-xs leading-relaxed text-zinc-400">

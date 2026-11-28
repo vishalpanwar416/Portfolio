@@ -120,7 +120,43 @@ const processes = sh('top', ['-bn1', '-o', '%CPU', '-w', '200']).split('\n')
   .slice(0, 6).map((c) => ({ name: c.slice(11).join(' '), cpu: Number(c[8]), mem: Number(c[9]) }))
 const osName = (readFileSync('/etc/os-release', 'utf8').match(/^PRETTY_NAME="?([^"\n]+)/m) || [])[1] || ''
 
+// ── scheduled jobs ─────────────────────────────────────
+// Every scheduled job on this laptop, for the Alerts page's job health and
+// the monitor's missed-run / failed-job alerts: hermes cron jobs (its
+// jobs.json) and this user's systemd timers (Media-man, the monitor…).
+
+function hermesJobs() {
+  const raw = readJson(join(process.env.HOME, '.hermes', 'cron', 'jobs.json'), null)
+  const list = Array.isArray(raw?.jobs) ? raw.jobs : raw?.jobs ? Object.values(raw.jobs) : []
+  return list.map((j) => ({
+    id: `hermes:${j.id}`, name: j.name || j.id, kind: 'hermes',
+    schedule: j.schedule_display || j.schedule?.display || '', enabled: j.enabled !== false && j.state !== 'paused',
+    lastRun: j.last_run_at ? Date.parse(j.last_run_at) : null, nextRun: j.next_run_at ? Date.parse(j.next_run_at) : null,
+    ok: !j.last_status || ['ok', 'silent', 'success', 'skipped'].includes(String(j.last_status).toLowerCase()),
+    status: j.last_status || '', error: String(j.last_error || j.last_delivery_error || '').slice(0, 200),
+    deliver: j.deliver || '',
+  }))
+}
+
+function systemdTimers() {
+  let timers = []
+  try { timers = JSON.parse(sh('systemctl', ['--user', 'list-timers', '--all', '--output=json', '--no-pager']) || '[]') } catch { return [] }
+  return timers.filter((t) => t.unit && t.activates).map((t) => {
+    const svc = Object.fromEntries(sh('systemctl', ['--user', 'show', t.activates, '-p', 'Result,ExecMainStatus,ActiveState'])
+      .split('\n').filter(Boolean).map((l) => [l.slice(0, l.indexOf('=')), l.slice(l.indexOf('=') + 1)]))
+    return {
+      id: `timer:${t.unit}`, name: t.activates.replace(/\.service$/, ''), kind: 'systemd', schedule: '', enabled: true,
+      lastRun: t.last ? Math.round(t.last / 1000) : null, nextRun: t.next ? Math.round(t.next / 1000) : null,
+      ok: svc.Result === 'success' || svc.ActiveState === 'activating', status: svc.Result || '',
+      error: svc.Result && svc.Result !== 'success' ? `exit ${svc.ExecMainStatus || '?'} (${svc.Result})` : '', deliver: '',
+    }
+  })
+}
+
+const jobs = [...hermesJobs(), ...systemdTimers()].slice(0, 120)
+
 const snapshot = {
+  jobs,
   host: hostname(),
   os: osName,
   uptimeSec: Math.round(Number(readFileSync('/proc/uptime', 'utf8').split(' ')[0])),
@@ -193,9 +229,11 @@ try {
   const done = []
   for (const m of items) {
     // Held while the laptop was off: say when it actually happened.
-    const late = Date.now() - m.at > 15 * 60e3
-      ? `\n_Sent late: happened ${new Date(m.at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })} IST, while the laptop was off_`
-      : ''
+    // Held for quiet hours: say when it happened, not that the laptop was off.
+    const when = new Date(m.at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })
+    const late = m.holdUntil
+      ? `\n_Held for quiet hours: happened ${when} IST_`
+      : Date.now() - m.at > 15 * 60e3 ? `\n_Sent late: happened ${when} IST, while the laptop was off_` : ''
     const sent = await fetch(`${BRIDGE}/send`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

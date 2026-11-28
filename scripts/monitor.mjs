@@ -127,6 +127,7 @@ for (const r of results) {
     head: `SSL certificate expiring`, sub: `${r.host} · ${days(r.cert)} days left`, backHead: 'SSL certificate renewed', backSub: r.host })
 }
 
+const istTime = (ts) => new Date(ts).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Kolkata' })
 const laptop = remote?.laptop
 if (laptop && laptop.online) {
   for (const s of laptop.services || []) {
@@ -134,6 +135,26 @@ if (laptop && laptop.online) {
   }
   if (laptop.disk?.total && laptop.disk.free / laptop.disk.total < 0.05) {
     problems.push({ key: 'disk', severity: 'warning', text: `Laptop disk almost full — ${Math.round(laptop.disk.free / 1e9)} GB free`, back: 'Laptop disk has space again' })
+  }
+
+  // Job health: a scheduled job that failed, or (hermes) missed its run. One
+  // message when it starts and when it's fixed, repeated daily at most.
+  const nice = (n) => String(n).replace(/[_@]/g, ' ').replace(/\s+/g, ' ').trim()
+  const JOB_REALERT = 24 * 3600e3
+  const awakeLongEnough = (laptop.uptimeSec || 0) > 3600 // a just-woken laptop catches up on its own
+  const overdue = (laptop.jobs || []).filter((j) => j.enabled && j.kind === 'hermes' && j.nextRun && now - j.nextRun > 30 * 60e3)
+  if (awakeLongEnough && overdue.length >= 3) {
+    // Many at once means the scheduler itself stopped, not the jobs.
+    problems.push({ key: 'job:hermes-scheduler', severity: 'critical', realert: JOB_REALERT, text: `Hermes stopped running jobs (${overdue.length} overdue)`, back: 'Hermes is running jobs again',
+      head: 'Hermes stopped running jobs', sub: `${overdue.length} jobs overdue, e.g. ${overdue.slice(0, 3).map((j) => nice(j.name)).join(', ')}`, backHead: 'Hermes is running jobs again', backSub: '' })
+  } else if (awakeLongEnough) {
+    for (const j of overdue) problems.push({ key: `job:${j.id}:late`, severity: 'critical', realert: JOB_REALERT, text: `${nice(j.name)} missed its run`, back: `${nice(j.name)} ran again`,
+      head: `${nice(j.name)} missed its run`, sub: `Was due at ${istTime(j.nextRun)} IST`, backHead: `${nice(j.name)} ran again`, backSub: '' })
+  }
+  for (const j of laptop.jobs || []) {
+    if (!j.enabled || j.ok) continue
+    problems.push({ key: `job:${j.id}`, severity: 'critical', realert: JOB_REALERT, text: `${nice(j.name)} failed: ${j.error || j.status}`, back: `${nice(j.name)} is working again`,
+      head: `${nice(j.name)} failed`, sub: [j.error || j.status, j.lastRun ? `Last run ${istTime(j.lastRun)} IST` : ''].filter(Boolean).join(' · '), backHead: `${nice(j.name)} is working again`, backSub: '' })
   }
 }
 
@@ -153,18 +174,26 @@ for (const p of remote?.supabase || []) {
 
 // WhatsApp messages share Media-man's post-report shape (see notify.js):
 // a plain headline, then the site and the reason, then when.
-const istTime = (ts) => new Date(ts).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Kolkata' })
 const messages = []
 const current = new Set(problems.map((p) => p.key))
+// A site must fail two checks in a row (about 10 minutes) before it pages:
+// one-off blips (a slow response, a laptop network hiccup) never reach WhatsApp.
+state.pending ||= {}
+for (const k of Object.keys(state.pending)) if (!current.has(k)) delete state.pending[k]
 for (const p of problems) {
   const prev = state.open[p.key]
+  if (!prev && p.key.startsWith('site:') && !state.pending[p.key]) {
+    state.pending[p.key] = now
+    continue
+  }
   if (!prev) {
+    delete state.pending[p.key]
     state.open[p.key] = { since: now, alertedAt: now, severity: p.severity, text: p.text, back: p.back, backHead: p.backHead, backSub: p.backSub }
     if (p.severity === 'critical') messages.push({ kind: 'critical', title: p.head || p.text, text: [p.head ? p.sub : '', `Since ${istTime(now)} IST`].filter(Boolean).join('\n') })
   } else {
     prev.text = p.text
     Object.assign(prev, { backHead: p.backHead, backSub: p.backSub })
-    if (p.severity === 'critical' && now - prev.alertedAt > REALERT_MS) {
+    if (p.severity === 'critical' && now - prev.alertedAt > (p.realert || REALERT_MS)) {
       prev.alertedAt = now
       messages.push({ kind: 'critical', title: p.head ? p.head.replace(/ is /, ' is still ') : `Still: ${p.text}`, text: [p.head ? p.sub : '', `Down for ${dur(now - prev.since)} (since ${istTime(prev.since)} IST)`].filter(Boolean).join('\n') })
     }

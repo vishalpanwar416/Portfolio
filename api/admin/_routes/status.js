@@ -37,6 +37,7 @@ module.exports = async (req, res) => {
     azure: Object.keys(process.env).filter((k) => /^AZURE_COST_[A-Z0-9_]+_SUBSCRIPTION$/.test(k)).map((k) => k.slice(11, -13).toLowerCase()),
     whatsappWaiting: await whatsappWaiting(),
     monitorSecret: has('MONITOR_SECRET'),
+    alertEmail: has('RESEND_API_KEY') && has('ALERT_EMAIL_TO'),
     razorpay: labels(/^RAZORPAY_([A-Z0-9_]+)_KEY_ID$/),
     supabase: labels(/^SUPABASE_([A-Z0-9_]+)_TOKEN$/),
     aws: Object.keys(process.env).filter((k) => /^AWS_COST_[A-Z0-9_]+_KEY_ID$/.test(k)).map((k) => k.slice(9, -7).toLowerCase()),

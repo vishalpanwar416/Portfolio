@@ -55,6 +55,11 @@ function clean(b, at) {
       ok: !!b.docker?.ok,
       containers: (b.docker?.containers || []).slice(0, 30).map((c) => ({ name: str(c.name, 80), image: str(c.image, 120), status: str(c.status, 60), running: !!c.running })),
     },
+    jobs: (b.jobs || []).slice(0, 120).map((j) => ({
+      id: str(j.id, 120), name: str(j.name, 120), kind: j.kind === 'systemd' ? 'systemd' : 'hermes', schedule: str(j.schedule, 60),
+      enabled: j.enabled !== false, lastRun: num(j.lastRun), nextRun: num(j.nextRun), ok: !!j.ok,
+      status: str(j.status, 40), error: str(j.error, 200), deliver: str(j.deliver, 80),
+    })),
     monitor: b.monitor?.at ? { at: str(b.monitor.at, 40), hosts: num(b.monitor.hosts), down: num(b.monitor.down), open: num(b.monitor.open) } : null,
     processes: (b.processes || []).slice(0, 8).map((p) => ({ name: str(p.name, 60), cpu: num(p.cpu), mem: num(p.mem) })),
     services: (b.services || []).slice(0, MAX_SERVICES).map((s) => ({

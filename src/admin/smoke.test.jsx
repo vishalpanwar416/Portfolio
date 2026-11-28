@@ -420,3 +420,18 @@ test('docs admin: people with access, and the Docs page renders', async () => {
   expect(screen.getByText('Learn · 12 done')).toBeTruthy()
   spy.mockRestore()
 })
+
+test('Jobs section shows failed and late jobs first', () => {
+  const { JobHealth } = require('./AlertRouting')
+  const now = Date.now()
+  const laptop = { at: new Date().toISOString(), jobs: [
+    { id: 'hermes:a', name: 'naukri_auto_apply', kind: 'hermes', enabled: true, ok: false, error: 'login expired', lastRun: now - 60e3, nextRun: now + 3600e3 },
+    { id: 'hermes:b', name: 'x_daily_review', kind: 'hermes', enabled: true, ok: true, lastRun: now - 86400e3, nextRun: now - 3 * 3600e3 },
+    { id: 'timer:c', name: 'media-man@sanero', kind: 'systemd', enabled: true, ok: true, lastRun: now - 3600e3, nextRun: now + 3600e3 },
+  ] }
+  render(<JobHealth laptop={laptop} />)
+  expect(screen.getByText('failed')).toBeTruthy()
+  expect(screen.getByText('late')).toBeTruthy()
+  expect(screen.getByText('login expired')).toBeTruthy()
+  expect(screen.queryByText(/media-man sanero/)).toBeNull()
+})

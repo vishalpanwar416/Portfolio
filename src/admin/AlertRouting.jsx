@@ -30,6 +30,7 @@ export function AlertRouting({ docs, sources = [] }) {
   const groups = groupsFrom(docs)
   const [defaultChat, setDefault] = useState(saved.defaultChat || FALLBACK_CHAT)
   const [rules, setRules] = useState(saved.rules || [])
+  const [quiet, setQuiet] = useState(saved.quiet || { enabled: false, start: '23:00', end: '07:00' })
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState(null)
   // Pick up changes saved elsewhere until the form is edited.
@@ -38,7 +39,8 @@ export function AlertRouting({ docs, sources = [] }) {
     if (dirty) return
     setDefault(saved.defaultChat || FALLBACK_CHAT)
     setRules(saved.rules || [])
-  }, [saved.defaultChat, saved.rules, dirty])
+    setQuiet(saved.quiet || { enabled: false, start: '23:00', end: '07:00' })
+  }, [saved.defaultChat, saved.rules, saved.quiet, dirty])
 
   const name = (id) => groups.find((g) => g.id === id)?.name || id
   const edit = (i, patch) => { setDirty(true); setRules(rules.map((r, j) => (j === i ? { ...r, ...patch } : r))) }
@@ -47,7 +49,7 @@ export function AlertRouting({ docs, sources = [] }) {
     setBusy(true); setMsg(null)
     try {
       const clean = rules.map((r) => ({ source: (r.source || '').trim().toLowerCase(), kind: r.kind || '', chatId: r.chatId })).filter((r) => r.chatId)
-      await saveDoc('alert_routes', { kind: 'alert_routes', defaultChat, rules: clean })
+      await saveDoc('alert_routes', { kind: 'alert_routes', defaultChat, rules: clean, quiet })
       setDirty(false); setMsg('Saved. New alerts follow these routes within a minute.')
     } catch (e) { setMsg(e.message) } finally { setBusy(false) }
   }
@@ -86,12 +88,22 @@ export function AlertRouting({ docs, sources = [] }) {
           </Select>
         </span>
       </div>
+      <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-white/[0.06] bg-black/20 p-2 text-xs text-zinc-400">
+        <label className="flex items-center gap-1.5">
+          <input type="checkbox" checked={!!quiet.enabled} onChange={(e) => { setDirty(true); setQuiet({ ...quiet, enabled: e.target.checked }) }} className="accent-white" />
+          Quiet hours
+        </label>
+        <Input type="time" value={quiet.start} onChange={(e) => { setDirty(true); setQuiet({ ...quiet, start: e.target.value }) }} className="w-28 text-xs" aria-label="Quiet from" />
+        <span>to</span>
+        <Input type="time" value={quiet.end} onChange={(e) => { setDirty(true); setQuiet({ ...quiet, end: e.target.value }) }} className="w-28 text-xs" aria-label="Quiet until" />
+        <span className="text-zinc-500">IST · everything but critical waits until they end</span>
+      </div>
       <div className="mt-3 flex items-center gap-3">
         <Button variant="primary" onClick={save} disabled={busy || !dirty}>Save routes</Button>
         {msg && <span className="text-xs text-zinc-400">{msg}</span>}
       </div>
       {!dirty && rules.length > 0 && (
-        <p className="mt-3 text-[11px] text-zinc-600">{rules.map((r) => `${r.source || 'any'}${r.kind ? ` (${r.kind})` : ''} → ${name(r.chatId)}`).join(' · ')} · else → {name(defaultChat)}</p>
+        <p className="mt-3 text-[11px] text-zinc-600">{rules.map((r) => `${r.source || 'any'}${r.kind ? ` (${r.kind})` : ''} → ${name(r.chatId)}`).join(' · ')} · else → {name(defaultChat)}{quiet.enabled ? ` · quiet ${quiet.start}–${quiet.end}` : ''}</p>
       )}
     </Section>
   )
@@ -143,6 +155,46 @@ export function SenderKeys() {
               {k.revoked && <Badge tone="red">revoked</Badge>}
               <span className="ml-auto text-[11px] text-zinc-600">made {timeAgo(k.createdAt)} · {k.lastUsedAt ? `last used ${timeAgo(k.lastUsedAt)}` : 'never used'}</span>
               {!k.revoked && <Button variant="danger" className="px-2 py-0.5 text-xs" onClick={() => revoke(k)}>Revoke</Button>}
+            </li>
+          ))}
+        </ul>
+      )}
+    </Section>
+  )
+}
+
+const niceJob = (n) => String(n).replace(/[_@]/g, ' ').replace(/\.service$/, '').replace(/\s+/g, ' ').trim()
+const when = (ms) => (ms ? new Date(ms).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : '—')
+
+/** Every scheduled job on the laptop (hermes cron + systemd timers), from the laptop agent. */
+export function JobHealth({ laptop }) {
+  const [filter, setFilter] = useState('problems')
+  const jobs = laptop?.jobs || []
+  const now = Date.now()
+  const state = (j) => (!j.enabled ? 'off' : !j.ok ? 'failed' : j.kind === 'hermes' && j.nextRun && now - j.nextRun > 30 * 60e3 ? 'late' : 'ok')
+  const rank = { failed: 0, late: 1, ok: 2, off: 3 }
+  const all = jobs.map((j) => ({ ...j, state: state(j) })).sort((a, b) => rank[a.state] - rank[b.state] || (b.lastRun || 0) - (a.lastRun || 0))
+  const bad = all.filter((j) => j.state === 'failed' || j.state === 'late')
+  const shown = filter === 'problems' ? bad : filter === 'all' ? all : all.filter((j) => j.kind === filter)
+  const tone = { failed: 'red', late: 'amber', ok: 'green', off: 'zinc' }
+  return (
+    <Section title={`Jobs · ${jobs.length}`} action={<span className="text-xs text-zinc-500">{bad.length ? `${bad.length} need attention` : 'all healthy'}</span>}>
+      <p className="mb-3 text-xs text-zinc-500">Every scheduled job on the laptop: hermes cron jobs and systemd timers. A job that fails or (hermes) misses its run by 30 minutes sends one alert, repeated daily at most.{laptop?.at ? ` Updated ${when(Date.parse(laptop.at))}.` : ''}</p>
+      <div className="mb-3 flex flex-wrap gap-1">
+        {[['problems', `Needs attention (${bad.length})`], ['all', 'All'], ['hermes', 'Hermes'], ['systemd', 'Timers']].map(([k, l]) => (
+          <button key={k} onClick={() => setFilter(k)} className={cx('rounded-lg px-2.5 py-1 text-xs', filter === k ? 'bg-white/[0.1] text-white' : 'text-zinc-400 hover:text-white')}>{l}</button>
+        ))}
+      </div>
+      {!jobs.length ? <Empty>No job data yet: the laptop agent reports it every 2 minutes.</Empty> : shown.length === 0 ? <Empty>Nothing needs attention.</Empty> : (
+        <ul className="divide-y divide-white/[0.05]">
+          {shown.slice(0, 80).map((j) => (
+            <li key={j.id} className="flex flex-wrap items-center gap-x-3 gap-y-0.5 py-2 text-sm">
+              <span className="w-16 shrink-0"><Badge tone={tone[j.state]}>{j.state}</Badge></span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-zinc-100">{niceJob(j.name)} <span className="text-[11px] text-zinc-600">{j.kind === 'hermes' ? 'hermes' : 'timer'}{j.deliver?.startsWith('vpalerts:') ? ` · ${j.deliver.slice(9)}` : ''}</span></span>
+                {j.error && j.state === 'failed' && <span className="block truncate text-[11px] text-red-300/80">{j.error}</span>}
+              </span>
+              <span className="text-[11px] tabular-nums text-zinc-500">last {when(j.lastRun)} · next {when(j.nextRun)}</span>
             </li>
           ))}
         </ul>

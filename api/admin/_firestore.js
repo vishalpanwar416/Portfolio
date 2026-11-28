@@ -178,9 +178,18 @@ async function mergeDocs(collection, writes) {
   }
 }
 
+/** One document from any collection, or null. */
+async function getDoc(collection, id) {
+  const r = await docRequest(id, {}, collection);
+  if (r.status === 404) return null;
+  if (!r.ok) throw new Error(`Firestore ${r.status}`);
+  const d = await r.json();
+  return Object.fromEntries(Object.entries(d.fields || {}).map(([k, v]) => [k, value(v)]));
+}
+
 async function deleteDoc(collection, id) {
   const r = await docRequest(id, { method: 'DELETE' }, collection);
   if (!r.ok && r.status !== 404) throw new Error(`Firestore ${r.status}`);
 }
 
-module.exports = { readSites, mergedProjects, registryProjects, alertLevel, writeSite, getSite, deleteSite, getSecret, putSecret, listDocs, mergeDocs, deleteDoc };
+module.exports = { readSites, mergedProjects, registryProjects, alertLevel, writeSite, getSite, deleteSite, getSecret, putSecret, listDocs, mergeDocs, deleteDoc, getDoc };
