@@ -4,6 +4,7 @@ import { BellRing, Check, ChevronRight, History, RefreshCw, Search, Send } from 
 import { SEVERITY, computeAlerts } from './alerts'
 import { api, timeAgo } from './data'
 import { Badge, Button, Empty, Input, Section, Select, cx } from './ui'
+import { AlertRouting, SenderKeys, groupsFrom } from './AlertRouting'
 
 const KIND = { site: 'Site', ssl: 'SSL', domain: 'Domain', database: 'Database', laptop: 'Laptop', deploy: 'Deploy', money: 'Money', client: 'Client', app: 'App' }
 
@@ -32,10 +33,12 @@ const when = (ms) => new Date(ms).toLocaleString('en-IN', { day: 'numeric', mont
 const mins = (ms) => (ms < 60e3 ? 'under a minute' : ms < 3600e3 ? `${Math.round(ms / 60e3)}m` : `${(ms / 3600e3).toFixed(1)}h`)
 
 /** Every alert sent, kept 120 days (api/admin/notify?history=1). */
-function AlertHistory() {
+function AlertHistory({ docs }) {
+  const groupName = (id) => groupsFrom(docs).find((g) => g.id === id)?.name
   const [state, setState] = useState({ items: null, error: null, loading: true })
   const [kind, setKind] = useState('all')
   const [site, setSite] = useState('all')
+  const [source, setSource] = useState('all')
   const [q, setQ] = useState('')
   const [open, setOpen] = useState(null)
   const load = async () => {
@@ -45,6 +48,7 @@ function AlertHistory() {
   useEffect(() => { load() }, [])
   const items = useMemo(() => state.items || [], [state.items])
   const sites = useMemo(() => [...new Set(items.map((i) => i.site).filter(Boolean))].sort(), [items])
+  const sources = useMemo(() => [...new Set(items.map((i) => i.source).filter(Boolean))].sort(), [items])
   // Sites that went down most in the last 30 days.
   const flappy = useMemo(() => {
     const since = Date.now() - 30 * 86400e3
@@ -52,7 +56,7 @@ function AlertHistory() {
     for (const i of items) if (i.severity === 'critical' && i.site && i.at >= since) n[i.site] = (n[i.site] || 0) + 1
     return Object.entries(n).filter(([, c]) => c >= 2).sort((a, b) => b[1] - a[1]).slice(0, 5)
   }, [items])
-  const shown = items.filter((i) => (kind === 'all' || i.severity === kind) && (site === 'all' || i.site === site)
+  const shown = items.filter((i) => (kind === 'all' || i.severity === kind) && (site === 'all' || i.site === site) && (source === 'all' || i.source === source)
     && (!q || `${i.title} ${i.message}`.toLowerCase().includes(q.toLowerCase())))
   return (
     <Section title={`History · ${items.length}`} action={<Button variant="glass" onClick={load} disabled={state.loading}><RefreshCw size={13} className={state.loading ? 'animate-spin' : ''} /></Button>}>
@@ -72,6 +76,10 @@ function AlertHistory() {
           <option value="all">All kinds</option>
           {Object.entries(HISTORY_KINDS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
         </Select>
+        <Select value={source} onChange={(e) => setSource(e.target.value)} aria-label="Source">
+          <option value="all">All senders</option>
+          {sources.map((x) => <option key={x} value={x}>{x}</option>)}
+        </Select>
         <Select value={site} onChange={(e) => setSite(e.target.value)} aria-label="Site">
           <option value="all">All sites</option>
           {sites.map((h) => <option key={h} value={h}>{h}</option>)}
@@ -88,7 +96,8 @@ function AlertHistory() {
                   <span className="min-w-0 flex-1">
                     <span className={cx('block text-sm text-zinc-100', open !== i.id && 'truncate')}>{i.message || i.title}</span>
                     <span className="block text-[11px] text-zinc-600">
-                      {i.status === 'delivered' && i.deliveredAt ? `Delivered ${mins(i.deliveredAt - i.at)} later` : i.status === 'discarded' ? 'Discarded unsent' : 'Waiting for the laptop'}
+                      {i.source ? `${i.source} · ` : ''}{i.chatId ? `${groupName(i.chatId) || 'WhatsApp'} · ` : ''}
+                      {i.status === 'delivered' && i.deliveredAt ? `delivered ${mins(i.deliveredAt - i.at)} later` : i.status === 'discarded' ? 'discarded unsent' : 'waiting for the laptop'}
                     </span>
                   </span>
                 </button>
@@ -149,7 +158,7 @@ export default function AlertsView({ data, go }) {
             </ul>
           )}
         </Section>
-        <AlertHistory />
+        <AlertHistory docs={data.docs} />
       </div>
 
       <div className="space-y-5 xl:col-span-2">
@@ -161,7 +170,7 @@ export default function AlertsView({ data, go }) {
               {mon && <> GitHub last ran {timeAgo(mon.at)} (<a className="underline" href={mon.url} target="_blank" rel="noreferrer">{mon.conclusion || mon.status}</a>).</>}
             </Channel>
             <Channel name="WhatsApp · ops group" ok={!!wa?.deliveredAt && !st.whatsappWaiting}>
-              Sent by the laptop agent through hermes, to the group Media-man reports to, so messages go out while the laptop is on and wait otherwise.
+              Every app sends alerts to this dashboard's gateway; the laptop agent delivers each one through hermes to the group its routing rule picks. Messages go out while the laptop is on and wait otherwise.
               {wa?.deliveredAt && <> Last delivered {timeAgo(wa.deliveredAt)}.</>}
               {st.whatsappWaiting > 0 && <span className="text-amber-300"> {st.whatsappWaiting} waiting.</span>}
             </Channel>
@@ -183,6 +192,8 @@ export default function AlertsView({ data, go }) {
           )}
         </Section>
 
+        <AlertRouting docs={data.docs} />
+        <SenderKeys />
         <Section title="What wakes you up">
           <ul className="space-y-2 text-xs text-zinc-400">
             <li><Badge tone="red">critical</Badge> its own message: a live project’s site down · Supabase paused or unhealthy · SSL or domain expiring within 7 days</li>

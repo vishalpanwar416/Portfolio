@@ -234,7 +234,7 @@ for (const m of messages) {
   const r = await fetch(`${API}/notify`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${process.env.MONITOR_SECRET}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ kind: m.kind, title: m.title, message: m.text, url: 'https://admin.vishalpanwar.in/#/alerts' }),
+    body: JSON.stringify({ source: 'monitor', kind: m.kind, title: m.title, message: m.text, url: 'https://admin.vishalpanwar.in/#/alerts' }),
     signal: AbortSignal.timeout(20000),
   }).catch((e) => ({ ok: false, status: e.message }))
   if (!r.ok) { console.error('queueing message failed', r.status); process.exitCode = 1 }

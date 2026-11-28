@@ -69,6 +69,7 @@ module.exports = async (req, res) => {
   // Same shape as every other alert: headline, who, what they said, link.
   const quote = lead.message ? lead.message.slice(0, 300).split('\n').map((l) => `> ${l}`).join('\n') : '';
   await sendNotification({
+    source: 'leads',
     kind: 'lead',
     title: `New lead${lead.site ? ` from ${lead.site}` : ''}`,
     message: [[lead.name, lead.email, lead.phone].filter(Boolean).join(' · '), quote, lead.utm?.source ? `Came via ${lead.utm.source}${lead.utm.campaign ? ` · ${lead.utm.campaign}` : ''}` : ''].filter(Boolean).join('\n'),

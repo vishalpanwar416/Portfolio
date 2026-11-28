@@ -175,10 +175,12 @@ try {
 }
 
 // ── WhatsApp alerts ────────────────────────────────────
-// The dashboard and the monitor queue messages at /api/admin/notify; this
-// delivers them through hermes' WhatsApp bridge (loopback only, which is why
-// the laptop does it) to the ops group Media-man reports to, then acks them.
-// If hermes is down they stay queued and go out on a later run.
+// The alert gateway (/api/admin/notify) queues every app's alerts with the
+// WhatsApp group its routing rules picked; this delivers each one through
+// hermes' WhatsApp bridge (loopback only, which is why the laptop does it) to
+// that group, then acks them. If hermes is down they stay queued and go out on
+// a later run. Once an hour it also tells the gateway which groups the bridge
+// can send to, so the Alerts page can offer them by name.
 
 const BRIDGE = process.env.WHATSAPP_BRIDGE_URL || 'http://127.0.0.1:3000'
 const WA_CHAT = readJson(CONFIG, {}).whatsappChat || '120363411809952493@g.us'
@@ -187,7 +189,7 @@ const NOTIFY = API.replace(/\/laptop$/, '/notify')
 try {
   const r = await fetch(NOTIFY, { headers: { Authorization: `Bearer ${secret}` }, signal: AbortSignal.timeout(20000) })
   if (!r.ok) throw new Error(`HTTP ${r.status}`)
-  const { items = [] } = await r.json()
+  const { items = [], gateway = false } = await r.json()
   const done = []
   for (const m of items) {
     // Held while the laptop was off: say when it actually happened.
@@ -197,7 +199,7 @@ try {
     const sent = await fetch(`${BRIDGE}/send`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chatId: WA_CHAT, message: `${m.text}${late}` }),
+      body: JSON.stringify({ chatId: m.chatId || WA_CHAT, message: `${m.text}${late}` }),
       signal: AbortSignal.timeout(20000),
     }).catch((e) => ({ ok: false, status: e.message }))
     if (!sent.ok) { console.error(`whatsapp: bridge ${sent.status}, ${items.length - done.length} left for next run`); break }
@@ -211,6 +213,23 @@ try {
       signal: AbortSignal.timeout(20000),
     })
     console.log(`whatsapp: delivered ${done.length}`)
+  }
+
+  // Group names for the routing screen, at most once an hour.
+  const GROUPS_STAMP = join(DIR, 'whatsapp-groups.json')
+  // Only a gateway that understands { groups } gets them (an older one would queue a test alert).
+  if (gateway && Date.now() - (readJson(GROUPS_STAMP, {}).at || 0) > 3600e3) {
+    const g = await fetch(`${BRIDGE}/groups`, { signal: AbortSignal.timeout(15000) }).then((x) => (x.ok ? x.json() : null)).catch(() => null)
+    const list = (g?.groups || (Array.isArray(g) ? g : [])).map((x) => ({ id: x.id || x.jid, name: x.subject || x.name })).filter((x) => x.id)
+    if (list.length) {
+      const saved = await fetch(NOTIFY, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${secret}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ groups: list }),
+        signal: AbortSignal.timeout(20000),
+      }).catch(() => null)
+      if (saved?.ok) { writeFileSync(GROUPS_STAMP, JSON.stringify({ at: Date.now(), count: list.length })); console.log(`whatsapp: ${list.length} groups reported`) }
+    }
   }
 } catch (e) {
   console.error(`whatsapp: not checked, retrying next run: ${e.message}`)

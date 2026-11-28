@@ -165,6 +165,7 @@ async function announce(matches) {
   const lines = matches.slice(0, 8).map((j) => `• *${j.company}* · ${j.title} (${yrs(j)})`);
   if (matches.length > 8) lines.push(`…and ${matches.length - 8} more`);
   const push = await sendNotification({
+    source: 'jobs',
     kind: 'jobs',
     title: `${matches.length} new SDE ${matches.length === 1 ? 'role' : 'roles'}`,
     message: [`At ${names.slice(0, 3).join(', ')}${names.length > 3 ? ` and ${names.length - 3} more` : ''}`, ...lines].join('\n'),
