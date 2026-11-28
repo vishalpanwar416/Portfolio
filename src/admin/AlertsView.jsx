@@ -23,6 +23,8 @@ const HISTORY_KINDS = {
   critical: { label: 'Critical', tone: 'red' },
   resolved: { label: 'Resolved', tone: 'green' },
   digest: { label: 'Morning check', tone: 'sky' },
+  lead: { label: 'New lead', tone: 'amber' },
+  jobs: { label: 'Jobs', tone: 'zinc' },
   info: { label: 'Info', tone: 'zinc' },
   test: { label: 'Test', tone: 'zinc' },
 }
@@ -106,7 +108,7 @@ export default function AlertsView({ data, go }) {
   const sendTest = async () => {
     setTest('sending')
     try {
-      await api('/api/admin/notify', { method: 'POST', body: JSON.stringify({ title: 'Admin test', message: 'WhatsApp alerts work. Critical ones arrive like this.' }) })
+      await api('/api/admin/notify', { method: 'POST', body: JSON.stringify({ kind: 'test', title: 'Admin test', message: 'WhatsApp alerts work.\nCritical ones arrive in this same shape.' }) })
       setTest('Queued: the laptop sends it to the ops group within 2 minutes')
     } catch (e) {
       setTest(e.message)

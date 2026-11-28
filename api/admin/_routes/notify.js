@@ -21,8 +21,10 @@ const MAX_WAITING = 200;
 const LOG = 'vp_alert_log';
 const KEEP_MS = 120 * 86400e3;
 
-/** critical | resolved | digest | info, from the title the monitor and routes use. */
-function classify(title) {
+/** critical | resolved | digest | lead | jobs | test | info — given by the caller, else guessed from the title. */
+const KINDS = ['critical', 'resolved', 'digest', 'lead', 'jobs', 'test', 'info'];
+function classify(title, kind) {
+  if (KINDS.includes(kind)) return kind;
   const t = String(title);
   if (/critical/i.test(t)) return 'critical';
   if (/resolved/i.test(t)) return 'resolved';
@@ -34,17 +36,26 @@ function classify(title) {
 /** The first host name mentioned, so history can be filtered by site. */
 const siteOf = (text) => (String(text).match(/\b((?:[a-z0-9-]+\.)+(?:in|com|app|ai|ae|ca|tv|io|dev|co|net|org))\b/i) || [])[1]?.toLowerCase() || '';
 
+// Every WhatsApp alert has the same shape as Media-man's post reports:
+//   <icon> *<headline>*      what happened, in plain words
+//   <detail lines>           which site / who / why, one fact per line
+//   <link>                   where to act
+const ICONS = { critical: '🔴', resolved: '✅', digest: '☀️', lead: '📩', jobs: '💼', test: '🧪', info: 'ℹ️' };
+
 /** Queue a WhatsApp message. Never throws: an alert must not break its caller. */
-async function sendNotification({ title, message, url }) {
+async function sendNotification({ title, message, url, kind, icon }) {
   const id = `${Date.now().toString(36)}${crypto.randomBytes(3).toString('hex')}`;
-  const text = [`*${String(title).slice(0, 120)}*`, String(message || '').slice(0, 3000), url].filter(Boolean).join('\n');
+  const severity = classify(title, kind);
+  const head = String(title).slice(0, 120).trim();
+  const mark = icon || (/^\p{Extended_Pictographic}/u.test(head) ? '' : ICONS[severity] || '');
+  const text = [`${mark ? `${mark} ` : ''}*${head}*`, String(message || '').trim().slice(0, 3000), url].filter(Boolean).join('\n');
   const at = Date.now();
   try {
     await mergeDocs(OUTBOX, [{ id, data: { text, at } }]);
     // The history entry is best-effort: losing it must not lose the alert.
     await mergeDocs(LOG, [{ id, data: {
       title: String(title).slice(0, 120), message: String(message || '').slice(0, 3000), url: url || '',
-      severity: classify(title), site: siteOf(`${title} ${message}`), at, status: 'queued',
+      severity, site: siteOf(`${title} ${message}`), at, status: 'queued',
     } }]).catch(() => {});
     return { queued: id };
   } catch (e) {
@@ -94,8 +105,8 @@ module.exports = async (req, res) => {
       }
       return res.status(200).json({ removed: ids.length, discarded: !!body.discard });
     }
-    const { title = 'VP Control', message = 'Test message: alerts will look like this.' } = body;
-    const r = await sendNotification({ title, message });
+    const { title = 'Admin test', message = 'Test message: alerts will look like this.', url, kind, icon } = body;
+    const r = await sendNotification({ title, message, url, kind: typeof kind === 'string' ? kind : undefined, icon: typeof icon === 'string' ? icon.slice(0, 4) : undefined });
     return r.error ? res.status(502).json(r) : res.status(200).json(r);
   } catch (e) {
     return res.status(e.status || 502).json({ error: e.message });

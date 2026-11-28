@@ -192,7 +192,7 @@ try {
   for (const m of items) {
     // Held while the laptop was off: say when it actually happened.
     const late = Date.now() - m.at > 15 * 60e3
-      ? `\n_${new Date(m.at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}_`
+      ? `\n_Sent late: happened ${new Date(m.at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })} IST, while the laptop was off_`
       : ''
     const sent = await fetch(`${BRIDGE}/send`, {
       method: 'POST',

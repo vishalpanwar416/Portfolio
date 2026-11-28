@@ -121,8 +121,10 @@ if (results.length >= 4 && downCount / results.length >= 0.8) {
 }
 
 for (const r of results) {
-  if (!r.up) problems.push({ key: `site:${r.host}`, severity: r.critical ? 'critical' : 'warning', text: `${r.host} (${r.project}) is DOWN — ${r.detail}`, back: `${r.host} is back up` })
-  if (r.cert && days(r.cert) < 7) problems.push({ key: `ssl:${r.host}`, severity: 'critical', text: `SSL for ${r.host} expires in ${days(r.cert)}d`, back: `SSL for ${r.host} renewed` })
+  if (!r.up) problems.push({ key: `site:${r.host}`, severity: r.critical ? 'critical' : 'warning', text: `${r.host} (${r.project}) is DOWN — ${r.detail}`, back: `${r.host} is back up`,
+    head: `${r.project} is down`, sub: `${r.host} · ${r.detail}`, backHead: `${r.project} is back up`, backSub: r.host })
+  if (r.cert && days(r.cert) < 7) problems.push({ key: `ssl:${r.host}`, severity: 'critical', text: `SSL for ${r.host} expires in ${days(r.cert)}d`, back: `SSL for ${r.host} renewed`,
+    head: `SSL certificate expiring`, sub: `${r.host} · ${days(r.cert)} days left`, backHead: 'SSL certificate renewed', backSub: r.host })
 }
 
 const laptop = remote?.laptop
@@ -137,35 +139,43 @@ if (laptop && laptop.online) {
 
 for (const p of remote?.supabase || []) {
   if (p.error || p.notConfigured) continue
-  if (p.status === 'INACTIVE' || p.status === 'PAUSED') problems.push({ key: `sb:${p.ref}`, severity: 'critical', text: `Supabase ${p.name} (${p.project}) is PAUSED — restore it in the Supabase dashboard`, back: `Supabase ${p.name} is active again` })
+  if (p.status === 'INACTIVE' || p.status === 'PAUSED') problems.push({ key: `sb:${p.ref}`, severity: 'critical', text: `Supabase ${p.name} (${p.project}) is PAUSED — restore it in the Supabase dashboard`, back: `Supabase ${p.name} is active again`,
+    head: `Supabase ${p.name} is paused`, sub: `${p.project} · restore it in the Supabase dashboard`, backHead: `Supabase ${p.name} is active again`, backSub: p.project })
   else if (p.status === 'ACTIVE_UNHEALTHY' || (p.health || []).some((h) => !h.healthy)) {
     const bad = (p.health || []).filter((h) => !h.healthy).map((h) => h.name).join(', ')
-    problems.push({ key: `sb:${p.ref}`, severity: 'critical', text: `Supabase ${p.name} (${p.project}) unhealthy${bad ? `: ${bad}` : ''}`, back: `Supabase ${p.name} is healthy again` })
+    problems.push({ key: `sb:${p.ref}`, severity: 'critical', text: `Supabase ${p.name} (${p.project}) unhealthy${bad ? `: ${bad}` : ''}`, back: `Supabase ${p.name} is healthy again`,
+      head: `Supabase ${p.name} is unhealthy`, sub: `${p.project}${bad ? ` · ${bad}` : ''}`, backHead: `Supabase ${p.name} is healthy again`, backSub: p.project })
   }
   if (p.dbBytes && p.dbBytes / p.free.dbBytes > 0.9) problems.push({ key: `sbdb:${p.ref}`, severity: 'warning', text: `Supabase ${p.name} database is ${Math.round((p.dbBytes / p.free.dbBytes) * 100)}% of the free 500 MB`, back: `Supabase ${p.name} database back under 90%` })
 }
 
 // ── diff against last run → messages ───────────────────
 
+// WhatsApp messages share Media-man's post-report shape (see notify.js):
+// a plain headline, then the site and the reason, then when.
+const istTime = (ts) => new Date(ts).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Kolkata' })
 const messages = []
 const current = new Set(problems.map((p) => p.key))
 for (const p of problems) {
   const prev = state.open[p.key]
   if (!prev) {
-    state.open[p.key] = { since: now, alertedAt: now, severity: p.severity, text: p.text, back: p.back }
-    if (p.severity === 'critical') messages.push({ severity: 'critical', title: 'CRITICAL', text: p.text })
+    state.open[p.key] = { since: now, alertedAt: now, severity: p.severity, text: p.text, back: p.back, backHead: p.backHead, backSub: p.backSub }
+    if (p.severity === 'critical') messages.push({ kind: 'critical', title: p.head || p.text, text: [p.head ? p.sub : '', `Since ${istTime(now)} IST`].filter(Boolean).join('\n') })
   } else {
     prev.text = p.text
+    Object.assign(prev, { backHead: p.backHead, backSub: p.backSub })
     if (p.severity === 'critical' && now - prev.alertedAt > REALERT_MS) {
       prev.alertedAt = now
-      messages.push({ severity: 'critical', title: 'Still down', text: `${p.text} (for ${dur(now - prev.since)})` })
+      messages.push({ kind: 'critical', title: p.head ? p.head.replace(/ is /, ' is still ') : `Still: ${p.text}`, text: [p.head ? p.sub : '', `Down for ${dur(now - prev.since)} (since ${istTime(prev.since)} IST)`].filter(Boolean).join('\n') })
     }
   }
 }
 for (const [key, prev] of Object.entries(state.open)) {
   if (current.has(key)) continue
   delete state.open[key]
-  if (prev.severity === 'critical') messages.push({ severity: 'info', title: 'Resolved', text: `${prev.back || `${key} resolved`} after ${dur(now - prev.since)}` })
+  if (prev.severity === 'critical') {
+    messages.push({ kind: 'resolved', title: prev.backHead || prev.back || `${key} resolved`, text: [prev.backHead ? prev.backSub : '', `Was down for ${dur(now - prev.since)}`].filter(Boolean).join('\n') })
+  }
 }
 
 // ── morning digest ─────────────────────────────────────
@@ -206,7 +216,10 @@ if (digestDue) {
       console.warn('PageSpeed run failed:', e.message)
     }
   }
-  if (lines.length) messages.push({ severity: 'info', title: `Morning check · ${lines.length}`, text: lines.join('\n') })
+  if (lines.length) {
+    const date = new Date(now).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' })
+    messages.push({ kind: 'digest', title: `Morning check · ${date}`, text: [`${lines.length} ${lines.length === 1 ? 'thing' : 'things'} to look at`, ...lines].join('\n') })
+  }
 }
 
 state.lastRun = { at: new Date(now).toISOString(), hosts: results.length, down: results.filter((r) => !r.up).length, open: Object.keys(state.open).length, source: remote ? 'api' : 'cache' }
@@ -215,14 +228,13 @@ console.log(`source: ${remote ? 'dashboard API' : 'cached host list'} · ${resul
 
 // ── send ───────────────────────────────────────────────
 
-const ICON = { critical: '🚨', info: '✅' }
 for (const m of messages) {
-  console.log(`[${m.severity}] ${m.title}: ${m.text}`)
+  console.log(`[${m.kind}] ${m.title}: ${m.text.replace(/\n/g, ' · ')}`)
   if (!process.env.MONITOR_SECRET) continue
   const r = await fetch(`${API}/notify`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${process.env.MONITOR_SECRET}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title: `${m.title.startsWith('Morning') ? '☀️' : ICON[m.severity] || ''} ${m.title}`.trim(), message: m.text, url: 'https://admin.vishalpanwar.in/#/alerts' }),
+    body: JSON.stringify({ kind: m.kind, title: m.title, message: m.text, url: 'https://admin.vishalpanwar.in/#/alerts' }),
     signal: AbortSignal.timeout(20000),
   }).catch((e) => ({ ok: false, status: e.message }))
   if (!r.ok) { console.error('queueing message failed', r.status); process.exitCode = 1 }

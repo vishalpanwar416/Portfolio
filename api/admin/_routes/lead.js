@@ -66,10 +66,12 @@ module.exports = async (req, res) => {
   } catch (e) {
     return res.status(e.status || 502).json({ error: 'Couldn’t save your message.' });
   }
+  // Same shape as every other alert: headline, who, what they said, link.
+  const quote = lead.message ? lead.message.slice(0, 300).split('\n').map((l) => `> ${l}`).join('\n') : '';
   await sendNotification({
-    title: `New lead${lead.site ? ` · ${lead.site}` : ''}`,
-    message: [lead.name, lead.email, lead.phone].filter(Boolean).join(' · ') + (lead.message ? `\n${lead.message.slice(0, 300)}` : ''),
-    priority: 'info',
+    kind: 'lead',
+    title: `New lead${lead.site ? ` from ${lead.site}` : ''}`,
+    message: [[lead.name, lead.email, lead.phone].filter(Boolean).join(' · '), quote, lead.utm?.source ? `Came via ${lead.utm.source}${lead.utm.campaign ? ` · ${lead.utm.campaign}` : ''}` : ''].filter(Boolean).join('\n'),
     url: 'https://admin.vishalpanwar.in/#/marketing/leads',
   }).catch(() => {});
   res.status(200).json({ ok: true });

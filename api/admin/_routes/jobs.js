@@ -162,9 +162,14 @@ async function announce(matches) {
     }).catch((e) => ({ ok: false, status: e.message }));
     (r.ok ? sent : errors).push(r.ok ? 'email' : `email ${r.status}`);
   }
-  const lines = matches.slice(0, 8).map((j) => `• ${j.company}: ${j.title} (${yrs(j)})`);
+  const lines = matches.slice(0, 8).map((j) => `• *${j.company}* · ${j.title} (${yrs(j)})`);
   if (matches.length > 8) lines.push(`…and ${matches.length - 8} more`);
-  const push = await sendNotification({ title: subject, message: lines.join('\n'), priority: 'info', url: DASHBOARD });
+  const push = await sendNotification({
+    kind: 'jobs',
+    title: `${matches.length} new SDE ${matches.length === 1 ? 'role' : 'roles'}`,
+    message: [`At ${names.slice(0, 3).join(', ')}${names.length > 3 ? ` and ${names.length - 3} more` : ''}`, ...lines].join('\n'),
+    url: DASHBOARD,
+  });
   return { sent: push.queued ? [...sent, 'whatsapp'] : sent, errors: push.error ? [...errors, `whatsapp ${push.error}`] : errors };
 }
 
