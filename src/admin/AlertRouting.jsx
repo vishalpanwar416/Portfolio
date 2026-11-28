@@ -30,7 +30,6 @@ export function AlertRouting({ docs, sources = [] }) {
   const groups = groupsFrom(docs)
   const [defaultChat, setDefault] = useState(saved.defaultChat || FALLBACK_CHAT)
   const [rules, setRules] = useState(saved.rules || [])
-  const [quiet, setQuiet] = useState(saved.quiet || { enabled: false, start: '23:00', end: '07:00' })
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState(null)
   // Pick up changes saved elsewhere until the form is edited.
@@ -39,8 +38,7 @@ export function AlertRouting({ docs, sources = [] }) {
     if (dirty) return
     setDefault(saved.defaultChat || FALLBACK_CHAT)
     setRules(saved.rules || [])
-    setQuiet(saved.quiet || { enabled: false, start: '23:00', end: '07:00' })
-  }, [saved.defaultChat, saved.rules, saved.quiet, dirty])
+  }, [saved.defaultChat, saved.rules, dirty])
 
   const name = (id) => groups.find((g) => g.id === id)?.name || id
   const edit = (i, patch) => { setDirty(true); setRules(rules.map((r, j) => (j === i ? { ...r, ...patch } : r))) }
@@ -49,7 +47,7 @@ export function AlertRouting({ docs, sources = [] }) {
     setBusy(true); setMsg(null)
     try {
       const clean = rules.map((r) => ({ source: (r.source || '').trim().toLowerCase(), kind: r.kind || '', chatId: r.chatId })).filter((r) => r.chatId)
-      await saveDoc('alert_routes', { kind: 'alert_routes', defaultChat, rules: clean, quiet })
+      await saveDoc('alert_routes', { kind: 'alert_routes', defaultChat, rules: clean })
       setDirty(false); setMsg('Saved. New alerts follow these routes within a minute.')
     } catch (e) { setMsg(e.message) } finally { setBusy(false) }
   }
@@ -88,22 +86,12 @@ export function AlertRouting({ docs, sources = [] }) {
           </Select>
         </span>
       </div>
-      <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-white/[0.06] bg-black/20 p-2 text-xs text-zinc-400">
-        <label className="flex items-center gap-1.5">
-          <input type="checkbox" checked={!!quiet.enabled} onChange={(e) => { setDirty(true); setQuiet({ ...quiet, enabled: e.target.checked }) }} className="accent-white" />
-          Quiet hours
-        </label>
-        <Input type="time" value={quiet.start} onChange={(e) => { setDirty(true); setQuiet({ ...quiet, start: e.target.value }) }} className="w-28 text-xs" aria-label="Quiet from" />
-        <span>to</span>
-        <Input type="time" value={quiet.end} onChange={(e) => { setDirty(true); setQuiet({ ...quiet, end: e.target.value }) }} className="w-28 text-xs" aria-label="Quiet until" />
-        <span className="text-zinc-500">IST · everything but critical waits until they end</span>
-      </div>
       <div className="mt-3 flex items-center gap-3">
         <Button variant="primary" onClick={save} disabled={busy || !dirty}>Save routes</Button>
         {msg && <span className="text-xs text-zinc-400">{msg}</span>}
       </div>
       {!dirty && rules.length > 0 && (
-        <p className="mt-3 text-[11px] text-zinc-600">{rules.map((r) => `${r.source || 'any'}${r.kind ? ` (${r.kind})` : ''} → ${name(r.chatId)}`).join(' · ')} · else → {name(defaultChat)}{quiet.enabled ? ` · quiet ${quiet.start}–${quiet.end}` : ''}</p>
+        <p className="mt-3 text-[11px] text-zinc-600">{rules.map((r) => `${r.source || 'any'}${r.kind ? ` (${r.kind})` : ''} → ${name(r.chatId)}`).join(' · ')} · else → {name(defaultChat)}</p>
       )}
     </Section>
   )
