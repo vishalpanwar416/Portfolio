@@ -9,7 +9,8 @@
 // Sending (any app or job):
 //   POST { source, kind, title, lines | message, url }
 //     Authorization: Bearer vpk_<id>_<secret>   a sender key, made on the
-//     Alerts page; the key decides `source`. MONITOR_SECRET or the owner's
+//     Alerts page; the key decides `source` (a body source of "<key's
+//     source>:<part>" narrows it, e.g. media-man:sanero). MONITOR_SECRET or the owner's
 //     sign-in also work, with `source` from the body.
 //     kind: critical | resolved | digest | lead | jobs | test | info
 //
@@ -157,7 +158,11 @@ module.exports = async (req, res) => {
     const sender = await senderFromKey(bearer);
     if (!sender) return res.status(401).json({ error: 'unknown or revoked sender key' });
     const b = req.body || {};
-    const r = await sendNotification({ title: b.title, message: b.message, lines: b.lines, url: b.url, kind: b.kind, source: sender.source });
+    // A key may narrow its source (media-man → media-man:sanero) but never change it.
+    const sub = typeof b.source === 'string' ? b.source.trim().toLowerCase() : '';
+    const source = sub.startsWith(`${sender.source}:`) && SOURCE_RE.test(sub) ? sub : sender.source;
+    const icon = typeof b.icon === 'string' && b.icon.length <= 4 ? b.icon : undefined;
+    const r = await sendNotification({ title: b.title, message: b.message, lines: b.lines, url: b.url, kind: b.kind, icon, source });
     return r.error ? res.status(502).json(r) : res.status(200).json(r);
   }
 
