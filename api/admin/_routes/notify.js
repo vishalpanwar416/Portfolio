@@ -7,6 +7,8 @@
 //   POST { title, message }   queue one (the monitor, or a test from Alerts)
 //   GET                       agent: messages waiting, oldest first
 //   POST { ack: [ids] }       agent: these were delivered
+//   GET ?history=1            owner: every alert of the last 120 days, newest
+//                             first, with when it was delivered (vp_alert_log)
 //   POST { ack: [ids], discard: true }  drop them unsent (stale alerts), without
 //                             marking WhatsApp as delivered
 const crypto = require('node:crypto');
@@ -15,17 +17,49 @@ const { listDocs, mergeDocs, deleteDoc, writeSite } = require('../_firestore');
 
 const OUTBOX = 'vp_outbox';
 const MAX_WAITING = 200;
+// Permanent record of every alert (the outbox forgets a message once sent).
+const LOG = 'vp_alert_log';
+const KEEP_MS = 120 * 86400e3;
+
+/** critical | resolved | digest | info, from the title the monitor and routes use. */
+function classify(title) {
+  const t = String(title);
+  if (/critical/i.test(t)) return 'critical';
+  if (/resolved/i.test(t)) return 'resolved';
+  if (/morning check/i.test(t)) return 'digest';
+  if (/test/i.test(t)) return 'test';
+  return 'info';
+}
+
+/** The first host name mentioned, so history can be filtered by site. */
+const siteOf = (text) => (String(text).match(/\b((?:[a-z0-9-]+\.)+(?:in|com|app|ai|ae|ca|tv|io|dev|co|net|org))\b/i) || [])[1]?.toLowerCase() || '';
 
 /** Queue a WhatsApp message. Never throws: an alert must not break its caller. */
 async function sendNotification({ title, message, url }) {
   const id = `${Date.now().toString(36)}${crypto.randomBytes(3).toString('hex')}`;
   const text = [`*${String(title).slice(0, 120)}*`, String(message || '').slice(0, 3000), url].filter(Boolean).join('\n');
+  const at = Date.now();
   try {
-    await mergeDocs(OUTBOX, [{ id, data: { text, at: Date.now() } }]);
+    await mergeDocs(OUTBOX, [{ id, data: { text, at } }]);
+    // The history entry is best-effort: losing it must not lose the alert.
+    await mergeDocs(LOG, [{ id, data: {
+      title: String(title).slice(0, 120), message: String(message || '').slice(0, 3000), url: url || '',
+      severity: classify(title), site: siteOf(`${title} ${message}`), at, status: 'queued',
+    } }]).catch(() => {});
     return { queued: id };
   } catch (e) {
     return { error: e.message };
   }
+}
+
+async function history() {
+  const docs = await listDocs(LOG);
+  const cutoff = Date.now() - KEEP_MS;
+  const all = Object.entries(docs).map(([id, d]) => ({ id, ...d }));
+  // Trim entries past the keep window, a few per call.
+  for (const old of all.filter((d) => (d.at || 0) < cutoff).slice(0, 50)) await deleteDoc(LOG, old.id).catch(() => {});
+  // An ack for a message queued before the log existed leaves a stub without a title: skip it.
+  return all.filter((d) => d.title && (d.at || 0) >= cutoff).sort((a, b) => b.at - a.at);
 }
 
 async function waiting() {
@@ -38,6 +72,9 @@ module.exports = async (req, res) => {
   const who = await requireOwnerOrMonitor(req, res);
   if (!who) return;
   try {
+    if (req.method === 'GET' && req.query?.history === '1') {
+      return res.status(200).json({ items: await history(), keepDays: KEEP_MS / 86400e3 });
+    }
     if (req.method === 'GET') {
       const items = await waiting();
       // A laptop off for weeks shouldn't come back to hundreds of messages.
@@ -51,6 +88,10 @@ module.exports = async (req, res) => {
       const ids = body.ack.map(String).filter((id) => /^[a-z0-9]{6,40}$/.test(id)).slice(0, 100);
       await Promise.all(ids.map((id) => deleteDoc(OUTBOX, id)));
       if (ids.length && !body.discard) await writeSite('whatsapp', { kind: 'whatsapp', deliveredAt: Date.now(), delivered: ids.length });
+      const now = Date.now();
+      if (ids.length) {
+        await mergeDocs(LOG, ids.map((id) => ({ id, data: body.discard ? { status: 'discarded', discardedAt: now } : { status: 'delivered', deliveredAt: now } }))).catch(() => {});
+      }
       return res.status(200).json({ removed: ids.length, discarded: !!body.discard });
     }
     const { title = 'VP Control', message = 'Test message: alerts will look like this.' } = body;

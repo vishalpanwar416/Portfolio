@@ -1,9 +1,9 @@
 // Everything that's wrong right now, and how it reaches your phone.
-import { useState } from 'react'
-import { BellRing, Check, ChevronRight, Send } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { BellRing, Check, ChevronRight, History, RefreshCw, Search, Send } from 'lucide-react'
 import { SEVERITY, computeAlerts } from './alerts'
 import { api, timeAgo } from './data'
-import { Badge, Button, Empty, Section, cx } from './ui'
+import { Badge, Button, Empty, Input, Section, Select, cx } from './ui'
 
 const KIND = { site: 'Site', ssl: 'SSL', domain: 'Domain', database: 'Database', laptop: 'Laptop', deploy: 'Deploy', money: 'Money', client: 'Client', app: 'App' }
 
@@ -16,6 +16,86 @@ function Channel({ name, ok, children }) {
         <div className="mt-0.5 text-xs leading-relaxed text-zinc-500">{children}</div>
       </div>
     </li>
+  )
+}
+
+const HISTORY_KINDS = {
+  critical: { label: 'Critical', tone: 'red' },
+  resolved: { label: 'Resolved', tone: 'green' },
+  digest: { label: 'Morning check', tone: 'sky' },
+  info: { label: 'Info', tone: 'zinc' },
+  test: { label: 'Test', tone: 'zinc' },
+}
+const when = (ms) => new Date(ms).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+const mins = (ms) => (ms < 60e3 ? 'under a minute' : ms < 3600e3 ? `${Math.round(ms / 60e3)}m` : `${(ms / 3600e3).toFixed(1)}h`)
+
+/** Every alert sent, kept 120 days (api/admin/notify?history=1). */
+function AlertHistory() {
+  const [state, setState] = useState({ items: null, error: null, loading: true })
+  const [kind, setKind] = useState('all')
+  const [site, setSite] = useState('all')
+  const [q, setQ] = useState('')
+  const [open, setOpen] = useState(null)
+  const load = async () => {
+    setState((s) => ({ ...s, loading: true }))
+    try { const r = await api('/api/admin/notify?history=1'); setState({ items: r.items, keep: r.keepDays, error: null, loading: false }) } catch (e) { setState((s) => ({ ...s, error: e.message, loading: false })) }
+  }
+  useEffect(() => { load() }, [])
+  const items = useMemo(() => state.items || [], [state.items])
+  const sites = useMemo(() => [...new Set(items.map((i) => i.site).filter(Boolean))].sort(), [items])
+  // Sites that went down most in the last 30 days.
+  const flappy = useMemo(() => {
+    const since = Date.now() - 30 * 86400e3
+    const n = {}
+    for (const i of items) if (i.severity === 'critical' && i.site && i.at >= since) n[i.site] = (n[i.site] || 0) + 1
+    return Object.entries(n).filter(([, c]) => c >= 2).sort((a, b) => b[1] - a[1]).slice(0, 5)
+  }, [items])
+  const shown = items.filter((i) => (kind === 'all' || i.severity === kind) && (site === 'all' || i.site === site)
+    && (!q || `${i.title} ${i.message}`.toLowerCase().includes(q.toLowerCase())))
+  return (
+    <Section title={`History · ${items.length}`} action={<Button variant="glass" onClick={load} disabled={state.loading}><RefreshCw size={13} className={state.loading ? 'animate-spin' : ''} /></Button>}>
+      <p className="mb-3 flex items-center gap-1.5 text-xs text-zinc-500"><History size={12} /> Every alert sent to WhatsApp, kept {state.keep || 120} days, with when it was delivered.</p>
+      {flappy.length > 0 && (
+        <div className="mb-3 flex flex-wrap items-center gap-1.5 text-xs text-zinc-400">
+          <span className="text-zinc-500">Went down most (30 days):</span>
+          {flappy.map(([h, c]) => <button key={h} onClick={() => setSite(h)}><Badge tone="amber">{h} · {c}×</Badge></button>)}
+        </div>
+      )}
+      <div className="mb-3 flex flex-wrap gap-2">
+        <span className="relative min-w-[10rem] flex-1">
+          <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500" />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search alerts" className="w-full pl-8" />
+        </span>
+        <Select value={kind} onChange={(e) => setKind(e.target.value)} aria-label="Kind">
+          <option value="all">All kinds</option>
+          {Object.entries(HISTORY_KINDS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+        </Select>
+        <Select value={site} onChange={(e) => setSite(e.target.value)} aria-label="Site">
+          <option value="all">All sites</option>
+          {sites.map((h) => <option key={h} value={h}>{h}</option>)}
+        </Select>
+      </div>
+      {state.error ? <Empty>Couldn't load history: {state.error}</Empty> : !state.items ? <div className="text-sm text-zinc-500">Loading…</div>
+        : shown.length === 0 ? <Empty>{items.length ? 'No alerts match.' : 'Nothing logged yet. Alerts are recorded from now on.'}</Empty> : (
+          <ul className="divide-y divide-white/[0.05]">
+            {shown.slice(0, 300).map((i) => (
+              <li key={i.id} className="py-2">
+                <button onClick={() => setOpen(open === i.id ? null : i.id)} className="flex w-full items-start gap-3 text-left">
+                  <span className="w-28 shrink-0 pt-0.5 text-[11px] tabular-nums text-zinc-500">{when(i.at)}</span>
+                  <span className="w-28 shrink-0"><Badge tone={HISTORY_KINDS[i.severity]?.tone}>{HISTORY_KINDS[i.severity]?.label || i.severity}</Badge></span>
+                  <span className="min-w-0 flex-1">
+                    <span className={cx('block text-sm text-zinc-100', open !== i.id && 'truncate')}>{i.message || i.title}</span>
+                    <span className="block text-[11px] text-zinc-600">
+                      {i.status === 'delivered' && i.deliveredAt ? `Delivered ${mins(i.deliveredAt - i.at)} later` : i.status === 'discarded' ? 'Discarded unsent' : 'Waiting for the laptop'}
+                    </span>
+                  </span>
+                </button>
+                {open === i.id && i.message && i.message.includes('\n') && <pre className="ml-[15rem] mt-1 whitespace-pre-wrap text-xs text-zinc-400">{i.message}</pre>}
+              </li>
+            ))}
+          </ul>
+        )}
+    </Section>
   )
 }
 
@@ -67,6 +147,7 @@ export default function AlertsView({ data, go }) {
             </ul>
           )}
         </Section>
+        <AlertHistory />
       </div>
 
       <div className="space-y-5 xl:col-span-2">
