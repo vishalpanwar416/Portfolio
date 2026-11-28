@@ -98,6 +98,7 @@ function AlertHistory({ docs }) {
                     <span className="block text-[11px] text-zinc-600">
                       {i.source ? `${i.source} · ` : ''}{i.chatId ? `${groupName(i.chatId) || 'WhatsApp'} · ` : ''}
                       {i.status === 'delivered' && i.deliveredAt ? `delivered ${mins(i.deliveredAt - i.at)} later` : i.status === 'discarded' ? 'discarded unsent'
+                        : i.status === 'sent-direct' ? 'sent straight to WhatsApp (gateway was down), recorded afterwards'
                         : i.status === 'merged' ? 'merged: same alert sent in the last 10 minutes' : i.status === 'held' ? `held for quiet hours until ${new Date(i.holdUntil).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })}` : 'waiting for the laptop'}
                       {i.emailedAt ? ' · also emailed' : i.emailError ? ` · email failed (${i.emailError})` : ''}
                     </span>

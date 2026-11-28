@@ -14,6 +14,11 @@
 //     sign-in also work, with `source` from the body.
 //     kind: critical | resolved | digest | lead | jobs | test | info
 //
+// Senders that had to skip the gateway (it was unreachable) and sent
+// straight to WhatsApp report it afterwards, so History stays complete:
+//   POST { record: true, source, kind, title, lines, chatId, sentAt }
+//   → logged as "sent-direct", never queued or resent.
+//
 // Laptop agent (MONITOR_SECRET):
 //   GET                       messages waiting, oldest first, with their chatId
 //   POST { ack: [ids] }       these were delivered (+ discard: true = dropped)
@@ -173,6 +178,22 @@ async function sendNotification({ title, message, lines, url, kind, icon, source
   }
 }
 
+/** Log an alert a sender already delivered itself while the gateway was down. */
+async function recordDirect(b, source) {
+  const now = Date.now();
+  const sentAt = Number(b.sentAt);
+  const at = Number.isFinite(sentAt) && sentAt > now - 7 * 86400e3 && sentAt <= now + 60e3 ? sentAt : now;
+  const head = String(b.title || 'Alert').slice(0, 120).trim();
+  const body = Array.isArray(b.lines) ? b.lines.map(String).filter(Boolean).join('\n') : String(b.message || '');
+  const id = `${at.toString(36)}${crypto.randomBytes(3).toString('hex')}`;
+  await mergeDocs(LOG, [{ id, data: {
+    title: head, message: body.slice(0, 3000), url: b.url || '', severity: classify(head, b.kind),
+    site: siteOf(`${head} ${body}`), source, chatId: CHAT_RE.test(b.chatId || '') ? b.chatId : '', at,
+    status: 'sent-direct', deliveredAt: at, recordedAt: now,
+  } }]);
+  return { recorded: id };
+}
+
 // ── sender keys ────────────────────────────────────────
 
 const sha = (s) => crypto.createHash('sha256').update(s).digest('hex');
@@ -228,6 +249,9 @@ module.exports = async (req, res) => {
     // A key may narrow its source (media-man → media-man:sanero) but never change it.
     const sub = typeof b.source === 'string' ? b.source.trim().toLowerCase() : '';
     const source = sub.startsWith(`${sender.source}:`) && SOURCE_RE.test(sub) ? sub : sender.source;
+    if (b.record === true) {
+      try { return res.status(200).json(await recordDirect(b, source)); } catch (e) { return res.status(502).json({ error: e.message }); }
+    }
     const icon = typeof b.icon === 'string' && b.icon.length <= 4 ? b.icon : undefined;
     const r = await sendNotification({ title: b.title, message: b.message, lines: b.lines, url: b.url, kind: b.kind, icon, source });
     return r.error ? res.status(502).json(r) : res.status(200).json(r);
@@ -270,6 +294,11 @@ module.exports = async (req, res) => {
         .map((g) => ({ id: g.id, name: String(g.name || g.id).slice(0, 100) }));
       await writeSite('whatsapp_groups', { kind: 'whatsapp_groups', groups, at: Date.now() });
       return res.status(200).json({ saved: groups.length });
+    }
+
+    if (body.record === true) {
+      const src = typeof body.source === 'string' && SOURCE_RE.test(body.source) ? body.source : 'monitor';
+      return res.status(200).json(await recordDirect(body, src));
     }
 
     if (body.action === 'createKey' || body.action === 'revokeKey') {
